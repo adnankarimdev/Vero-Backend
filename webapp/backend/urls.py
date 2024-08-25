@@ -1,7 +1,7 @@
 from django.urls import path
 
-from . import views
+from .views import create_charts 
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path('create-charts/', create_charts, name='create_charts'),
 ]
