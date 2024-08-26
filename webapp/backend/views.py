@@ -331,3 +331,31 @@ def create_charts(request):
         return JsonResponse({"content": ai_msg.content})
     
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
+@csrf_exempt
+def create_review(request):
+    prompt = """
+    You are to transform a given review into a complete google review. 
+    Do not ALTER the tone, or the point of the review. 
+    If you can, try to include my buisness key words if possible, 
+    only if it makes sense with the review: [latte, best coffee shop, artisan]. 
+    You are to ONLY return the completed google review. 
+"""
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        all_reviews = data.get("allReviewsToSend", "")
+        
+        # Messages for the LLM
+        messages = [
+            ("system", prompt),
+            ("human", all_reviews),
+        ]
+        
+        # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        
+        # Return the AI-generated content as a JSON response
+        return JsonResponse({"content": ai_msg.content})
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
