@@ -16,6 +16,46 @@ llm = ChatOpenAI(
     max_retries=2,
 )
 
+prompt_review_score = """
+You are to evaluate the helpfulness of a given review based on the following criteria:
+
+	1.	Detail (25%)
+	•	High Detail: The review provides comprehensive information, covering multiple aspects such as location, atmosphere, product quality, service, and unique features. Descriptions are vivid and specific, offering a clear picture of the experience.
+	•	Score: 25/25
+	•	Moderate Detail: The review touches on a few aspects but lacks depth or specificity. It may describe the experience broadly without going into much detail.
+	•	Score: 15-20/25
+	•	Low Detail: The review is vague, offering little to no specific information about the experience.
+	•	Score: 0-10/25
+	2.	Clarity (25%)
+	•	Highly Clear: The review is well-structured, easy to read, and free from ambiguity. The language is straightforward, making it easy for others to understand the reviewer’s experience.
+	•	Score: 25/25
+	•	Moderately Clear: The review is generally understandable but may contain some unclear or confusing statements. The structure might be slightly disjointed.
+	•	Score: 15-20/25
+	•	Low Clarity: The review is difficult to understand due to poor structure, unclear language, or vague descriptions.
+	•	Score: 0-10/25
+	3.	Relevance (25%)
+	•	Highly Relevant: The review focuses on aspects that are likely to be important to most potential customers, such as the quality of the product, service, or overall experience. It addresses common interests or concerns.
+	•	Score: 25/25
+	•	Moderately Relevant: The review is somewhat relevant but may include information that is less pertinent or overly specific to the reviewer’s personal preferences.
+	•	Score: 15-20/25
+	•	Low Relevance: The review covers aspects that are not generally useful to other customers or focuses on irrelevant details.
+	•	Score: 0-10/25
+	4.	Actionable Insights (25%)
+	•	Highly Actionable: The review offers clear and useful feedback, highlighting both strengths and areas for improvement. It provides insights that the business can use to enhance customer experience and that other customers can consider.
+	•	Score: 25/25
+	•	Moderately Actionable: The review mentions some positive or negative aspects but lacks specific suggestions or actionable points that could be useful for the business or future customers.
+	•	Score: 15-20/25
+	•	Low Actionable Insights: The review does not provide any useful feedback or suggestions. It may be purely opinion-based without offering insights for improvement.
+	•	Score: 0-10/25
+
+    Instructions:
+
+	•	Assess each criterion and provide a score out of 25 for each.
+	•	Combine the scores for a total score out of 100.
+	•	Return only the total score in this format: score_value.
+	•	Do not include any other text, explanations, or output—only the total score.
+"""
+
 prompt = """
 You are to return graphs for me in this format: 
                 <Card>
@@ -306,9 +346,43 @@ you are to ONLY make charts that are from react-chartjs-2, you can assume i have
 got it?
 """
 
+prompt_review_adjuster = """
+    Task: Transform the provided review into a polished Google review.
+    
+    Guidelines:
 
+        •	Maintain the original tone and key message of the review—do not alter the point or criticism of the review.
+        •	You can alter the text, but it must keep the same core point of the message.
+        •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
+        •	Your response should consist solely of the completed Google review.
+
+    This version is concise, clear, and directs the focus on maintaining the review’s integrity while subtly incorporating keywords if they fit naturally.
+    """
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+
+@csrf_exempt
+def create_review_score(request):
+    global prompt_review_score
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_review = data.get("userReview", "")
+        
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_review_score),
+            ("human", user_review),
+        ]
+        
+        # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        
+        # Return the AI-generated content as a JSON response
+        print(ai_msg.content)
+        return JsonResponse({"content": ai_msg.content})
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 
 @csrf_exempt
 def create_charts(request):
@@ -334,13 +408,7 @@ def create_charts(request):
 
 @csrf_exempt
 def create_review(request):
-    prompt = """
-    You are to transform a given review into a complete google review. 
-    Do not ALTER the tone, or the point of the review. 
-    If you can, try to include my buisness key words if possible, 
-    only if it makes sense with the review: [latte, best coffee shop, artisan]. 
-    You are to ONLY return the completed google review. 
-"""
+    global prompt_review_adjuster
     if request.method == "POST":
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
@@ -348,7 +416,7 @@ def create_review(request):
         
         # Messages for the LLM
         messages = [
-            ("system", prompt),
+            ("system", prompt_review_adjuster),
             ("human", all_reviews),
         ]
         
