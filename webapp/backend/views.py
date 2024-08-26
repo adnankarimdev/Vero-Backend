@@ -18,41 +18,37 @@ llm = ChatOpenAI(
 
 prompt_review_score = """
 You are to evaluate the helpfulness of a given review based on the following criteria:
-
-	1.	Detail (25%)
-	•	High Detail: The review provides comprehensive information, covering multiple aspects such as location, atmosphere, product quality, service, and unique features. Descriptions are vivid and specific, offering a clear picture of the experience.
-	•	Score: 25/25
-	•	Moderate Detail: The review touches on a few aspects but lacks depth or specificity. It may describe the experience broadly without going into much detail.
-	•	Score: 15-20/25
-	•	Low Detail: The review is vague, offering little to no specific information about the experience.
-	•	Score: 0-10/25
-	2.	Clarity (25%)
-	•	Highly Clear: The review is well-structured, easy to read, and free from ambiguity. The language is straightforward, making it easy for others to understand the reviewer’s experience.
-	•	Score: 25/25
-	•	Moderately Clear: The review is generally understandable but may contain some unclear or confusing statements. The structure might be slightly disjointed.
-	•	Score: 15-20/25
-	•	Low Clarity: The review is difficult to understand due to poor structure, unclear language, or vague descriptions.
-	•	Score: 0-10/25
-	3.	Relevance (25%)
-	•	Highly Relevant: The review focuses on aspects that are likely to be important to most potential customers, such as the quality of the product, service, or overall experience. It addresses common interests or concerns.
-	•	Score: 25/25
-	•	Moderately Relevant: The review is somewhat relevant but may include information that is less pertinent or overly specific to the reviewer’s personal preferences.
-	•	Score: 15-20/25
-	•	Low Relevance: The review covers aspects that are not generally useful to other customers or focuses on irrelevant details.
-	•	Score: 0-10/25
-	4.	Actionable Insights (25%)
-	•	Highly Actionable: The review offers clear and useful feedback, highlighting both strengths and areas for improvement. It provides insights that the business can use to enhance customer experience and that other customers can consider.
-	•	Score: 25/25
-	•	Moderately Actionable: The review mentions some positive or negative aspects but lacks specific suggestions or actionable points that could be useful for the business or future customers.
-	•	Score: 15-20/25
-	•	Low Actionable Insights: The review does not provide any useful feedback or suggestions. It may be purely opinion-based without offering insights for improvement.
-	•	Score: 0-10/25
+	1.	Informative and Insightful (20%)
+	•	High Score: The review is specific, relevant, and offers valuable insights about the place, describing what other visitors are likely to experience. It highlights what makes the place special and shares unique and new information.
+	•	Moderate Score: The review provides some relevant details but lacks depth or fails to introduce something unique or new.
+	•	Low Score: The review is vague, generic, or fails to provide specific information that would be helpful to other visitors.
+	2.	Authenticity (20%)
+	•	High Score: The review accurately reflects the reviewer’s own experience, including both positive and negative aspects. The reviewer is honest and specific about the service and the place.
+	•	Moderate Score: The review is generally authentic but may lack specific details or balance between positive and negative aspects.
+	•	Low Score: The review appears exaggerated, biased, or lacks honesty and specificity regarding the reviewer’s experience.
+	3.	Respectfulness (20%)
+	•	High Score: The review is constructive, even in criticism, and avoids profanity. The feedback is respectful and considerate of how business owners might use the information to improve their offerings.
+	•	Moderate Score: The review is generally respectful but may contain mildly harsh language or criticism that is not fully constructive.
+	•	Low Score: The review contains disrespectful language, harsh criticism, or profanity, making it unhelpful for business improvement.
+	4.	Writing Style (20%)
+	•	High Score: The review is well-written, with proper spelling and grammar. The reviewer avoids excessive capitalization and punctuation, and the length of the review is appropriate (e.g., a paragraph).
+	•	Moderate Score: The review is understandable but may contain minor spelling or grammatical errors. The writing style is acceptable but could be improved for clarity or professionalism.
+	•	Low Score: The review contains significant spelling or grammatical errors, excessive capitalization, or punctuation, making it difficult to read or less professional.
+	5.	Privacy and Professionalism (10%)
+	•	High Score: The review does not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer does not write reviews for places where they are currently or were formerly employed.
+	•	Moderate Score: The review may slightly breach privacy or professionalism guidelines, but the issues are minor.
+	•	Low Score: The review includes personal or professional information or violates the policy of not reviewing places of employment.
+	6.	Focus on Experience (10%)
+	•	High Score: The review focuses on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It stays relevant to the location and does not engage in broader debates.
+	•	Moderate Score: The review is mostly focused on the experience but may include minor general commentary or irrelevant information.
+	•	Low Score: The review shifts focus away from the firsthand experience, including significant general commentary or unrelated topics.
 
     Instructions:
 
-	•	Assess each criterion and provide a score out of 25 for each.
-	•	Combine the scores for a total score out of 100.
-	•	Return only the total score in this format: score_value.
+	•	Assess each review based on these criteria to determine its overall helpfulness, authenticity, and relevance.
+	•	Combine the scores for a thoughtful and nuanced total score out of 100, taking into account the overall impact, balance, and importance of each criterion.
+	•	Do not simply sum the scores; instead, weigh the overall quality of the review in determining the final score.
+	•	Return only the total score, the number only.
 	•	Do not include any other text, explanations, or output—only the total score.
 """
 
@@ -353,11 +349,15 @@ prompt_review_adjuster = """
 
         •	Maintain the original tone and key message of the review—do not alter the point or criticism of the review.
         •	You can alter the text, but it must keep the same core point of the message.
-        •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
         •	Your response should consist solely of the completed Google review.
-
-    This version is concise, clear, and directs the focus on maintaining the review’s integrity while subtly incorporating keywords if they fit naturally.
+        •   Be informative and insightful: Be specific and relevant to the place you’re reviewing, and describe what other visitors are likely to experience. Highlight what makes the place special, and try to share something unique and new. 
+        •   Be authentic: Review your own experience, and explain what the place was like and the service you received. Try to be as accurate as possible, and include both the positive and negative aspects of your visit.
+        •   Be respectful: Business owners often use feedback to improve their offerings. Even if you’re frustrated, make sure your criticism is constructive. Additionally, please avoid profanity.
+        •   Write with style: Check your spelling and grammar, and avoid excessive capitalization and punctuation. In general, a paragraph is a great length for a review. 
+        •   Avoid personal and professional information: Do not include the phone numbers or URLs of other businesses in your reviews. Additionally, do not write reviews for places where you are currently or formerly, an employee.
+        •   Avoid general commentary: Certain locations may become the subject of larger public debate or conversation due to recent news coverage or current events. While we respect and value your opinion, Local Reviews are not meant for social or political commentary. Forums, like blogs or social networks, are much more appropriate for those types of conversations. Please write about your firsthand experience with the place and not general commentary on the place in relation to recent news.
     """
+#  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
