@@ -4,7 +4,8 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from langchain_openai import ChatOpenAI
-
+from langchain.agents.agent_types import AgentType
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 
@@ -14,6 +15,15 @@ llm = ChatOpenAI(
     max_tokens=None,
     timeout=None,
     max_retries=2,
+)
+
+agent = create_csv_agent(
+    llm,
+    "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/reviews.csv",
+    verbose=True,
+    agent_type=AgentType.OPENAI_FUNCTIONS,
+    allow_dangerous_code=True,
+    handle_parsing_errors=True
 )
 
 prompt_review_score = """
@@ -70,7 +80,7 @@ You are to return graphs for me in this format:
               </div>
             </CardContent>
           </Card>
-with relevant titles, data, and so forth. return it as code and nothing else because it will be dynamically updated. i will ask natural questions, you respond with graphs. if the question cannot be turned into a graph, then reply with null. You are to fill out the data yourself and plug it in directly into the graph. You cannot create an external variable for the data. 
+with relevant titles, data, and so forth. return it as code and nothing else because it will be dynamically updated. i will ask natural questions, you respond with graphs. if the question cannot be turned into a graph, then reply with another graph with a query you create that is closest to the user query. You are to fill out the data yourself and plug it in directly into the graph. You cannot create an external variable for the data. 
 
 here's the data:
 [
@@ -342,6 +352,49 @@ you are to ONLY make charts that are from react-chartjs-2, you can assume i have
 got it?
 """
 
+# prompt = """
+# Assume you have read a CSV with the following sample data:
+# Location: Phil & Sebastion - Bridgeland
+# Rating: 5
+# Body: Great location and vibe. Lots of seating and offers good consistent coffee, hoopla donuts, merch, and collabs with village ice cream (for the best affogato). The interior here is also very simple, modern yet sophisticated in another way. Staff are friendly and quick to serve as well.  There are good seasonal drinks that get offered here. Overall a great spot to drop by for quality coffee.
+# Date: a year ago
+# Location: Phil & Sebastion - Chinook
+# Rating: 5
+# Body: Great coffee! I came across Phil & Sebastian when I visited Calgary last year, and now that I'm back in town for stampede I popped in for a visit. There's a few locations around Calgary, I believe; I visited both the location by the river and the location at Chinook Mall - the latter had donuts and they all looked amazing, but I opted for the ube and coconut which ended up being a good choice! Highly recommend if you're in Calgary.
+# Date: a year ago
+# Location: Phil & Sebastion - Farmers Market
+# Rating: 5
+# Body: First time trying Hoopla donuts and now I understand why these are my friend's fav. The donut itself is fluffy and light and has an enjoyable texture. The mango flavour wasn't overpowering and worked well with the airy coconut cream filling.
+# Date: a year ago
+# You are to return graphs for ALL locations in the csv you read unless otherwise specified. Graphs must have relevant titles and data. Return ONLY the exact format specified below, with no additional text or explanations. Use react-chartjs-2 charts (BarChart, PieChart, LineChart, DoughnutChart, RadarChart, PolarAreaChart, BubbleChart, or ScatterChart). Fill out all data directly in the graph. Specify ALL details regarding location, rating, body, and date.
+# Output format:
+# <Card>
+# <CardHeader>
+# <CardTitle>[Title]</CardTitle>
+# <CardDescription>[Description]</CardDescription>
+# </CardHeader>
+# <CardContent>
+# <div className="space-y-4">
+# <div className="h-64">
+# <[ChartType] data={{
+# labels: [...],
+# datasets: [{
+# label: '...',
+# data: [...],
+# backgroundColor: [...],
+# borderColor: [...],
+# borderWidth: 1,
+# }]
+# }} options={{...}} />
+# </div>
+# </div>
+# </CardContent>
+# </Card>
+# Respond ONLY with this format, populated with relevant data based on the query. If a query cannot be graphed, create a closely related query that can be graphed and use that instead.
+
+# User Query: 
+# """
+
 prompt_review_adjuster = """
     Task: Transform the provided review into a polished Google review.
     
@@ -398,11 +451,14 @@ def create_charts(request):
             ("human", search_query),
         ]
         
-        # Invoke the LLM with the messages
+        # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
-        
+        # ai_msg = agent.invoke(prompt + search_query)
+        # print(ai_msg.keys())
+        # print(type(ai_msg))
         # Return the AI-generated content as a JSON response
-        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg['output']})
+        return JsonResponse({"content": ai_msg.content})  
     
     return JsonResponse({"error": "Invalid request method"}, status=400)
 
