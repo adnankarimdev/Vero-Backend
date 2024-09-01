@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 import os
 import json
+from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from langchain_openai import ChatOpenAI
@@ -13,6 +14,9 @@ from langchain.chains import RetrievalQA
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from .serializers import UserSerializer
+from rest_framework import status
+from rest_framework.response import Response
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
@@ -164,6 +168,46 @@ Sincerely,
 P&S
 """
 
+@csrf_exempt
+def log_in_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse the JSON body of the request
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or not password:
+            return JsonResponse({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            return JsonResponse({"message": "Logged in successfully"}, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+@csrf_exempt
+def sign_up_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse the JSON body of the request
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
 def load_data_for_llm():
     global llm
     print("in ere")
