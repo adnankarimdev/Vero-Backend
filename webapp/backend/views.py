@@ -10,6 +10,9 @@ import pickle
 from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
@@ -17,6 +20,7 @@ documents_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/Google
 
 embeddings = OpenAIEmbeddings()
 
+google_email_app_password = "jmym xiii qzgc qnhc"
 llm = ChatOpenAI(
     model="gpt-4o",
     temperature=0,
@@ -118,6 +122,48 @@ prompt_review_adjuster = """
     """
 #  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
+prompt_address_email = """
+You are a customer service representative for a coffee shop. You have received a negative review from a customer, and you want to craft a personalized response based on the details provided. Below is the review and the customer’s answers to specific questions you asked. Use this information to write a thoughtful and empathetic response.
+
+Review:
+
+[Insert the negative review text here.]
+
+Customer’s Answers to Questions:
+
+	1.	What specific issue did you experience?
+[Insert customer’s answer here.]
+	2.	How did this issue affect your visit?
+[Insert customer’s answer here.]
+	3.	Was there anything that you think could have improved your experience?
+[Insert customer’s answer here.]
+	4.	Do you have any suggestions for how we can avoid similar issues in the future?
+[Insert customer’s answer here.]
+
+Response Requirements:
+
+	1.	Acknowledge the specific issue the customer experienced and show understanding of their frustration.
+	2.	Apologize sincerely for the inconvenience caused.
+	3.	Explain any actions you are taking to address the issue or improve.
+	4.	Thank the customer for their feedback and invite them to provide more details if they wish.
+	5.	Offer a resolution or compensation if appropriate, such as a discount or free item on their next visit.
+
+Response Example:
+
+“Dear [Customer’s Name],
+
+Thank you for taking the time to share your feedback. We are genuinely sorry to hear about your recent experience at [Coffee Shop Name]. We understand that [specific issue] was a significant inconvenience, and we deeply apologize for not meeting your expectations.
+
+From your answers, we see that [specific issue] affected your visit by [how it affected their visit]. We appreciate your suggestion of [suggestion for improvement] and are taking steps to address this issue to prevent it from happening in the future.
+
+Thank you for bringing this to our attention. Your feedback is invaluable in helping us improve our service. If you have any more details or further suggestions, please feel free to reach out to us directly. As a token of our appreciation and to make up for the inconvenience, we would like to offer you [mention any compensation or resolution].
+
+We hope to have the opportunity to serve you better in the future.
+
+Sincerely,
+P&S
+"""
+
 def load_data_for_llm():
     global llm
     print("in ere")
@@ -135,6 +181,66 @@ def load_data_for_llm():
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+
+@csrf_exempt
+def send_email(request):
+    if request.method == "POST":
+      data = json.loads(request.body)
+      to_email = data.get("userEmailToSend", "")
+      name = data.get("userNameToSend", "")
+      review_body = data.get("userReviewToSend", "")
+      subject = "Your concerns"
+      gpt_body = f'''
+  Name: {name}
+  {review_body}
+'''
+      messages = [
+    ("system", prompt_address_email),
+    ("human", gpt_body),
+    ]
+      
+      # Invoke the LLM with the messages
+      ai_msg = llm.invoke(messages)
+      
+      # Return the AI-generated content as a JSON response
+      print(ai_msg.content)
+      body = ai_msg.content
+      from_email = "adnan.karim.dev@gmail.com"
+      from_password = google_email_app_password
+      # Create the email message
+      msg = MIMEMultipart()
+      msg['From'] = from_email
+      msg['To'] = to_email
+      msg['Subject'] = subject
+
+      # Attach the body text
+      msg.attach(MIMEText(body, 'plain'))
+
+      try:
+          # Connect to the Gmail SMTP server
+          server = smtplib.SMTP('smtp.gmail.com', 587)
+          server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+
+          # Login to the server
+          server.login(from_email, from_password)
+
+          # Send the email
+          server.sendmail(from_email, to_email, msg.as_string())
+          print('Email sent successfully.')
+          return JsonResponse({"content": "Success"})
+
+      except Exception as e:
+        error_message = str(e) 
+        return JsonResponse({
+            "success": False,
+            "error": {
+                "message": error_message
+            }
+        }, status=500) 
+
+      finally:
+          # Close the connection to the server
+          server.quit()
 
 @csrf_exempt
 def create_review_score(request):
