@@ -186,7 +186,8 @@ def get_review_settings(request, place_id):
                 "complimentaryItem": settings.complimentary_item,
                 "questions": settings.questions,
                 "dialogBody": settings.worry_dialog_body,
-                "dialogTitle": settings.worry_dialog_title
+                "dialogTitle": settings.worry_dialog_title,
+                "websiteUrl" : settings.website_url
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -222,7 +223,8 @@ def save_user_review_question_settings(request):
                     'show_complimentary_item': data.get('showComplimentaryItem', False),
                     'complimentary_item': data.get('complimentaryItem', ''),
                     'worry_dialog_body': data.get('dialogBody', ''),
-                    'worry_dialog_title': data.get('dialogTitle', '')
+                    'worry_dialog_title': data.get('dialogTitle', ''),
+                    'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', '')
                 }
             )
 

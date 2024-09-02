@@ -27,6 +27,7 @@ class UserData(models.Model):
     worry_dialog_title = models.TextField(blank=True, null=True)
     # Assuming you want to link questions to this model
     questions = models.JSONField(blank=True, null=True)  # or use a separate model
+    website_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"Data for {self.client_email}"
