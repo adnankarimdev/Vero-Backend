@@ -23,6 +23,8 @@ class UserData(models.Model):
     place_ids = models.TextField(blank=True, null=True)
     show_complimentary_item = models.BooleanField(default=False)
     complimentary_item = models.CharField(max_length=255, blank=True, null=True)
+    worry_dialog_body = models.TextField(blank=True, null=True)
+    worry_dialog_title = models.TextField(blank=True, null=True)
     # Assuming you want to link questions to this model
     questions = models.JSONField(blank=True, null=True)  # or use a separate model
 
