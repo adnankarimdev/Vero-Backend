@@ -20,6 +20,7 @@ from rest_framework.response import Response
 from .models import UserData 
 import jwt
 import secrets
+import googlemaps
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
@@ -213,6 +214,52 @@ def get_review_settings(request, place_id):
             return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+    
+
+@csrf_exempt  
+def set_place_ids(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse the JSON body of the request
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Extract place_id from the data
+        
+        place_ids = [place['place_id'] for place in data.get('places', [])]
+        print(place_ids)
+
+        if place_ids:
+            # Use update_or_create to either update an existing entry or create a new one
+            user_data, created = UserData.objects.update_or_create(
+                place_ids=place_ids,
+                defaults={
+                    'questions': data.get('questions', []),
+                    'email_intro': data.get('emailIntro', ''),
+                    'email_signature': data.get('emailSignature', ''),
+                    'email_body': data.get('emailBody', ''),
+                    'email_app_password': data.get('emailAppPassword', ''),
+                    'client_email': data.get('clientEmail', ''),
+                    'worry_rating': data.get('worryRating', 3),
+                    'show_worry_dialog': data.get('showWorryDialog', True),
+                    'place_ids': data.get('placeIds', ''),
+                    'show_complimentary_item': data.get('showComplimentaryItem', False),
+                    'complimentary_item': data.get('complimentaryItem', ''),
+                    'worry_dialog_body': data.get('dialogBody', ''),
+                    'worry_dialog_title': data.get('dialogTitle', ''),
+                    'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
+                    'user_email': data.get('userEmail', ''),
+                    'places_information': data.get('places', [])
+                }
+            )
+
+            serializer = UserDataSerializer(user_data)
+            status_code = status.HTTP_200_OK if not created else status.HTTP_201_CREATED
+            return JsonResponse(serializer.data, status=status_code)
+        else:
+            return JsonResponse({"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
 @csrf_exempt  
 def save_user_review_question_settings(request):

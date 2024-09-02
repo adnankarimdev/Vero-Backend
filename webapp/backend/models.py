@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+import json
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     business_name = models.CharField(max_length=100)
@@ -25,10 +25,17 @@ class UserData(models.Model):
     complimentary_item = models.CharField(max_length=255, blank=True, null=True)
     worry_dialog_body = models.TextField(blank=True, null=True)
     worry_dialog_title = models.TextField(blank=True, null=True)
-    # Assuming you want to link questions to this model
-    questions = models.JSONField(blank=True, null=True)  # or use a separate model
+    questions = models.JSONField(blank=True, null=True) 
+    places_information = models.JSONField(blank=True, null=True) 
     website_url = models.URLField(blank=True, null=True)
     user_email = models.EmailField(blank=True, null=True)
 
+    def set_place_ids(self, place_ids_list):
+        self.place_ids = json.dumps(place_ids_list)
+
+    def get_place_ids(self):
+        if self.place_ids:
+            return json.loads(self.place_ids)
+        return []
     def __str__(self):
         return f"Data for {self.client_email}"
