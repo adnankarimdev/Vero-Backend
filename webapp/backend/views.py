@@ -18,12 +18,16 @@ from .serializers import UserSerializer, UserDataSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from .models import UserData 
+import jwt
+import secrets
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
 documents_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl'
 
 embeddings = OpenAIEmbeddings()
+
+SECRET_KEY = secrets.token_urlsafe(32)
 
 google_email_app_password = "jmym xiii qzgc qnhc"
 llm = ChatOpenAI(
@@ -168,6 +172,21 @@ We hope to have the opportunity to serve you better in the future.
 Sincerely,
 P&S
 """
+
+@csrf_exempt 
+def get_place_id_by_email(request, email):
+    if request.method == 'GET':
+        try:
+            settings = UserData.objects.get(user_email=email)
+            data = {
+                "placeIds": settings.place_ids
+            }
+            return JsonResponse(data, status=200)
+        except UserData.DoesNotExist:
+            return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+        
 @csrf_exempt 
 def get_review_settings(request, place_id):
     if request.method == 'GET':
@@ -224,7 +243,8 @@ def save_user_review_question_settings(request):
                     'complimentary_item': data.get('complimentaryItem', ''),
                     'worry_dialog_body': data.get('dialogBody', ''),
                     'worry_dialog_title': data.get('dialogTitle', ''),
-                    'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', '')
+                    'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
+                    'user_email': data.get('userEmail', '')
                 }
             )
 
@@ -242,19 +262,30 @@ def log_in_user(request):
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
         email = data.get('email')
         password = data.get('password')
 
         if not email or not password:
-            return JsonResponse({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"error": "Email and password are required"}, status=400)
 
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
             login(request, user)
-            return JsonResponse({"message": "Logged in successfully"}, status=status.HTTP_200_OK)
+
+            # Generate a token (if using JWT)
+            token = jwt.encode({'user_id': user.id}, SECRET_KEY, algorithm='HS256')
+
+            return JsonResponse({
+                "message": "Logged in successfully",
+                "token": token,
+                "user": {
+                    "id": user.id,
+                    "email": user.email
+                }
+            }, status=200)
         else:
             return JsonResponse({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
     else:
@@ -271,6 +302,7 @@ def sign_up_user(request):
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
