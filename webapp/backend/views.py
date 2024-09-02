@@ -14,9 +14,10 @@ from langchain.chains import RetrievalQA
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserDataSerializer
 from rest_framework import status
 from rest_framework.response import Response
+from .models import UserData 
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
@@ -167,7 +168,68 @@ We hope to have the opportunity to serve you better in the future.
 Sincerely,
 P&S
 """
+@csrf_exempt 
+def get_review_settings(request, place_id):
+    if request.method == 'GET':
+        try:
+            settings = UserData.objects.get(place_ids=place_id)
+            data = {
+                "emailIntro": settings.email_intro,
+                "emailSignature": settings.email_signature,
+                "emailBody": settings.email_body,
+                "emailAppPassword": settings.email_app_password,
+                "clientEmail": settings.client_email,
+                "worryRating": settings.worry_rating,
+                "showWorryDialog": settings.show_worry_dialog,
+                "placeIds": settings.place_ids,
+                "showComplimentaryItem": settings.show_complimentary_item,
+                "complimentaryItem": settings.complimentary_item,
+                "questions": settings.questions,
+            }
+            return JsonResponse(data, status=200)
+        except UserData.DoesNotExist:
+            return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+    
+@csrf_exempt  
+def save_user_review_question_settings(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse the JSON body of the request
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Extract place_id from the data
+        place_id = data.get('placeIds')
 
+        if place_id:
+            # Use update_or_create to either update an existing entry or create a new one
+            user_data, created = UserData.objects.update_or_create(
+                place_ids=place_id,
+                defaults={
+                    'questions': data.get('questions', []),
+                    'email_intro': data.get('emailIntro', ''),
+                    'email_signature': data.get('emailSignature', ''),
+                    'email_body': data.get('emailBody', ''),
+                    'email_app_password': data.get('emailAppPassword', ''),
+                    'client_email': data.get('clientEmail', ''),
+                    'worry_rating': data.get('worryRating', 3),
+                    'show_worry_dialog': data.get('showWorryDialog', True),
+                    'place_ids': data.get('placeIds', ''),
+                    'show_complimentary_item': data.get('showComplimentaryItem', False),
+                    'complimentary_item': data.get('complimentaryItem', '')
+                }
+            )
+
+            serializer = UserDataSerializer(user_data)
+            status_code = status.HTTP_200_OK if not created else status.HTTP_201_CREATED
+            return JsonResponse(serializer.data, status=status_code)
+        else:
+            return JsonResponse({"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
 @csrf_exempt
 def log_in_user(request):
     if request.method == 'POST':

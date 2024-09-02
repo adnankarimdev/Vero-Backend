@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, UserData
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,3 +15,8 @@ class UserSerializer(serializers.ModelSerializer):
             business_name=validated_data['business_name']
         )
         return user
+    
+class UserDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserData
+        fields = '__all__'

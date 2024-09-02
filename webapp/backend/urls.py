@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import create_charts, create_review, create_review_score, send_email, sign_up_user, log_in_user
+from .views import create_charts, create_review, create_review_score, send_email, sign_up_user, log_in_user, save_user_review_question_settings, get_review_settings
 
 urlpatterns = [
     path('create-charts/', create_charts, name='create_charts'),
@@ -8,5 +8,7 @@ urlpatterns = [
     path('create-review-score/', create_review_score, name='create_review_score'),
     path('send-email/', send_email, name='send_email'),
     path('sign-up/', sign_up_user, name='sign_up_user'),
-    path('login/', log_in_user, name="log_in_user")
+    path('login/', log_in_user, name="log_in_user"),
+    path('save-review-settings/', save_user_review_question_settings, name="save_user_review_question_settings"),
+    path('get-review-settings/<str:place_id>/', get_review_settings, name='get_review_settings')
 ]
