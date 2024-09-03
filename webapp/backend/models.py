@@ -27,7 +27,7 @@ class UserData(models.Model):
     worry_dialog_title = models.TextField(blank=True, null=True)
     questions = models.JSONField(blank=True, null=True) 
     places_information = models.JSONField(blank=True, null=True) 
-    website_url = models.URLField(blank=True, null=True)
+    website_urls = models.TextField(blank=True, null=True)
     user_email = models.EmailField(blank=True, null=True)
 
     def set_place_ids(self, place_ids_list):

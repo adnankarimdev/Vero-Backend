@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 import os
 import json
+from django.db.models import Q
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -179,8 +180,12 @@ def get_place_id_by_email(request, email):
     if request.method == 'GET':
         try:
             settings = UserData.objects.get(user_email=email)
+            place_ids_as_array = json.loads(settings.place_ids) if settings.place_ids else []
+            website_urls_as_array = json.loads(settings.website_urls) if settings.website_urls else []
             data = {
-                "placeIds": settings.place_ids
+                "placeIds": place_ids_as_array,
+                "places": settings.places_information,
+                "websiteUrls": website_urls_as_array
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -189,10 +194,16 @@ def get_place_id_by_email(request, email):
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
         
 @csrf_exempt 
-def get_review_settings(request, place_id):
+def get_review_questions(request, place_id):
+    place_ids_list = place_id.split(',') # Convert place_id to a JSON-encoded string
     if request.method == 'GET':
         try:
-            settings = UserData.objects.get(place_ids=place_id)
+            all_user_data = UserData.objects.all()
+            matching_settings = [
+                user_data for user_data in all_user_data
+                if any(pid in json.loads(user_data.place_ids) for pid in place_ids_list)
+            ]
+            settings = settings = matching_settings[0]
             data = {
                 "emailIntro": settings.email_intro,
                 "emailSignature": settings.email_signature,
@@ -207,7 +218,45 @@ def get_review_settings(request, place_id):
                 "questions": settings.questions,
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
-                "websiteUrl" : settings.website_url
+                "websiteUrls" : settings.website_urls,
+                "places" : settings.places_information
+            }
+            return JsonResponse(data, status=200)
+        except UserData.DoesNotExist:
+            return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+    
+@csrf_exempt 
+def get_review_settings(request, place_ids):
+    place_ids_list = place_ids.split(',')
+    if request.method == 'GET':
+        try:
+            all_user_data = UserData.objects.all()
+
+            # Filter results by checking if any place_id from place_ids_list exists in each entry's place_ids
+            matching_settings = [
+                user_data for user_data in all_user_data
+                if any(pid in json.loads(user_data.place_ids) for pid in place_ids_list)
+            ]
+            settings = matching_settings[0] 
+            data = {
+                "emailIntro": settings.email_intro,
+                "emailSignature": settings.email_signature,
+                "emailBody": settings.email_body,
+                "emailAppPassword": settings.email_app_password,
+                "clientEmail": settings.client_email,
+                "worryRating": settings.worry_rating,
+                "showWorryDialog": settings.show_worry_dialog,
+                "placeIds": settings.place_ids,
+                "showComplimentaryItem": settings.show_complimentary_item,
+                "complimentaryItem": settings.complimentary_item,
+                "questions": settings.questions,
+                "dialogBody": settings.worry_dialog_body,
+                "dialogTitle": settings.worry_dialog_title,
+                "websiteUrls" : settings.website_urls,
+                "places" : settings.places_information,
+                "userEmail" : settings.user_email
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -227,6 +276,9 @@ def set_place_ids(request):
         # Extract place_id from the data
         
         place_ids = [place['place_id'] for place in data.get('places', [])]
+        base_url = "http://localhost:4100/clientreviews/"
+
+        website_urls = [f"{base_url}{place_id}" for place_id in place_ids]
         print(place_ids)
 
         if place_ids:
@@ -242,12 +294,12 @@ def set_place_ids(request):
                     'client_email': data.get('clientEmail', ''),
                     'worry_rating': data.get('worryRating', 3),
                     'show_worry_dialog': data.get('showWorryDialog', True),
-                    'place_ids': data.get('placeIds', ''),
+                    'place_ids': json.dumps(place_ids),
                     'show_complimentary_item': data.get('showComplimentaryItem', False),
                     'complimentary_item': data.get('complimentaryItem', ''),
                     'worry_dialog_body': data.get('dialogBody', ''),
                     'worry_dialog_title': data.get('dialogTitle', ''),
-                    'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
+                    'website_urls': json.dumps(website_urls),
                     'user_email': data.get('userEmail', ''),
                     'places_information': data.get('places', [])
                 }
@@ -270,12 +322,13 @@ def save_user_review_question_settings(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Extract place_id from the data
-        place_id = data.get('placeIds')
+        user_email = data.get('userEmail')
+        print(data)
 
-        if place_id:
+        if user_email:
             # Use update_or_create to either update an existing entry or create a new one
             user_data, created = UserData.objects.update_or_create(
-                place_ids=place_id,
+                user_email=user_email,
                 defaults={
                     'questions': data.get('questions', []),
                     'email_intro': data.get('emailIntro', ''),
@@ -285,13 +338,13 @@ def save_user_review_question_settings(request):
                     'client_email': data.get('clientEmail', ''),
                     'worry_rating': data.get('worryRating', 3),
                     'show_worry_dialog': data.get('showWorryDialog', True),
-                    'place_ids': data.get('placeIds', ''),
+                    'place_ids': json.dumps(data.get('placeIds', '')),
                     'show_complimentary_item': data.get('showComplimentaryItem', False),
                     'complimentary_item': data.get('complimentaryItem', ''),
                     'worry_dialog_body': data.get('dialogBody', ''),
                     'worry_dialog_title': data.get('dialogTitle', ''),
-                    'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
-                    'user_email': data.get('userEmail', '')
+                    # 'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
+                    # 'user_email': data.get('userEmail', '')
                 }
             )
 
