@@ -22,8 +22,11 @@ from .models import UserData
 import jwt
 import secrets
 import googlemaps
+import resend
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
+RESEND_API_KEY = 're_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1'
+resend.api_key = RESEND_API_KEY
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
 documents_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl'
 
@@ -207,6 +210,40 @@ Important: Only return the review template BODY and nothing else.
 
 Here is the data:
 """
+prompt_review_question_generator = """
+Generate me 3 questions for someone who is about to leave me a 1, 2, 3 ,4 & 5 star review. These questions should be aligned to their reasoning of their review. Make questions as specific as possible, but do not mention the specific locations, since these questions will be used for all locations.
+
+return it in this format where questions is a key in json:
+questions: [ {id:1, questions:[]}, {id:2, questions:[]}, {id:3, questions:[]}, {id:4, questions:[]}, {id:5, questions:[]}]
+
+NOTE: Just return the key with the values and nothing else. 
+
+Here is the data: which will give insight in terms of what buisness I am and which areas to focus the questions on. If the area of focus is undefined, then create your own questions with the rules above:
+
+"""
+
+@csrf_exempt
+def generate_review_questions(request):
+    global prompt_review_question_generator
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_query = data.get("context", "")
+        print(user_query)
+        
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_review_question_generator),
+            ("human", user_query),
+        ]
+        
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})  
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 
 @csrf_exempt
 def generate_review_template(request):
@@ -504,6 +541,7 @@ def send_email(request):
       
       # Return the AI-generated content as a JSON response
       print(ai_msg.content)
+      
       body = ai_msg.content
       from_email = "adnan.karim.dev@gmail.com"
       from_password = google_email_app_password
