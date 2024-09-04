@@ -136,6 +136,43 @@ prompt_review_adjuster = """
     """
 #  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
+prompt_review_five_star_creator = """
+    Task: Transform the provided user badges selected for each section for a five star review into a polished Google review. The buisness name will also be provided that you will be generating a review for.
+    
+You are to create a google review based on the following criteria:
+	1.	Informative and Insightful (20%)
+	•	High Score: The review is specific, relevant, and offers valuable insights about the place, describing what other visitors are likely to experience. It highlights what makes the place special and shares unique and new information.
+	•	Moderate Score: The review provides some relevant details but lacks depth or fails to introduce something unique or new.
+	•	Low Score: The review is vague, generic, or fails to provide specific information that would be helpful to other visitors.
+	2.	Authenticity (20%)
+	•	High Score: The review accurately reflects the reviewer’s own experience, including both positive and negative aspects. The reviewer is honest and specific about the service and the place.
+	•	Moderate Score: The review is generally authentic but may lack specific details or balance between positive and negative aspects.
+	•	Low Score: The review appears exaggerated, biased, or lacks honesty and specificity regarding the reviewer’s experience.
+	3.	Respectfulness (20%)
+	•	High Score: The review is constructive, even in criticism, and avoids profanity. The feedback is respectful and considerate of how business owners might use the information to improve their offerings.
+	•	Moderate Score: The review is generally respectful but may contain mildly harsh language or criticism that is not fully constructive.
+	•	Low Score: The review contains disrespectful language, harsh criticism, or profanity, making it unhelpful for business improvement.
+	4.	Writing Style (20%)
+	•	High Score: The review is well-written, with proper spelling and grammar. The reviewer avoids excessive capitalization and punctuation, and the length of the review is appropriate (e.g., a paragraph).
+	•	Moderate Score: The review is understandable but may contain minor spelling or grammatical errors. The writing style is acceptable but could be improved for clarity or professionalism.
+	•	Low Score: The review contains significant spelling or grammatical errors, excessive capitalization, or punctuation, making it difficult to read or less professional.
+	5.	Privacy and Professionalism (10%)
+	•	High Score: The review does not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer does not write reviews for places where they are currently or were formerly employed.
+	•	Moderate Score: The review may slightly breach privacy or professionalism guidelines, but the issues are minor.
+	•	Low Score: The review includes personal or professional information or violates the policy of not reviewing places of employment.
+	6.	Focus on Experience (10%)
+	•	High Score: The review focuses on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It stays relevant to the location and does not engage in broader debates.
+	•	Moderate Score: The review is mostly focused on the experience but may include minor general commentary or irrelevant information.
+	•	Low Score: The review shifts focus away from the firsthand experience, including significant general commentary or unrelated topics.
+
+    Instructions:
+	•	Return only the review body.
+	•	Do not include any other text, explanations, or output—only the review body.
+
+    here is the data:
+
+    """
+
 prompt_address_email = """
 You are a customer service representative for a coffee shop. You have received a negative review from a customer, and you want to craft a personalized response based on the details provided. Below is the review and the customer’s answers to specific questions you asked. Use this information to write a thoughtful and empathetic response.
 
@@ -211,16 +248,89 @@ Important: Only return the review template BODY and nothing else.
 Here is the data:
 """
 prompt_review_question_generator = """
-Generate me 3 questions for someone who is about to leave me a 1, 2, 3 ,4 & 5 star review. These questions should be aligned to their reasoning of their review. Make questions as specific as possible, but do not mention the specific locations, since these questions will be used for all locations.
+Generate me 3 questions for someone who is about to leave me a 1, 2, 3 ,4 star review. These questions should be aligned to their reasoning of their review. Make questions as specific as possible, but do not mention the specific locations, since these questions will be used for all locations.
 
 return it in this format where questions is a key in json:
-questions: [ {id:1, questions:[]}, {id:2, questions:[]}, {id:3, questions:[]}, {id:4, questions:[]}, {id:5, questions:[]}]
+questions: [ {id:1, questions:[]}, {id:2, questions:[]}, {id:3, questions:[]}, {id:4, questions:[]}]
 
 NOTE: Just return the key with the values and nothing else. 
 
 Here is the data: which will give insight in terms of what buisness I am and which areas to focus the questions on. If the area of focus is undefined, then create your own questions with the rules above:
 
 """
+
+prompt_five_star_categories_generator = """
+Generate me 5 badges for each name for someone who is about to give me 5 stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor.
+
+return it in this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "<factor_1>",
+      "badges": []
+    },
+    {
+      "name": "<factor_2>",
+      "badges": []
+    },
+    {
+      "name": "<factor_3>",
+      "badges": []
+    }
+  ]
+}
+
+NOTE: Just return the key with the values and nothing else. 
+
+Here is the data: which will give insight in terms of what buisness I am
+
+"""
+
+@csrf_exempt
+def generate_categories(request):
+    global prompt_five_star_categories_generator
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_query = data.get("context", "")
+        print(user_query)
+        
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_five_star_categories_generator),
+            ("human", user_query),
+        ]
+        
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})  
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+@csrf_exempt
+def generate_five_star_review(request):
+    global prompt_review_five_star_creator
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_query = data.get("context", "")
+        print(user_query)
+        
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_review_five_star_creator),
+            ("human", user_query),
+        ]
+        
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})  
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 
 @csrf_exempt
 def generate_review_questions(request):
