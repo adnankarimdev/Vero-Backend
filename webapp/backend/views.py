@@ -175,6 +175,62 @@ Sincerely,
 P&S
 """
 
+prompt_review_template_generator = """
+Generate a Google review template based on the following data:
+
+	•	Business Name: <name of business>
+	•	User Rating: <rating out of 5>
+	•	Questions Answered: <list of questions>
+
+    The review template should allow the user to fill in specific parts of the text, such as “[write what you thought]” in places where the user’s personal experience should be described.
+Instructions:
+
+	1.	Tailor the review to reflect the specific business name provided.
+	2.	Align the tone of the review with the rating:
+	•	For a 1-star review: Provide constructive criticism that addresses the concerns while aiming for an overall positive tone.
+	•	For a 5-star review: Highlight positive aspects and express satisfaction.
+	3.	The review should always aim for a high score based on the following criteria:
+	1.	Informative and Insightful (20%):
+	•	The review should be specific, relevant, and offer valuable insights about the place, describing what other visitors are likely to experience. It should highlight what makes the place special and share unique and new information.
+	2.	Authenticity (20%):
+	•	The review must accurately reflect the reviewer’s own experience, including both positive and negative aspects. The reviewer should be honest and specific about the service and the place.
+	3.	Respectfulness (20%):
+	•	The review should be constructive, even in criticism, and avoid profanity. The feedback must be respectful and considerate of how business owners might use the information to improve their offerings.
+	4.	Writing Style (20%):
+	•	The review should be well-written, with proper spelling and grammar. Avoid excessive capitalization and punctuation, and keep the review length appropriate (e.g., a paragraph).
+	5.	Privacy and Professionalism (10%):
+	•	The review should not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer must not write reviews for places where they are currently or were formerly employed.
+	6.	Focus on Experience (10%):
+	•	The review should focus on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It should stay relevant to the location and not engage in broader debates.
+
+Important: Only return the review template BODY and nothing else.
+
+Here is the data:
+"""
+
+@csrf_exempt
+def generate_review_template(request):
+    global prompt_review_template_generator
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_query = data.get("context", "")
+        print(user_query)
+        
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_review_template_generator),
+            ("human", user_query),
+        ]
+        
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})  
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
 @csrf_exempt 
 def get_place_id_by_email(request, email):
     if request.method == 'GET':
