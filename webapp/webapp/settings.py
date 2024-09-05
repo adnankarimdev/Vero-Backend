@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.0.239']
 
+GOOGLE_MAPS_API_KEY = 'AIzaSyDEJBvbJXfBOqam_dohKIp-9OT6ZBYB2rY'
+
 AUTH_USER_MODEL = 'backend.CustomUser'
 
 # Application definition

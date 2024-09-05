@@ -23,6 +23,8 @@ import jwt
 import secrets
 import googlemaps
 import resend
+import requests
+from django.conf import settings
 
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 RESEND_API_KEY = 're_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1'
@@ -248,7 +250,21 @@ Important: Only return the review template BODY and nothing else.
 Here is the data:
 """
 prompt_review_question_generator = """
-Generate me 3 questions for someone who is about to leave me a 1, 2, 3 ,4 star review. These questions should be aligned to their reasoning of their review. Make questions as specific as possible, but do not mention the specific locations, since these questions will be used for all locations.
+Given that this criteria means a very thought out google review:
+1.	Informative and Insightful (20%)
+	•	High Score: The review is specific, relevant, and offers valuable insights about the place, describing what other visitors are likely to experience. It highlights what makes the place special and shares unique and new information.
+	2.	Authenticity (20%)
+	•	High Score: The review accurately reflects the reviewer’s own experience, including both positive and negative aspects. The reviewer is honest and specific about the service and the place.
+	3.	Respectfulness (20%)
+	•	High Score: The review is constructive, even in criticism, and avoids profanity. The feedback is respectful and considerate of how business owners might use the information to improve their offerings.
+	4.	Writing Style (20%)
+	•	High Score: The review is well-written, with proper spelling and grammar. The reviewer avoids excessive capitalization and punctuation, and the length of the review is appropriate (e.g., a paragraph).
+	5.	Privacy and Professionalism (10%)
+	•	High Score: The review does not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer does not write reviews for places where they are currently or were formerly employed.
+	6.	Focus on Experience (10%)
+	•	High Score: The review focuses on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It stays relevant to the location and does not engage in broader debates.​
+    --------
+Generate me 3 questions for someone who is about to leave me a 1, 2, 3 ,4 star review. These questions should be aligned to their reasoning of their review. Make questions as very VERY specific, but do not mention the specific locations, since these questions will be used for all locations.
 
 return it in this format where questions is a key in json:
 questions: [ {id:1, questions:[]}, {id:2, questions:[]}, {id:3, questions:[]}, {id:4, questions:[]}]
@@ -285,6 +301,20 @@ NOTE: Just return the key with the values and nothing else.
 Here is the data: which will give insight in terms of what buisness I am
 
 """
+@csrf_exempt
+def get_place_details(request, place_id):
+    # Ensure you have your API key in your settings
+    google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
+    url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&key={google_maps_api_key}"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        data = response.json()
+    except requests.RequestException as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse(data)
 
 @csrf_exempt
 def generate_categories(request):

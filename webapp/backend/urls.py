@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import create_charts, create_review, create_review_score, send_email, sign_up_user, log_in_user, save_user_review_question_settings, get_review_settings, get_place_id_by_email, set_place_ids, get_review_questions, generate_review_template, generate_review_questions, generate_five_star_review, generate_categories
+from .views import create_charts, create_review, create_review_score, send_email, sign_up_user, log_in_user, save_user_review_question_settings, get_review_settings, get_place_id_by_email, set_place_ids, get_review_questions, generate_review_template, generate_review_questions, generate_five_star_review, generate_categories, get_place_details
 
 urlpatterns = [
     path('create-charts/', create_charts, name='create_charts'),
@@ -18,4 +18,5 @@ urlpatterns = [
     path('generate-review-questions/', generate_review_questions, name='generate_review_questions'),
     path('generate-five-star-review/', generate_five_star_review, name='generate_five_star_review'),
     path('generate-categories/', generate_categories, name='generate_categories'),
+    path('get-place-details/<str:place_id>/', get_place_details, name='get_place_details'),
 ]
