@@ -18,7 +18,7 @@ from email.mime.multipart import MIMEMultipart
 from .serializers import UserSerializer, UserDataSerializer
 from rest_framework import status
 from rest_framework.response import Response
-from .models import UserData 
+from .models import UserData, CustomerReviewInfo
 import jwt
 import secrets
 import googlemaps
@@ -545,7 +545,43 @@ def set_place_ids(request):
             return JsonResponse({"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
+@csrf_exempt  
+def save_customer_review(request):
+    if request.method == 'POST':
+        
+        try:
+            body = json.loads(request.body)
+            print(body)
+            data = body["data"]
+            location = data.get('location')
+            rating = data.get('rating')
+            badges = json.dumps(data.get('badges', []))
+            posted_to_google_review = data.get('postedToGoogleReview', False)
+            generated_review_body = data.get('generatedReviewBody', '')
+            final_review_body = data.get('finalReviewBody')
+            email_sent_to_company = data.get('emailSentToCompany', False)
+            place_id_from_review = data.get('placeIdFromReview')
+
+            if not all([location, rating, place_id_from_review]):
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+            # Create and save the CustomerReview instance
+            review = CustomerReviewInfo(
+                location=location,
+                rating=rating,
+                badges=badges,
+                posted_to_google_review=posted_to_google_review,
+                generated_review_body=generated_review_body,
+                final_review_body=final_review_body,
+                email_sent_to_company=email_sent_to_company,
+                place_id_from_review=place_id_from_review
+            )
+            review.save()
+
+            return JsonResponse({'message': 'Review saved successfully'}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
 @csrf_exempt  
 def save_user_review_question_settings(request):
     if request.method == 'POST':

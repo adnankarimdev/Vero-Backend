@@ -1,6 +1,19 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import json
+
+class CustomerReviewInfo(models.Model):
+    location = models.CharField(max_length=255)  # Required string
+    place_id_from_review = models.CharField(max_length=255, default='')
+    rating = models.IntegerField()  # Required number
+    badges = models.JSONField(blank=True, null=True)  # Optional array of strings
+    posted_to_google_review = models.BooleanField(default=False)  # Defaults to false
+    generated_review_body = models.TextField(default='')  # Defaults to empty string
+    final_review_body = models.TextField(default='')  # Defaults string
+    email_sent_to_company = models.BooleanField(default=False)  # Defaults to false
+
+    def __str__(self):
+        return f"{self.location} - {self.rating}"
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     business_name = models.CharField(max_length=100)
