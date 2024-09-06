@@ -13,6 +13,7 @@ class CustomerReviewInfo(models.Model):
     email_sent_to_company = models.BooleanField(default=False)  # Defaults to false
     analyzed_review_details = models.JSONField(blank=True, null=True) 
     time_taken_to_write_review_in_seconds = models.FloatField(blank=True, null=True)
+    review_date = models.CharField(max_length=255, default='')
 
     def __str__(self):
         return f"{self.location} - {self.rating}"

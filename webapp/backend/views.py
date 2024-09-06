@@ -349,6 +349,20 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 
 """
 @csrf_exempt
+def get_reviews_by_client_ids(request):
+    client_ids = request.GET.getlist('clientIds[]')  # Get the list of client IDs from the query parameters
+    if not client_ids:
+        return JsonResponse({'error': 'No client IDs provided'}, status=400)
+    
+    # Query the database
+    reviews = CustomerReviewInfo.objects.filter(place_id_from_review__in=client_ids)
+    
+    # Serialize the data
+    data = list(reviews.values())
+    
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
 def get_place_details(request, place_id):
     # Ensure you have your API key in your settings
     google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
@@ -623,6 +637,7 @@ def save_customer_review(request):
             email_sent_to_company = data.get('emailSentToCompany', False)
             place_id_from_review = data.get('placeIdFromReview')
             time_taken_to_write_review_in_seconds = data.get('timeTakenToWriteReview')
+            review_date = data.get('reviewDate')
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
 
@@ -630,8 +645,8 @@ def save_customer_review(request):
                 print("DIIED HERE 1")
                 return JsonResponse({'error': 'Missing required fields'}, status=400)
             
-            #do gpt call to analyze review
-            if rating <= 4:
+            #do gpt call to analyze review; 5 star reviews will be analyzed if there is a final review body
+            if rating <= 4 or (rating == 5 and final_review_body):
                 print("DIIED HERE 2")
                 analyzed_review =  analyze_review(rating, final_review_body, "5 minutes")
                 print("ANALYZED REVEIEW ", analyzed_review)
@@ -651,7 +666,8 @@ def save_customer_review(request):
                 email_sent_to_company=email_sent_to_company,
                 place_id_from_review=place_id_from_review,
                 analyzed_review_details = analyzed_review,
-                time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds
+                time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds,
+                review_date = review_date
             )
             review.save()
             print("REVIEWS SAVED")
