@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 import os
+import re
 import json
 from django.db.models import Q
 from django.contrib.auth import authenticate, login
@@ -26,6 +27,17 @@ import resend
 import requests
 from django.conf import settings
 
+stop_words = [
+    "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
+    "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
+    "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was",
+    "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and",
+    "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between",
+    "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off",
+    "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any",
+    "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
+    "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
+]
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 RESEND_API_KEY = 're_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1'
 resend.api_key = RESEND_API_KEY
@@ -139,30 +151,34 @@ prompt_review_adjuster = """
 #  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
 prompt_review_five_star_creator = """
-    Task: Transform the provided user badges selected for each section for a five star review into a polished Google review. The buisness name will also be provided that you will be generating a review for.
+    Task: Transform the provided user badges selected for each section for a five star review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well.
     
 You are to create a google review based on the following criteria:
-	1.	Informative and Insightful (20%)
+	1.	Informative and Insightful (16%)
 	•	High Score: The review is specific, relevant, and offers valuable insights about the place, describing what other visitors are likely to experience. It highlights what makes the place special and shares unique and new information.
 	•	Moderate Score: The review provides some relevant details but lacks depth or fails to introduce something unique or new.
 	•	Low Score: The review is vague, generic, or fails to provide specific information that would be helpful to other visitors.
-	2.	Authenticity (20%)
+	2.	Authenticity (16%)
 	•	High Score: The review accurately reflects the reviewer’s own experience, including both positive and negative aspects. The reviewer is honest and specific about the service and the place.
 	•	Moderate Score: The review is generally authentic but may lack specific details or balance between positive and negative aspects.
 	•	Low Score: The review appears exaggerated, biased, or lacks honesty and specificity regarding the reviewer’s experience.
-	3.	Respectfulness (20%)
+	3.	Integration of Keywords (10%)
+	•	High Score: The review incorporates as many relevant keywords as possible, provided they fit naturally into the review. The language should feel authentic and not forced, with keywords blending seamlessly into the narrative.
+	•	Moderate Score: The review uses some keywords, but they may feel slightly forced or unnatural in context.
+	•	Low Score: The review lacks relevant keywords or uses them in a way that feels out of place, awkward, or artificial.
+    4.	Respectfulness (16%)
 	•	High Score: The review is constructive, even in criticism, and avoids profanity. The feedback is respectful and considerate of how business owners might use the information to improve their offerings.
 	•	Moderate Score: The review is generally respectful but may contain mildly harsh language or criticism that is not fully constructive.
 	•	Low Score: The review contains disrespectful language, harsh criticism, or profanity, making it unhelpful for business improvement.
-	4.	Writing Style (20%)
+	5.	Writing Style (16%)
 	•	High Score: The review is well-written, with proper spelling and grammar. The reviewer avoids excessive capitalization and punctuation, and the length of the review is appropriate (e.g., a paragraph).
 	•	Moderate Score: The review is understandable but may contain minor spelling or grammatical errors. The writing style is acceptable but could be improved for clarity or professionalism.
 	•	Low Score: The review contains significant spelling or grammatical errors, excessive capitalization, or punctuation, making it difficult to read or less professional.
-	5.	Privacy and Professionalism (10%)
+	6.	Privacy and Professionalism (10%)
 	•	High Score: The review does not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer does not write reviews for places where they are currently or were formerly employed.
 	•	Moderate Score: The review may slightly breach privacy or professionalism guidelines, but the issues are minor.
 	•	Low Score: The review includes personal or professional information or violates the policy of not reviewing places of employment.
-	6.	Focus on Experience (10%)
+	7.	Focus on Experience (10%)
 	•	High Score: The review focuses on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It stays relevant to the location and does not engage in broader debates.
 	•	Moderate Score: The review is mostly focused on the experience but may include minor general commentary or irrelevant information.
 	•	Low Score: The review shifts focus away from the firsthand experience, including significant general commentary or unrelated topics.
@@ -176,7 +192,7 @@ You are to create a google review based on the following criteria:
     """
 
 prompt_address_email = """
-You are a customer service representative for a coffee shop. You have received a negative review from a customer, and you want to craft a personalized response based on the details provided. Below is the review and the customer’s answers to specific questions you asked. Use this information to write a thoughtful and empathetic response.
+You are a customer service representative for [Buisness Name]. You have received a negative review from a customer, and you want to craft a personalized response based on the details provided. Below is the review and the customer’s answers to specific questions you asked. Use this information to write a thoughtful and empathetic response.
 
 Review:
 
@@ -200,12 +216,18 @@ Response Requirements:
 	3.	Explain any actions you are taking to address the issue or improve.
 	4.	Thank the customer for their feedback and invite them to provide more details if they wish.
 	5.	Offer a resolution or compensation if appropriate, such as a discount or free item on their next visit.
+    6.  If the answers to the questions are not specified, ask constructive questions for follow ups to try and get constructive feedback.
 
+Input Format:
+  Buisness Name: <buisness_name>
+  Name: <name_of_customer_you_are_addressing>
+  Negative Review Text: <review_body>
+  
 Response Example:
 
 “Dear [Customer’s Name],
 
-Thank you for taking the time to share your feedback. We are genuinely sorry to hear about your recent experience at [Coffee Shop Name]. We understand that [specific issue] was a significant inconvenience, and we deeply apologize for not meeting your expectations.
+Thank you for taking the time to share your feedback. We are genuinely sorry to hear about your recent experience at [Buisness Name]. We understand that [specific issue] was a significant inconvenience, and we deeply apologize for not meeting your expectations.
 
 From your answers, we see that [specific issue] affected your visit by [how it affected their visit]. We appreciate your suggestion of [suggestion for improvement] and are taking steps to address this issue to prevent it from happening in the future.
 
@@ -214,7 +236,10 @@ Thank you for bringing this to our attention. Your feedback is invaluable in hel
 We hope to have the opportunity to serve you better in the future.
 
 Sincerely,
-P&S
+[Buisness Name]
+
+Note:
+NEVER SEND THE RESPONSE EXAMPLE!
 """
 
 prompt_review_template_generator = """
@@ -348,6 +373,53 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 ---
 
 """
+
+prompt_keyword_generator = """
+ 
+You are an expert in search engine optimization and keyword analysis. I need to find the top keywords related to a business's Google Maps presence. Please follow these instructions based on the information available:
+
+1. **If a website URL is provided**, analyze the website and provide a list of the top keywords that are relevant for Google Maps searches.
+
+   Website URL: [Insert Website URL Here]
+
+2. **If no website URL is provided**, make educated guesses based on the business name and any tags associated with the business. Provide a list of the top keywords that would be relevant for Google Maps searches based on this information.
+
+   Business Name: [Insert Business Name Here]
+   Tags: [Insert Tags Here]
+
+Provide your response as a list of keywords. Your output should be the following structure:
+
+{
+  "keywords": [keywords_you_found],
+}
+
+
+---
+
+**Input Format**:
+- Website URL: [Buisness website urls]
+- Buisness Name: [Buisness Names]
+- Tags: [Buisness Tags]
+
+**Output Example**:
+
+{
+  "keywords": [
+  "Coffee roasters Calgary",
+  "Local coffee shop Calgary",
+  "Phil & Sebastian coffee locations",
+  "Specialty coffee Calgary",
+  "Direct trade coffee Calgary",
+  "Coffee subscriptions Calgary",
+  "Calgary coffee delivery",
+  "Espresso bar Calgary"
+]
+}
+
+RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
+---
+
+"""
 @csrf_exempt
 def get_reviews_by_client_ids(request):
     client_ids = request.GET.getlist('clientIds[]')  # Get the list of client IDs from the query parameters
@@ -406,6 +478,7 @@ def generate_five_star_review(request):
     if request.method == "POST":
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
+        print("review data", data)
         user_query = data.get("context", "")
         print(user_query)
         
@@ -513,7 +586,8 @@ def get_review_questions(request, place_id):
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
                 "websiteUrls" : settings.website_urls,
-                "places" : settings.places_information
+                "places" : settings.places_information,
+                "keywords": settings.company_keywords
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -550,7 +624,9 @@ def get_review_settings(request, place_ids):
                 "dialogTitle": settings.worry_dialog_title,
                 "websiteUrls" : settings.website_urls,
                 "places" : settings.places_information,
-                "userEmail" : settings.user_email
+                "userEmail" : settings.user_email,
+                "keywords" : settings.company_keywords,
+                "companyUrls" : settings.company_website_urls
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -559,8 +635,25 @@ def get_review_settings(request, place_ids):
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
     
 
+def extract_words(keywords):
+    """
+    Extract individual words from a list of keywords, removing special characters.
+    
+    :param keywords: List of keywords to split into words.
+    :return: List of all extracted words.
+    """
+    all_words = []
+    
+    for keyword in keywords:
+        # Use regular expressions to split by non-word characters and ignore empty strings
+        words = re.findall(r'\b\w+\b', keyword)
+        all_words.extend(words)
+    
+    return all_words
+
 @csrf_exempt  
 def set_place_ids(request):
+    global stop_words
     if request.method == 'POST':
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
@@ -568,12 +661,24 @@ def set_place_ids(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Extract place_id from the data
-        
+        print(data)
         place_ids = [place['place_id'] for place in data.get('places', [])]
+        buisness_names = [place['name'] for place in data.get('places', [])]
+        buisness_tags = [item for sublist in data.get('googleTypes', []) for item in sublist]
+        company_website_urls = [place['websiteUrl'] for place in data.get('places', [])]
+        unique_website_urls = list(set(company_website_urls))
         base_url = "http://localhost:4100/clientreviews/"
 
         website_urls = [f"{base_url}{place_id}" for place_id in place_ids]
         print(place_ids)
+
+        # extract company websites, make it unique
+        # if no company website, just use buisness name and its types
+        # generate keywords based on company website via gpt prompt 
+        keywords = generate_keywords(website_urls, buisness_names, buisness_tags)
+        sub_keywords = extract_words(keywords["keywords"])
+        final_keywords = list(set(keywords["keywords"]+sub_keywords))
+        filtered_keywords = [word for word in final_keywords if word.lower() not in stop_words]
 
         if place_ids:
             # Use update_or_create to either update an existing entry or create a new one
@@ -595,7 +700,9 @@ def set_place_ids(request):
                     'worry_dialog_title': data.get('dialogTitle', ''),
                     'website_urls': json.dumps(website_urls),
                     'user_email': data.get('userEmail', ''),
-                    'places_information': data.get('places', [])
+                    'places_information': data.get('places', []),
+                    'company_website_urls': unique_website_urls,
+                    'company_keywords': filtered_keywords
                 }
             )
 
@@ -612,6 +719,20 @@ def analyze_review(rating, ratingBody, timeTaken):
     analyzed_data = "Rating: \n" + str(rating) + "\n" + "Rating Body: \n" + ratingBody + "\n" + "Time taken: \n" + timeTaken
     messages = [
     ("system", prompt_review_analyzer),
+    ("human", analyzed_data),
+    ]
+    
+    ai_msg = llm.invoke(messages)
+    print(ai_msg.content)
+    data = json.loads(ai_msg.content)
+    return data
+
+
+def generate_keywords(business_urls, buisness_names, buisness_tags):
+    global prompt_keyword_generator
+    analyzed_data = "Website URL: \n" + "\n".join(business_urls) + "\n" + "Buisness Names: \n" + "\n".join(buisness_names) + "\n" + "Tags: \n" + "\n".join(buisness_tags)
+    messages = [
+    ("system", prompt_keyword_generator),
     ("human", analyzed_data),
     ]
     
@@ -795,8 +916,10 @@ def send_email(request):
       to_email = data.get("userEmailToSend", "")
       name = data.get("userNameToSend", "")
       review_body = data.get("userReviewToSend", "")
+      buisness_name = data.get("buisnessName", "")
       subject = "Your concerns"
       gpt_body = f'''
+  Buisness Name: {buisness_name}
   Name: {name}
   {review_body}
 '''
