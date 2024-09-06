@@ -317,16 +317,16 @@ You will receive a review body, the review rating (from 1 to 5), and the time it
    - **8+ minutes**: Likely more detailed but should be evaluated for relevance and focus.
 7. **Objectivity**: Is the review fair and respectful, even when critical?
 
-Given these indicators, provide an overall assessment of the review quality. Your output should be a JSON object with the following structure:
+Given these indicators, provide an overall assessment of the review quality. Your output should be the following structure:
 
-```
+
 {
   "score": [1-10],
   "reasoning": "[Explanation based on the criteria above]",
   "emotion": "[One word: happy, sad, angry, etc.]",
   "tone": "[One word: formal, casual, balanced, etc.]"
 }
-```
+
 
 ---
 
@@ -336,15 +336,15 @@ Given these indicators, provide an overall assessment of the review quality. You
 - Time spent: [Minutes]
 
 **Output Example**:
-```
+
 {
   "score": 8,
   "reasoning": "The review was detailed and highlighted specific aspects of the service, with a balanced tone and helpful recommendations. It could be slightly more concise.",
   "emotion": "happy",
   "tone": "balanced"
 }
-```
 
+RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 ---
 
 """
