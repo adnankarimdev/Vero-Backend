@@ -301,6 +301,53 @@ NOTE: Just return the key with the values and nothing else.
 Here is the data: which will give insight in terms of what buisness I am
 
 """
+
+prompt_review_analyzer = """
+ 
+You will receive a review body, the review rating (from 1 to 5), and the time it took to write the review (in minutes). Your task is to evaluate the quality of the review based on the following criteria:
+
+1. **Specificity**: Does the review highlight specific details about the product, service, or experience? Look for mentions of standout moments, staff, or product features.
+2. **Balanced Tone**: Is the review balanced in its praise or criticism? Does it offer constructive feedback along with any positive remarks, without being overly exaggerated?
+3. **Emotional Engagement**: Does the review convey genuine emotions such as enthusiasm, gratitude, or constructive criticism, showing personal involvement?
+4. **Well-Written**: Is the review clear, concise, and free of grammar and spelling errors?
+5. **Actionable Information**: Does the review provide insights or recommendations that other potential customers could find helpful?
+6. **Length**: Is the review appropriately detailed without being too short or overly long, given the time it took to write? Use the following guideline:
+   - **Under 2 minutes**: May be concise but should still provide some direct, specific content.
+   - **3-7 minutes**: Expected to be well-balanced, offering enough detail, effort, and clarity.
+   - **8+ minutes**: Likely more detailed but should be evaluated for relevance and focus.
+7. **Objectivity**: Is the review fair and respectful, even when critical?
+
+Given these indicators, provide an overall assessment of the review quality. Your output should be a JSON object with the following structure:
+
+```
+{
+  "score": [1-10],
+  "reasoning": "[Explanation based on the criteria above]",
+  "emotion": "[One word: happy, sad, angry, etc.]",
+  "tone": "[One word: formal, casual, balanced, etc.]"
+}
+```
+
+---
+
+**Input Format**:
+- Review body: [Text of the review]
+- Rating: [1 to 5]
+- Time spent: [Minutes]
+
+**Output Example**:
+```
+{
+  "score": 8,
+  "reasoning": "The review was detailed and highlighted specific aspects of the service, with a balanced tone and helpful recommendations. It could be slightly more concise.",
+  "emotion": "happy",
+  "tone": "balanced"
+}
+```
+
+---
+
+"""
 @csrf_exempt
 def get_place_details(request, place_id):
     # Ensure you have your API key in your settings
@@ -546,13 +593,26 @@ def set_place_ids(request):
     else:
         return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+def analyze_review(rating, ratingBody, timeTaken):
+    global prompt_review_analyzer
+    analyzed_data = "Rating: \n" + str(rating) + "\n" + "Rating Body: \n" + ratingBody + "\n" + "Time taken: \n" + timeTaken
+    messages = [
+    ("system", prompt_review_analyzer),
+    ("human", analyzed_data),
+    ]
+    
+    ai_msg = llm.invoke(messages)
+    print(ai_msg.content)
+    data = json.loads(ai_msg.content)
+    return data
+
 @csrf_exempt  
 def save_customer_review(request):
     if request.method == 'POST':
         
         try:
             body = json.loads(request.body)
-            print(body)
+            # print(body)
             data = body["data"]
             location = data.get('location')
             rating = data.get('rating')
@@ -562,9 +622,23 @@ def save_customer_review(request):
             final_review_body = data.get('finalReviewBody')
             email_sent_to_company = data.get('emailSentToCompany', False)
             place_id_from_review = data.get('placeIdFromReview')
+            time_taken_to_write_review_in_seconds = data.get('timeTakenToWriteReview')
+
+            print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
 
             if not all([location, rating, place_id_from_review]):
+                print("DIIED HERE 1")
                 return JsonResponse({'error': 'Missing required fields'}, status=400)
+            
+            #do gpt call to analyze review
+            if rating <= 4:
+                print("DIIED HERE 2")
+                analyzed_review =  analyze_review(rating, final_review_body, "5 minutes")
+                print("ANALYZED REVEIEW ", analyzed_review)
+            else:
+                print("DIIED HERE 3")
+                analyzed_review = {}
+                print("ANALYZED REVEIEW ", analyzed_review)
 
             # Create and save the CustomerReview instance
             review = CustomerReviewInfo(
@@ -575,9 +649,12 @@ def save_customer_review(request):
                 generated_review_body=generated_review_body,
                 final_review_body=final_review_body,
                 email_sent_to_company=email_sent_to_company,
-                place_id_from_review=place_id_from_review
+                place_id_from_review=place_id_from_review,
+                analyzed_review_details = analyzed_review,
+                time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds
             )
             review.save()
+            print("REVIEWS SAVED")
 
             return JsonResponse({'message': 'Review saved successfully'}, status=201)
         except json.JSONDecodeError:
