@@ -40,6 +40,7 @@ stop_words = [
 ]
 os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
 RESEND_API_KEY = 're_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1'
+SENDGRID_API = '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'
 resend.api_key = RESEND_API_KEY
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
 documents_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl'
@@ -280,29 +281,18 @@ Important: Only return the review template BODY and nothing else.
 Here is the data:
 """
 prompt_review_question_generator = """
-Given that this criteria means a very thought out google review:
-1.	Informative and Insightful (20%)
-	•	High Score: The review is specific, relevant, and offers valuable insights about the place, describing what other visitors are likely to experience. It highlights what makes the place special and shares unique and new information.
-	2.	Authenticity (20%)
-	•	High Score: The review accurately reflects the reviewer’s own experience, including both positive and negative aspects. The reviewer is honest and specific about the service and the place.
-	3.	Respectfulness (20%)
-	•	High Score: The review is constructive, even in criticism, and avoids profanity. The feedback is respectful and considerate of how business owners might use the information to improve their offerings.
-	4.	Writing Style (20%)
-	•	High Score: The review is well-written, with proper spelling and grammar. The reviewer avoids excessive capitalization and punctuation, and the length of the review is appropriate (e.g., a paragraph).
-	5.	Privacy and Professionalism (10%)
-	•	High Score: The review does not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer does not write reviews for places where they are currently or were formerly employed.
-	6.	Focus on Experience (10%)
-	•	High Score: The review focuses on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It stays relevant to the location and does not engage in broader debates.​
-    --------
-Generate me 3 questions for someone who is about to leave me a 1, 2, 3 ,4 star review. These questions should be aligned to their reasoning of their review. Make questions as very VERY specific, but do not mention the specific locations, since these questions will be used for all locations.
 
-return it in this format where questions is a key in json:
+Before generating questions, perform an internet search using the location name to determine the industry or type of business. If an industry is identified, align the questions accordingly. If no specific location is provided, create focused questions that still meet the above criteria.
+--------
+
+Generate me 3 specific questions for someone who is about to leave a 1, 2, 3, or 4-star review. These questions should be aligned with their reasoning for the review, industry-relevant, and tailored to their experience. Make the questions extremely specific to avoid generality but do not mention the specific locations. 
+
+Return it in this format where questions are a key in JSON:
 questions: [ {id:1, questions:[]}, {id:2, questions:[]}, {id:3, questions:[]}, {id:4, questions:[]}]
 
-NOTE: Just return the key with the values and nothing else. 
+NOTE: Just return the key with the values and nothing else.
 
-Here is the data: which will give insight in terms of what buisness I am and which areas to focus the questions on. If the area of focus is undefined, then create your own questions with the rules above:
-
+Here is the data: which will give insight into what type of business it is and areas to focus on. If no specific area is provided, create your own relevant questions using the rules above:
 """
 
 prompt_five_star_categories_generator = """
