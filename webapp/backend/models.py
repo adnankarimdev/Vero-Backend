@@ -14,6 +14,7 @@ class CustomerReviewInfo(models.Model):
     analyzed_review_details = models.JSONField(blank=True, null=True) 
     time_taken_to_write_review_in_seconds = models.FloatField(blank=True, null=True)
     review_date = models.CharField(max_length=255, default='')
+    posted_with_bubble_rating_platform = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.location} - {self.rating}"
@@ -47,6 +48,7 @@ class UserData(models.Model):
     user_email = models.EmailField(blank=True, null=True)
     company_website_urls = models.JSONField(blank=True, null=True)
     company_keywords = models.JSONField(blank=True, null=True)
+    bubble_rating_platform = models.BooleanField(default=False)
 
     def set_place_ids(self, place_ids_list):
         self.place_ids = json.dumps(place_ids_list)

@@ -200,7 +200,7 @@ You are a customer service representative for [Buisness Name]. You have received
 
 Review:
 
-[Insert the negative review text here.]
+[Insert the negative review text here and/or User Review Selected Badges.]
 
 Customer’s Answers to Questions:
 
@@ -226,6 +226,7 @@ Input Format:
   Buisness Name: <buisness_name>
   Name: <name_of_customer_you_are_addressing>
   Negative Review Text: <review_body>
+  User Review Selected Badges: <badges_selected_by_user>
 
 Response Example:
 
@@ -305,7 +306,8 @@ Here is the data: which will give insight in terms of what buisness I am and whi
 """
 
 prompt_five_star_categories_generator = """
-Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor.
+Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor. 
+Any rating below 4 should be badges that of getting information of concern from the user. They should not be questions, but short statements. For example, the coffee was bad.
 
 return it in this format where categories is a key in json. Don't include any random white spaces.:
 {
@@ -333,7 +335,7 @@ Here is the data: which will give insight in terms of what buisness I am and the
 
 prompt_review_analyzer = """
  
-You will receive a review body, the review rating (from 1 to 5), and the time it took to write the review (in minutes). Your task is to evaluate the quality of the review based on the following criteria:
+You will receive a review body, the review rating (from 1 to 5), and the time it took to write the review (in seconds). Your task is to evaluate the quality of the review based on the following criteria:
 
 1. **Specificity**: Does the review highlight specific details about the product, service, or experience? Look for mentions of standout moments, staff, or product features.
 2. **Balanced Tone**: Is the review balanced in its praise or criticism? Does it offer constructive feedback along with any positive remarks, without being overly exaggerated?
@@ -591,7 +593,8 @@ def get_review_questions(request, place_id):
                 "dialogTitle": settings.worry_dialog_title,
                 "websiteUrls" : settings.website_urls,
                 "places" : settings.places_information,
-                "keywords": settings.company_keywords
+                "keywords": settings.company_keywords,
+                "useBubblePlatform": settings.bubble_rating_platform
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -630,7 +633,8 @@ def get_review_settings(request, place_ids):
                 "places" : settings.places_information,
                 "userEmail" : settings.user_email,
                 "keywords" : settings.company_keywords,
-                "companyUrls" : settings.company_website_urls
+                "companyUrls" : settings.company_website_urls,
+                "useBubblePlatform": settings.bubble_rating_platform
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -720,7 +724,7 @@ def set_place_ids(request):
 
 def analyze_review(rating, ratingBody, timeTaken):
     global prompt_review_analyzer
-    analyzed_data = "Rating: \n" + str(rating) + "\n" + "Rating Body: \n" + ratingBody + "\n" + "Time taken: \n" + timeTaken
+    analyzed_data = "Rating: \n" + str(rating) + "\n" + "Rating Body: \n" + ratingBody + "\n" + "Time taken: \n" + str(timeTaken)
     messages = [
     ("system", prompt_review_analyzer),
     ("human", analyzed_data),
@@ -763,6 +767,7 @@ def save_customer_review(request):
             place_id_from_review = data.get('placeIdFromReview')
             time_taken_to_write_review_in_seconds = data.get('timeTakenToWriteReview')
             review_date = data.get('reviewDate')
+            posted_with_bubble_rating_platform = data.get('postedWithBubbleRatingPlatform', False)
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
 
@@ -771,9 +776,9 @@ def save_customer_review(request):
                 return JsonResponse({'error': 'Missing required fields'}, status=400)
             
             #do gpt call to analyze review; 5 star reviews will be analyzed if there is a final review body
-            if rating <= 4 or (rating == 5 and final_review_body):
+            if final_review_body.strip() != '':
                 print("DIIED HERE 2")
-                analyzed_review =  analyze_review(rating, final_review_body, "5 minutes")
+                analyzed_review =  analyze_review(rating, final_review_body, time_taken_to_write_review_in_seconds)
                 print("ANALYZED REVEIEW ", analyzed_review)
             else:
                 print("DIIED HERE 3")
@@ -792,7 +797,8 @@ def save_customer_review(request):
                 place_id_from_review=place_id_from_review,
                 analyzed_review_details = analyzed_review,
                 time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds,
-                review_date = review_date
+                review_date = review_date,
+                posted_with_bubble_rating_platform = posted_with_bubble_rating_platform
             )
             review.save()
             print("REVIEWS SAVED")
@@ -830,6 +836,7 @@ def save_user_review_question_settings(request):
                     'complimentary_item': data.get('complimentaryItem', ''),
                     'worry_dialog_body': data.get('dialogBody', ''),
                     'worry_dialog_title': data.get('dialogTitle', ''),
+                    'bubble_rating_platform': data.get('useBubblePlatform', False)
                     # 'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 }
