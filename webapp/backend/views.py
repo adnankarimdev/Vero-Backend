@@ -186,6 +186,7 @@ You are to create a google review based on the following criteria:
 
     Instructions:
 	•	Return only the review body.
+    •	Do not include any emojis even if the badges have emojis.
 	•	Do not include any other text, explanations, or output—only the review body.
 
     Input Format:
@@ -372,7 +373,7 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 
 prompt_keyword_generator = """
  
-You are an expert in search engine optimization and keyword analysis. I need to find the top keywords related to a business's Google Maps presence. Please follow these instructions based on the information available:
+You are an expert in search engine optimization (SEO) and keyword analysis. I need to find the top keywords related to a business's Google Maps presence. Please follow these instructions based on the information available:
 
 1. **If a website URL is provided**, analyze the website and provide a list of the top keywords that are relevant for Google Maps searches.
 
@@ -383,7 +384,7 @@ You are an expert in search engine optimization and keyword analysis. I need to 
    Business Name: [Insert Business Name Here]
    Tags: [Insert Tags Here]
 
-Provide your response as a list of keywords. Your output should be the following structure:
+Also, add other keywords you feel would be extremely beneficial to the buisness for SEO. Provide your response as a list of keywords. Your output should be the following structure:
 
 {
   "keywords": [keywords_you_found],
@@ -689,7 +690,7 @@ def set_place_ids(request):
                     'email_body': data.get('emailBody', ''),
                     'email_app_password': data.get('emailAppPassword', ''),
                     'client_email': data.get('clientEmail', ''),
-                    'worry_rating': data.get('worryRating', 3),
+                    'worry_rating': data.get('worryRating', 4),
                     'show_worry_dialog': data.get('showWorryDialog', True),
                     'place_ids': json.dumps(place_ids),
                     'show_complimentary_item': data.get('showComplimentaryItem', False),
