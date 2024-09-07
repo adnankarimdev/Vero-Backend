@@ -151,7 +151,7 @@ prompt_review_adjuster = """
 #  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
 prompt_review_five_star_creator = """
-    Task: Transform the provided user badges selected for each section for a five star review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well.
+    Task: Transform the provided user badges selected for each section for a [review rating] review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well.
     
 You are to create a google review based on the following criteria:
 	1.	Informative and Insightful (16%)
@@ -187,7 +187,11 @@ You are to create a google review based on the following criteria:
 	•	Return only the review body.
 	•	Do not include any other text, explanations, or output—only the review body.
 
-    here is the data:
+    Input Format:
+    Buisness Name: [Name of Buisness]
+    Rating: [Rating out of 5 star]
+    User Selected Badges: [Badges selected by the user]
+    Keywords: [Keywords to choose from that fit naturally]
 
     """
 
@@ -222,7 +226,7 @@ Input Format:
   Buisness Name: <buisness_name>
   Name: <name_of_customer_you_are_addressing>
   Negative Review Text: <review_body>
-  
+
 Response Example:
 
 “Dear [Customer’s Name],
@@ -301,7 +305,7 @@ Here is the data: which will give insight in terms of what buisness I am and whi
 """
 
 prompt_five_star_categories_generator = """
-Generate me 5 badges for each name for someone who is about to give me 5 stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor.
+Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor.
 
 return it in this format where categories is a key in json. Don't include any random white spaces.:
 {
@@ -323,7 +327,7 @@ return it in this format where categories is a key in json. Don't include any ra
 
 NOTE: Just return the key with the values and nothing else. 
 
-Here is the data: which will give insight in terms of what buisness I am
+Here is the data: which will give insight in terms of what buisness I am and the rating the user gave
 
 """
 
