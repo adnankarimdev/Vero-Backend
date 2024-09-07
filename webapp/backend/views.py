@@ -307,7 +307,7 @@ Here is the data: which will give insight in terms of what buisness I am and whi
 
 prompt_five_star_categories_generator = """
 Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor. 
-Any rating below 4 should be badges that of getting information of concern from the user. They should not be questions, but short statements. For example, the coffee was bad.
+Any rating below 4 should be badges that of getting information of concern from the user. They should not be questions, but short statements. Do not include any sentence enders, but include an emoji that represents that badge at the end of the sentence. For example :coffee was bad 🤮
 
 return it in this format where categories is a key in json. Don't include any random white spaces.:
 {
