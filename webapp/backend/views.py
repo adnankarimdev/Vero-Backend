@@ -26,6 +26,7 @@ import googlemaps
 import resend
 import requests
 from django.conf import settings
+from token_count import TokenCount
 
 stop_words = [
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
@@ -57,6 +58,8 @@ llm = ChatOpenAI(
     timeout=None,
     max_retries=2,
 )
+
+tc = TokenCount(model_name="gpt-4o")
 
 agent = create_csv_agent(
     llm,
@@ -335,45 +338,28 @@ Here is the data: which will give insight in terms of what buisness I am and the
 
 prompt_review_analyzer = """
  
-You will receive a review body, the review rating (from 1 to 5), and the time it took to write the review (in seconds). Your task is to evaluate the quality of the review based on the following criteria:
-
-1. **Specificity**: Does the review highlight specific details about the product, service, or experience? Look for mentions of standout moments, staff, or product features.
-2. **Balanced Tone**: Is the review balanced in its praise or criticism? Does it offer constructive feedback along with any positive remarks, without being overly exaggerated?
-3. **Emotional Engagement**: Does the review convey genuine emotions such as enthusiasm, gratitude, or constructive criticism, showing personal involvement?
-4. **Well-Written**: Is the review clear, concise, and free of grammar and spelling errors?
-5. **Actionable Information**: Does the review provide insights or recommendations that other potential customers could find helpful?
-6. **Length**: Is the review appropriately detailed without being too short or overly long, given the time it took to write? Use the following guideline:
-   - **Under 2 minutes**: May be concise but should still provide some direct, specific content.
-   - **3-7 minutes**: Expected to be well-balanced, offering enough detail, effort, and clarity.
-   - **8+ minutes**: Likely more detailed but should be evaluated for relevance and focus.
-7. **Objectivity**: Is the review fair and respectful, even when critical?
-
-Given these indicators, provide an overall assessment of the review quality. Your output should be the following structure:
-
-
+You will receive a review body, the review rating (from 1 to 5), and the time it took to write the review (in seconds). Your task is to analyze the review and determine any improvements that the business could make. Your output should be the following structure:
 {
   "score": [1-10],
-  "reasoning": "[Explanation based on the criteria above]",
-  "emotion": "[One word: happy, sad, angry, etc.]",
-  "tone": "[One word: formal, casual, balanced, etc.]"
+  "reasoning": "[Detailed recommendations for business improvements based on the review criteria above]",
+  "emotion": "[One word based on review body: happy, sad, angry, etc.]",
+  "tone": "[One word based on review body: formal, casual, balanced, etc.]"
 }
-
-
 ---
 
 **Input Format**:
 - Review body: [Text of the review]
 - Rating: [1 to 5]
-- Time spent: [Minutes]
 
 **Output Example**:
 
 {
   "score": 8,
-  "reasoning": "The review was detailed and highlighted specific aspects of the service, with a balanced tone and helpful recommendations. It could be slightly more concise.",
+  "reasoning": "The review highlighted issues with slow service and unhelpful staff. The business could improve by training staff to be more responsive and efficient. Additionally, addressing the reviewer's concern about product quality could enhance overall customer satisfaction.",
   "emotion": "happy",
   "tone": "balanced"
 }
+Note: if the review lacks specific details, for the reasoning field, just write "Cannot provide suggestions due to lack of details provided by the customer.".
 
 RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 ---
@@ -458,6 +444,9 @@ def get_place_details(request, place_id):
 @csrf_exempt
 def generate_categories(request):
     global prompt_five_star_categories_generator
+    tokens = tc.num_tokens_from_string(prompt_five_star_categories_generator)
+    print(f"GEN CATGORIES INPUT: Tokens in the string: {tokens}")
+
     if request.method == "POST":
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
@@ -473,6 +462,8 @@ def generate_categories(request):
         # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
+        tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(f"GEN CATGORIES OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
         # return JsonResponse({"content": ai_msg.content})  
     
@@ -481,6 +472,8 @@ def generate_categories(request):
 @csrf_exempt
 def generate_five_star_review(request):
     global prompt_review_five_star_creator
+    tokens = tc.num_tokens_from_string(prompt_review_five_star_creator)
+    print(f"GEN 5 STAR REVIEW INPUT: Tokens in the string: {tokens}")
     if request.method == "POST":
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
@@ -497,6 +490,8 @@ def generate_five_star_review(request):
         # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
+        tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(f"GEN 5 STAR REVIEW OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
         # return JsonResponse({"content": ai_msg.content})  
     
@@ -733,7 +728,6 @@ def analyze_review(rating, ratingBody, timeTaken):
     ]
     
     ai_msg = llm.invoke(messages)
-    print(ai_msg.content)
     data = json.loads(ai_msg.content)
     return data
 
@@ -777,8 +771,9 @@ def save_customer_review(request):
                 print("DIIED HERE 1")
                 return JsonResponse({'error': 'Missing required fields'}, status=400)
             
-            #do gpt call to analyze review; 5 star reviews will be analyzed if there is a final review body
-            if final_review_body.strip() != '':
+            #do gpt call to analyze reviews; only for free forms. 
+            #low ratings with bubble will imply suggestions based on badges selected.
+            if final_review_body.strip() != '' and not posted_with_bubble_rating_platform:
                 print("DIIED HERE 2")
                 analyzed_review =  analyze_review(rating, final_review_body, time_taken_to_write_review_in_seconds)
                 print("ANALYZED REVEIEW ", analyzed_review)
