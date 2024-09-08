@@ -297,10 +297,19 @@ Here is the data: which will give insight into what type of business it is and a
 """
 
 prompt_five_star_categories_generator = """
-Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my buisness. To start, give me the top 3 most important factors of my buisness for customers. Then, fill out badges relevant to that factor. 
-Any rating below 4 should be badges that of getting information of concern from the user. They should not be questions, but short statements. Do not include any sentence enders, but include an emoji that represents that badge at the end of the sentence. For example :coffee was bad 🤮
+Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor.
 
-return it in this format where categories is a key in json. Don't include any random white spaces.:
+For ratings:
+
+	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns. Examples: “service was terrible 😡”, “product quality was unacceptable 😠”.
+	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “staff were unhelpful 😕”, “experience was disappointing 😞”.
+	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “ambiance could be improved 😐”, “service was slow ⏳”.
+	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “menu options could be better 🧐”, “cleanliness was lacking 🧹”.
+	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “excellent service 😊”, “great atmosphere 🌟”.
+
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders.
+
+Return it in this format where categories is a key in json. Don't include any random white spaces.:
 {
   "categories": [
     {
@@ -667,6 +676,8 @@ def set_place_ids(request):
         company_website_urls = [place['websiteUrl'] for place in data.get('places', [])]
         unique_website_urls = list(set(company_website_urls))
         base_url = "http://localhost:4100/clientreviews/"
+        default_worry_dialog = "We’re truly sorry to hear that your experience didn’t meet your expectations, and we greatly appreciate your feedback. We strive to provide the best possible service to all our customers, and it’s clear we missed the mark this time. We would love the opportunity to make things right and improve your next experience. Please share your name and email with us,and we’ll personally follow up to address any concerns. Your satisfaction is our top priority, and we look forward to hearing from you! "
+        default_worry_title = "We are sorry 😔"
 
         website_urls = [f"{base_url}{place_id}" for place_id in place_ids]
         print(place_ids)
@@ -695,8 +706,8 @@ def set_place_ids(request):
                     'place_ids': json.dumps(place_ids),
                     'show_complimentary_item': data.get('showComplimentaryItem', False),
                     'complimentary_item': data.get('complimentaryItem', ''),
-                    'worry_dialog_body': data.get('dialogBody', ''),
-                    'worry_dialog_title': data.get('dialogTitle', ''),
+                    'worry_dialog_body': default_worry_dialog,
+                    'worry_dialog_title': default_worry_title,
                     'website_urls': json.dumps(website_urls),
                     'user_email': data.get('userEmail', ''),
                     'places_information': data.get('places', []),
