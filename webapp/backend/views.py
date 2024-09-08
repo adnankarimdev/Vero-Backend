@@ -154,41 +154,22 @@ prompt_review_adjuster = """
     """
 #  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
+#cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
-    Task: Transform the provided user badges selected for each section for a [review rating] review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well.
+Task: Transform the provided user badges selected for each section for a [review rating] review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well. You are to only put 2 keywords at a maximum if it goes in naturally.
     
 You are to create a google review based on the following criteria:
-	1.	Informative and Insightful (16%)
-	•	High Score: The review is specific, relevant, and offers valuable insights about the place, describing what other visitors are likely to experience. It highlights what makes the place special and shares unique and new information.
-	•	Moderate Score: The review provides some relevant details but lacks depth or fails to introduce something unique or new.
-	•	Low Score: The review is vague, generic, or fails to provide specific information that would be helpful to other visitors.
-	2.	Authenticity (16%)
-	•	High Score: The review accurately reflects the reviewer’s own experience, including both positive and negative aspects. The reviewer is honest and specific about the service and the place.
-	•	Moderate Score: The review is generally authentic but may lack specific details or balance between positive and negative aspects.
-	•	Low Score: The review appears exaggerated, biased, or lacks honesty and specificity regarding the reviewer’s experience.
-	3.	Integration of Keywords (10%)
-	•	High Score: The review incorporates as many relevant keywords as possible, provided they fit naturally into the review. The language should feel authentic and not forced, with keywords blending seamlessly into the narrative.
-	•	Moderate Score: The review uses some keywords, but they may feel slightly forced or unnatural in context.
-	•	Low Score: The review lacks relevant keywords or uses them in a way that feels out of place, awkward, or artificial.
-    4.	Respectfulness (16%)
-	•	High Score: The review is constructive, even in criticism, and avoids profanity. The feedback is respectful and considerate of how business owners might use the information to improve their offerings.
-	•	Moderate Score: The review is generally respectful but may contain mildly harsh language or criticism that is not fully constructive.
-	•	Low Score: The review contains disrespectful language, harsh criticism, or profanity, making it unhelpful for business improvement.
-	5.	Writing Style (16%)
-	•	High Score: The review is well-written, with proper spelling and grammar. The reviewer avoids excessive capitalization and punctuation, and the length of the review is appropriate (e.g., a paragraph).
-	•	Moderate Score: The review is understandable but may contain minor spelling or grammatical errors. The writing style is acceptable but could be improved for clarity or professionalism.
-	•	Low Score: The review contains significant spelling or grammatical errors, excessive capitalization, or punctuation, making it difficult to read or less professional.
-	6.	Privacy and Professionalism (10%)
-	•	High Score: The review does not include personal or professional information, such as phone numbers or URLs of other businesses. The reviewer does not write reviews for places where they are currently or were formerly employed.
-	•	Moderate Score: The review may slightly breach privacy or professionalism guidelines, but the issues are minor.
-	•	Low Score: The review includes personal or professional information or violates the policy of not reviewing places of employment.
-	7.	Focus on Experience (10%)
-	•	High Score: The review focuses on the reviewer’s firsthand experience with the place, avoiding general commentary on social or political issues. It stays relevant to the location and does not engage in broader debates.
-	•	Moderate Score: The review is mostly focused on the experience but may include minor general commentary or irrelevant information.
-	•	Low Score: The review shifts focus away from the firsthand experience, including significant general commentary or unrelated topics.
+	1.	Informative and Insightful (16%): Specific and valuable; unique insights.
+	2.	Authenticity (16%): Honest, detailed reflection of the experience.
+	3.	Integration of Keywords (10%): Relevant keywords used naturally.
+	4.	Respectfulness (16%): Constructive, respectful, and avoids profanity.
+	5.	Writing Style (16%): Well-written, correct grammar and spelling.
+	6.	Privacy and Professionalism (10%): No personal or professional info; no conflict of interest.
+	7.	Focus on Experience (10%): Focused on personal experience; avoids irrelevant commentary.
 
     Instructions:
 	•	Return only the review body.
+    •   You can only put a MAXIMUM of 2 keywords in the review body.
     •	Do not include any emojis even if the badges have emojis.
 	•	Do not include any other text, explanations, or output—only the review body.
 
@@ -722,12 +703,16 @@ def set_place_ids(request):
 def analyze_review(rating, ratingBody, timeTaken):
     global prompt_review_analyzer
     analyzed_data = "Rating: \n" + str(rating) + "\n" + "Rating Body: \n" + ratingBody + "\n" + "Time taken: \n" + str(timeTaken)
+    tokens = tc.num_tokens_from_string(prompt_review_analyzer)
+    print(f"ANALYZE REVIEW INPUT: Tokens in the string: {tokens}")
     messages = [
     ("system", prompt_review_analyzer),
     ("human", analyzed_data),
     ]
     
     ai_msg = llm.invoke(messages)
+    tokens = tc.num_tokens_from_string(ai_msg.content)
+    print(f"ANALYZE REVIEW OUTPUT: Tokens in the string: {tokens}")
     data = json.loads(ai_msg.content)
     return data
 
