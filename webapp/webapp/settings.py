@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-y^#=%lxy#+mt4v0kvvperrim1&82h5h4q1w6@z33_4q9+&wtt)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.0.239']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.0.0.239', "192.168.1.226", "e79f-2604-3d09-1c77-8cb0-61dc-c59a-c01b-4aac.ngrok-free.app", "vero.ngrok.dev"]
 
 GOOGLE_MAPS_API_KEY = 'AIzaSyDEJBvbJXfBOqam_dohKIp-9OT6ZBYB2rY'
 
@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 
