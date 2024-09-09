@@ -531,10 +531,12 @@ def get_place_id_by_email(request, email):
             settings = UserData.objects.get(user_email=email)
             place_ids_as_array = json.loads(settings.place_ids) if settings.place_ids else []
             website_urls_as_array = json.loads(settings.website_urls) if settings.website_urls else []
+            in_location_urls_as_array = json.loads(settings.in_location_urls) if settings.in_location_urls else []
             data = {
                 "placeIds": place_ids_as_array,
                 "places": settings.places_information,
-                "websiteUrls": website_urls_as_array
+                "websiteUrls": website_urls_as_array,
+                "locationUrls": in_location_urls_as_array
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -606,6 +608,7 @@ def get_review_settings(request, place_ids):
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
                 "websiteUrls" : settings.website_urls,
+                "locationUrls" : settings.in_location_urls,
                 "places" : settings.places_information,
                 "userEmail" : settings.user_email,
                 "keywords" : settings.company_keywords,
@@ -652,10 +655,12 @@ def set_place_ids(request):
         company_website_urls = [place['websiteUrl'] for place in data.get('places', [])]
         unique_website_urls = list(set(company_website_urls))
         base_url = "http://localhost:4100/clientreviews/"
+        in_location_url = "http://localhost:4100/instorereviews/"
         default_worry_dialog = "We’re truly sorry to hear that your experience didn’t meet your expectations, and we greatly appreciate your feedback. We strive to provide the best possible service to all our customers, and it’s clear we missed the mark this time. We would love the opportunity to make things right and improve your next experience. Please share your name and email with us,and we’ll personally follow up to address any concerns. Your satisfaction is our top priority, and we look forward to hearing from you! "
         default_worry_title = "We are sorry 😔"
 
         website_urls = [f"{base_url}{place_id}" for place_id in place_ids]
+        in_location_urls = [f"{in_location_url}{place_id}" for place_id in place_ids]
         print(place_ids)
 
         # extract company websites, make it unique
@@ -685,6 +690,7 @@ def set_place_ids(request):
                     'worry_dialog_body': default_worry_dialog,
                     'worry_dialog_title': default_worry_title,
                     'website_urls': json.dumps(website_urls),
+                    'in_location_urls': json.dumps(in_location_urls),
                     'user_email': data.get('userEmail', ''),
                     'places_information': data.get('places', []),
                     'company_website_urls': unique_website_urls,
@@ -749,6 +755,7 @@ def save_customer_review(request):
             time_taken_to_write_review_in_seconds = data.get('timeTakenToWriteReview')
             review_date = data.get('reviewDate')
             posted_with_bubble_rating_platform = data.get('postedWithBubbleRatingPlatform', False)
+            posted_with_in_store_mode = data.get('postedWithInStoreMode', False)
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
 
@@ -780,7 +787,8 @@ def save_customer_review(request):
                 analyzed_review_details = analyzed_review,
                 time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds,
                 review_date = review_date,
-                posted_with_bubble_rating_platform = posted_with_bubble_rating_platform
+                posted_with_bubble_rating_platform = posted_with_bubble_rating_platform,
+                posted_with_in_store_mode = posted_with_in_store_mode
             )
             review.save()
             print("REVIEWS SAVED")
@@ -901,6 +909,67 @@ def load_data_for_llm():
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+
+
+@csrf_exempt
+def send_email_to_post_later(request):
+    global prompt_review_five_star_creator
+    if request.method == "POST":
+      data = json.loads(request.body)
+      to_email = data.get("userEmailToSend", "")
+      name = data.get("userNameToSend", "")
+      googleReviewUrl = data.get("googleReviewUrl", "")
+      user_query = data.get("context", "")
+      subject = "Your 5 star review ✨"
+
+      messages = [
+    ("system", prompt_review_five_star_creator),
+    ("human", user_query),
+    ]
+      
+      # Invoke the LLM with the messages
+      ai_msg = llm.invoke(messages)
+      
+      # Return the AI-generated content as a JSON response
+      print(ai_msg.content)
+      
+      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and paste it in the link provided below! \n" + ai_msg.content + "\n" + f"Link: {googleReviewUrl}"
+      from_email = "adnan.karim.dev@gmail.com"
+      from_password = google_email_app_password
+      # Create the email message
+      msg = MIMEMultipart()
+      msg['From'] = from_email
+      msg['To'] = to_email
+      msg['Subject'] = subject
+
+      # Attach the body text
+      msg.attach(MIMEText(body, 'plain'))
+
+      try:
+          # Connect to the Gmail SMTP server
+          server = smtplib.SMTP('smtp.gmail.com', 587)
+          server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+
+          # Login to the server
+          server.login(from_email, from_password)
+
+          # Send the email
+          server.sendmail(from_email, to_email, msg.as_string())
+          print('Email sent successfully.')
+          return JsonResponse({"content": "Success"})
+
+      except Exception as e:
+        error_message = str(e) 
+        return JsonResponse({
+            "success": False,
+            "error": {
+                "message": error_message
+            }
+        }, status=500) 
+
+      finally:
+          # Close the connection to the server
+          server.quit()
 
 @csrf_exempt
 def send_email(request):
