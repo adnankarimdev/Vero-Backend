@@ -758,6 +758,7 @@ def save_customer_review(request):
             posted_with_bubble_rating_platform = data.get('postedWithBubbleRatingPlatform', False)
             posted_with_in_store_mode = data.get('postedWithInStoreMode', False)
             review_uuid = data.get('reviewUuid', '')
+            pending_google_review = data.get('pendingGoogleReview', False)
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
 
@@ -791,7 +792,8 @@ def save_customer_review(request):
                 review_date = review_date,
                 posted_with_bubble_rating_platform = posted_with_bubble_rating_platform,
                 posted_with_in_store_mode = posted_with_in_store_mode,
-                review_uuid = review_uuid
+                review_uuid = review_uuid,
+                pending_google_review = pending_google_review
             )
             review.save()
             print("REVIEWS SAVED")
@@ -914,10 +916,32 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 
-def generate_random_hash():
-    random_bytes = secrets.token_bytes(16)  # Generate 16 random bytes
-    hash_object = hashlib.sha256(random_bytes)  # Use SHA-256 to hash the random bytes
-    return hash_object.hexdigest()[:32]
+@csrf_exempt
+def update_review_data(request):
+    if request.method == "POST":
+      data = json.loads(request.body)
+      review_uuid = data.get('reviewUuid')
+      final_review_body = data.get('finalReviewBody')
+
+      review_to_update = CustomerReviewInfo.objects.get(review_uuid=review_uuid)
+      emailed_review_to_update = ReviewsToPostLater.objects.get(review_uuid=review_uuid)
+
+      review_to_update.posted_to_google_review = True
+      review_to_update.final_review_body = final_review_body
+      review_to_update.posted_to_google_after_email_sent = True
+      review_to_update.pending_google_review = False
+      review_to_update.save()
+
+      emailed_review_to_update.posted_to_google = True
+      emailed_review_to_update.save()
+      response_data = {"message": "Successfully updated existing review!"}
+      return JsonResponse(response_data, status=status.HTTP_200_OK)
+
+
+      #first, update customerReviewInfo by UUID; turn posted to google to true. 
+
+      #then, delete reviewtopostlater entry by UUID. I don't see any reason to keep the entry.. or is there a reason? 
+      #maybe keep it, 
 
 
 @csrf_exempt 
@@ -960,11 +984,16 @@ def send_email_to_post_later(request):
     "google_review_url": googleReviewUrl,
     "review_uuid": review_uuid,
     "review_body": ai_msg.content,
-    "customer_url": customer_url
+    "customer_url": customer_url,
+    "posted_to_google": False
     }
       serializer = ReviewsToPostLaterSerializer(data=dataToStore)
       if serializer.is_valid():
         serializer.save()
+      else:
+        # Print or log the validation errors
+        print("Serializer errors:", serializer.errors)
+        # print('saved reviewwwww')
       
       # Return the AI-generated content as a JSON response
       print(ai_msg.content)

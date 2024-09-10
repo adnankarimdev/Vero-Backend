@@ -17,6 +17,8 @@ class CustomerReviewInfo(models.Model):
     posted_with_bubble_rating_platform = models.BooleanField(default=False)
     posted_with_in_store_mode = models.BooleanField(default=False)
     review_uuid = models.CharField(max_length=255, default='')
+    posted_to_google_after_email_sent = models.BooleanField(default=False)
+    pending_google_review = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.location} - {self.rating}"
@@ -31,12 +33,13 @@ class CustomUser(AbstractUser):
         return self.email
     
 class ReviewsToPostLater(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     name = models.CharField(max_length=100)
     google_review_url = models.TextField(blank=True, null=True)
     review_uuid = models.CharField(max_length=255, default='')
     review_body = models.TextField(blank=True, null=True)
     customer_url = models.TextField(blank=True, null=True)
+    posted_to_google = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email

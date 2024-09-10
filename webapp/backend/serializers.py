@@ -29,4 +29,4 @@ class CustomerReviewSerializer(serializers.ModelSerializer):
 class ReviewsToPostLaterSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewsToPostLater
-        fields = ['email', 'name', 'google_review_url', 'review_uuid', 'review_body', 'customer_url']
+        fields = ['email', 'name', 'google_review_url', 'review_uuid', 'review_body', 'customer_url', 'posted_to_google']
