@@ -16,6 +16,7 @@ class CustomerReviewInfo(models.Model):
     review_date = models.CharField(max_length=255, default='')
     posted_with_bubble_rating_platform = models.BooleanField(default=False)
     posted_with_in_store_mode = models.BooleanField(default=False)
+    review_uuid = models.CharField(max_length=255, default='')
 
     def __str__(self):
         return f"{self.location} - {self.rating}"
@@ -25,6 +26,17 @@ class CustomUser(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'business_name']
+
+    def __str__(self):
+        return self.email
+    
+class ReviewsToPostLater(models.Model):
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=100)
+    google_review_url = models.TextField(blank=True, null=True)
+    review_uuid = models.CharField(max_length=255, default='')
+    review_body = models.TextField(blank=True, null=True)
+    customer_url = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.email

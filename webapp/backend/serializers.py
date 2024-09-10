@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, UserData, CustomerReviewInfo
+from .models import CustomUser, UserData, CustomerReviewInfo, ReviewsToPostLater
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,3 +25,8 @@ class CustomerReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerReviewInfo
         fields = '__all__'
+
+class ReviewsToPostLaterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewsToPostLater
+        fields = ['email', 'name', 'google_review_url', 'review_uuid', 'review_body', 'customer_url']

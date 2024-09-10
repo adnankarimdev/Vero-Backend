@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import create_charts, create_review, create_review_score, send_email, sign_up_user, log_in_user, save_user_review_question_settings, get_review_settings, get_place_id_by_email, set_place_ids, get_review_questions, generate_review_template, generate_review_questions, generate_five_star_review, generate_categories, get_place_details, save_customer_review, get_reviews_by_client_ids, send_email_to_post_later
+from .views import create_charts, create_review, create_review_score, send_email, sign_up_user, log_in_user, save_user_review_question_settings, get_review_settings, get_place_id_by_email, set_place_ids, get_review_questions, generate_review_template, generate_review_questions, generate_five_star_review, generate_categories, get_place_details, save_customer_review, get_reviews_by_client_ids, send_email_to_post_later, get_review_by_uuid
 
 urlpatterns = [
     path('create-charts/', create_charts, name='create_charts'),
@@ -22,4 +22,5 @@ urlpatterns = [
     path('save-customer-review/', save_customer_review, name='save_customer_review'),
     path('get-reviews-by-client-ids/', get_reviews_by_client_ids, name='get_reviews_by_client_ids'),
     path('send-email-to-post-later/', send_email_to_post_later, name='send_email_to_post_later'),
+    path('get-review-by-uuid/<str:review_uuid>/', get_review_by_uuid, name='get_review_by_uuid'),
 ]

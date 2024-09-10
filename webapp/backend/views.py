@@ -2,6 +2,7 @@ from django.http import HttpResponse
 import os
 import re
 import json
+import hashlib
 from django.db.models import Q
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
@@ -16,10 +17,10 @@ from langchain.chains import RetrievalQA
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from .serializers import UserSerializer, UserDataSerializer
+from .serializers import UserSerializer, UserDataSerializer, ReviewsToPostLaterSerializer
 from rest_framework import status
 from rest_framework.response import Response
-from .models import UserData, CustomerReviewInfo
+from .models import UserData, CustomerReviewInfo, ReviewsToPostLater
 import jwt
 import secrets
 import googlemaps
@@ -756,6 +757,7 @@ def save_customer_review(request):
             review_date = data.get('reviewDate')
             posted_with_bubble_rating_platform = data.get('postedWithBubbleRatingPlatform', False)
             posted_with_in_store_mode = data.get('postedWithInStoreMode', False)
+            review_uuid = data.get('reviewUuid', '')
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
 
@@ -788,7 +790,8 @@ def save_customer_review(request):
                 time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds,
                 review_date = review_date,
                 posted_with_bubble_rating_platform = posted_with_bubble_rating_platform,
-                posted_with_in_store_mode = posted_with_in_store_mode
+                posted_with_in_store_mode = posted_with_in_store_mode,
+                review_uuid = review_uuid
             )
             review.save()
             print("REVIEWS SAVED")
@@ -911,6 +914,24 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 
+def generate_random_hash():
+    random_bytes = secrets.token_bytes(16)  # Generate 16 random bytes
+    hash_object = hashlib.sha256(random_bytes)  # Use SHA-256 to hash the random bytes
+    return hash_object.hexdigest()[:32]
+
+
+@csrf_exempt 
+def get_review_by_uuid(request, review_uuid):
+    if request.method == 'GET':
+        try:
+            review = ReviewsToPostLater.objects.get(review_uuid=review_uuid)
+            serializer = ReviewsToPostLaterSerializer(review)
+            return JsonResponse(serializer.data, status=200)
+        except UserData.DoesNotExist:
+            return JsonResponse({"error": "Review UUID not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+    
 @csrf_exempt
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
@@ -920,6 +941,7 @@ def send_email_to_post_later(request):
       name = data.get("userNameToSend", "")
       googleReviewUrl = data.get("googleReviewUrl", "")
       user_query = data.get("context", "")
+      review_uuid = data.get("reviewUuid", "")
       subject = "Your 5 star review ✨"
 
       messages = [
@@ -929,11 +951,25 @@ def send_email_to_post_later(request):
       
       # Invoke the LLM with the messages
       ai_msg = llm.invoke(messages)
+
+      #here, we will store to a new Table called AtHomeReviews; save 
+      customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
+      dataToStore = {
+    "email": to_email,
+    "name": name,
+    "google_review_url": googleReviewUrl,
+    "review_uuid": review_uuid,
+    "review_body": ai_msg.content,
+    "customer_url": customer_url
+    }
+      serializer = ReviewsToPostLaterSerializer(data=dataToStore)
+      if serializer.is_valid():
+        serializer.save()
       
       # Return the AI-generated content as a JSON response
       print(ai_msg.content)
       
-      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and paste it in the link provided below! \n" + ai_msg.content + "\n" + f"Link: {googleReviewUrl}"
+      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and open link provided below! \n" + f"{customer_url}"
       from_email = "adnan.karim.dev@gmail.com"
       from_password = google_email_app_password
       # Create the email message
