@@ -16,6 +16,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from .serializers import UserSerializer, UserDataSerializer, ReviewsToPostLaterSerializer
 from rest_framework import status
@@ -27,6 +28,8 @@ import googlemaps
 import resend
 import requests
 from django.conf import settings
+from icalendar import Calendar, Event
+from datetime import datetime, timedelta
 from token_count import TokenCount
 
 stop_words = [
@@ -956,7 +959,33 @@ def get_review_by_uuid(request, review_uuid):
             return JsonResponse({"error": "Review UUID not found."}, status=404)
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+
+def create_calendar_invite(event_summary: str, event_description: str, event_location: str, start_time: datetime, duration_minutes: int = 1) -> bytes:
+    """
+    Creates a calendar invite (.ics) for an event.
+
+    :param event_summary: The title of the event.
+    :param event_description: A detailed description of the event.
+    :param event_location: The location or URL of the event.
+    :param start_time: The starting datetime of the event.
+    :param duration_minutes: The duration of the event in minutes (default is 1 minute).
+    :return: The .ics file as bytes.
+    """
+    cal = Calendar()
+    event = Event()
+    event.add('summary', event_summary)
+    event.add('dtstart', start_time)
+    event.add('dtend', start_time + timedelta(minutes=duration_minutes))  # Event lasts for the specified duration in minutes
+    event.add('dtstamp', datetime.now())
+    event.add('location', event_location)
+    event.add('description', event_description)
     
+    # Add the event to the calendar
+    cal.add_component(event)
+
+    # Return the calendar invite as a byte string
+    return cal.to_ical()
+
 @csrf_exempt
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
@@ -999,7 +1028,13 @@ def send_email_to_post_later(request):
       # Return the AI-generated content as a JSON response
       print(ai_msg.content)
       
-      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and open link provided below! \n" + f"{customer_url}"
+      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and open link provided below! \n" + f"{customer_url} \n Want to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️"
+
+      # Create the calendar invite using the new function
+      event_summary = f"Follow up on your 5-star review for {name}"
+      event_description = f"Reminder to post your 5-star review for {name} on Google. Here’s your custom link: {googleReviewUrl}"
+      start_time = datetime.now() + timedelta(days=1)  # Set to 1 day from now
+      ics_file = create_calendar_invite(event_summary, event_description, googleReviewUrl, start_time)
       from_email = "adnan.karim.dev@gmail.com"
       from_password = google_email_app_password
       # Create the email message
@@ -1010,6 +1045,11 @@ def send_email_to_post_later(request):
 
       # Attach the body text
       msg.attach(MIMEText(body, 'plain'))
+
+      # Attach the calendar invite
+      part = MIMEApplication(ics_file, Name="invite.ics")
+      part['Content-Disposition'] = 'attachment; filename="invite.ics"'
+      msg.attach(part)
 
       try:
           # Connect to the Gmail SMTP server
