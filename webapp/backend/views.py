@@ -281,6 +281,7 @@ NOTE: Just return the key with the values and nothing else.
 Here is the data: which will give insight into what type of business it is and areas to focus on. If no specific area is provided, create your own relevant questions using the rules above:
 """
 
+# Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
 Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor.
 
