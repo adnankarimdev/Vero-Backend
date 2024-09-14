@@ -31,6 +31,9 @@ from django.conf import settings
 from icalendar import Calendar, Event
 from datetime import datetime, timedelta
 from token_count import TokenCount
+from apscheduler.schedulers.blocking import BlockingScheduler
+from datetime import datetime
+from .scheduler import scheduler
 
 stop_words = [
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
@@ -994,54 +997,107 @@ def create_calendar_invite(event_summary: str, event_description: str, event_loc
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
     if request.method == "POST":
-      data = json.loads(request.body)
-      to_email = data.get("userEmailToSend", "")
-      name = data.get("userNameToSend", "")
-      googleReviewUrl = data.get("googleReviewUrl", "")
-      user_query = data.get("context", "")
-      review_uuid = data.get("reviewUuid", "")
-      subject = "Your 5 star review ✨"
+        try:
+            data = json.loads(request.body)
+            to_email = data.get("userEmailToSend", "")
+            name = data.get("userNameToSend", "")
+            googleReviewUrl = data.get("googleReviewUrl", "")
+            user_query = data.get("context", "")
+            review_uuid = data.get("reviewUuid", "")
+            date = data.get("date", "")
+            time = data.get("time", "")
+            subject = "Your 5 star review ✨"
 
-      messages = [
-    ("system", prompt_review_five_star_creator),
-    ("human", user_query),
-    ]
-      
-      # Invoke the LLM with the messages
-      ai_msg = llm.invoke(messages)
+            # Combine date and time to form a datetime object
+            date_part = date[:10]
+            combined_datetime = datetime.strptime(f"{date_part} {time}", "%Y-%m-%d %I:%M %p")
 
-      #here, we will store to a new Table called AtHomeReviews; save 
-      customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
-      dataToStore = {
-    "email": to_email,
-    "name": name,
-    "google_review_url": googleReviewUrl,
-    "review_uuid": review_uuid,
-    "review_body": ai_msg.content,
-    "customer_url": customer_url,
-    "posted_to_google": False
-    }
-      serializer = ReviewsToPostLaterSerializer(data=dataToStore)
-      if serializer.is_valid():
-        serializer.save()
-      else:
-        # Print or log the validation errors
-        print("Serializer errors:", serializer.errors)
-        # print('saved reviewwwww')
-      
-      # Return the AI-generated content as a JSON response
-      print(ai_msg.content)
-      
-      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and open link provided below. It'll take less than a minute! (We aren't even kidding) \n" + f"{customer_url} \n Want to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️"
+            messages = [
+                ("system", prompt_review_five_star_creator),
+                ("human", user_query),
+            ]
 
-      # Create the calendar invite using the new function
-      event_summary = f"Follow up on your 5-star review for {name}"
-      event_description = f"Reminder to post your 5-star review for {name} on Google. Here’s your custom link: {googleReviewUrl}"
-      start_time = datetime.now() + timedelta(days=1)  # Set to 1 day from now
-      ics_file = create_calendar_invite(event_summary, event_description, googleReviewUrl, start_time)
-      from_email = "adnan.karim.dev@gmail.com"
-      from_password = google_email_app_password
-      # Create the email message
+            # Invoke the LLM with the messages
+            ai_msg = llm.invoke(messages)
+
+            # Store the review data
+            customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
+            dataToStore = {
+                "email": to_email,
+                "name": name,
+                "google_review_url": googleReviewUrl,
+                "review_uuid": review_uuid,
+                "review_body": ai_msg.content,
+                "customer_url": customer_url,
+                "posted_to_google": False
+            }
+            serializer = ReviewsToPostLaterSerializer(data=dataToStore)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                # Print or log the validation errors
+                print("Serializer errors:", serializer.errors)
+
+            # Create the calendar invite
+            body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nWant to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️"
+            event_summary = f"Follow up on your 5-star review for {name}"
+            event_description = f"Reminder to post your 5-star review for {name} on Google. Here’s your custom link: {googleReviewUrl}"
+            start_time = datetime.now() + timedelta(days=1)  # Set to 1 day from now
+            ics_file = create_calendar_invite(event_summary, event_description, googleReviewUrl, start_time)
+            from_email = "adnan.karim.dev@gmail.com"
+            from_password = google_email_app_password
+
+            # Schedule the email to be sent once at the specified date and time
+            email_args = (subject, body, ics_file, from_email, to_email, from_password)
+            scheduler.add_job(send_sceduled_email, 'date', run_date=combined_datetime, args=email_args)
+
+            return JsonResponse({"content": "Success"})
+
+        except Exception as e:
+            # Handle any exceptions that occur
+            print("Error:", str(e))
+            return JsonResponse({"error": "An error occurred"}, status=500)
+    #   # Create the email message
+    #   msg = MIMEMultipart()
+    #   msg['From'] = from_email
+    #   msg['To'] = to_email
+    #   msg['Subject'] = subject
+
+    #   # Attach the body text
+    #   msg.attach(MIMEText(body, 'plain'))
+
+    #   # Attach the calendar invite
+    #   part = MIMEApplication(ics_file, Name="invite.ics")
+    #   part['Content-Disposition'] = 'attachment; filename="invite.ics"'
+    #   msg.attach(part)
+
+    #   try:
+    #       # Connect to the Gmail SMTP server
+    #       server = smtplib.SMTP('smtp.gmail.com', 587)
+    #       server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+
+    #       # Login to the server
+    #       server.login(from_email, from_password)
+
+    #       # Send the email
+    #       server.sendmail(from_email, to_email, msg.as_string())
+    #       print('Email sent successfully.')
+    #       return JsonResponse({"content": "Success"})
+
+    #   except Exception as e:
+    #     error_message = str(e) 
+    #     return JsonResponse({
+    #         "success": False,
+    #         "error": {
+    #             "message": error_message
+    #         }
+    #     }, status=500) 
+
+    #   finally:
+    #       # Close the connection to the server
+    #       server.quit()
+
+def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_password):
       msg = MIMEMultipart()
       msg['From'] = from_email
       msg['To'] = to_email
@@ -1080,7 +1136,6 @@ def send_email_to_post_later(request):
       finally:
           # Close the connection to the server
           server.quit()
-
 @csrf_exempt
 def send_email(request):
     if request.method == "POST":
