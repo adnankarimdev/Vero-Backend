@@ -286,7 +286,7 @@ Here is the data: which will give insight into what type of business it is and a
 
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
-Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor.
+Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my business. To start, give me the top 3 most important factors of my business for customers, and add a 4th called Other. Then, fill out badges relevant to that factor.
 
 For ratings:
 
@@ -311,6 +311,10 @@ Return it in this format where categories is a key in json. Don't include any ra
     },
     {
       "name": "<factor_3>",
+      "badges": []
+    },
+    {
+      "name": "Other",
       "badges": []
     }
   ]
@@ -1028,7 +1032,7 @@ def send_email_to_post_later(request):
       # Return the AI-generated content as a JSON response
       print(ai_msg.content)
       
-      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and open link provided below! \n" + f"{customer_url} \n Want to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️"
+      body = f"Hey {name}! \n" + "Here's your five star review! Just go ahead and open link provided below. It'll take less than a minute! (We aren't even kidding) \n" + f"{customer_url} \n Want to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️"
 
       # Create the calendar invite using the new function
       event_summary = f"Follow up on your 5-star review for {name}"
