@@ -31,9 +31,9 @@ from django.conf import settings
 from icalendar import Calendar, Event
 from datetime import datetime, timedelta
 from token_count import TokenCount
-from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
-from .scheduler import scheduler
+from backend.scheduler import scheduler
+import pytz
 
 stop_words = [
     "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
@@ -1011,6 +1011,15 @@ def send_email_to_post_later(request):
             # Combine date and time to form a datetime object
             date_part = date[:10]
             combined_datetime = datetime.strptime(f"{date_part} {time}", "%Y-%m-%d %I:%M %p")
+            print("Naive Datetime:", combined_datetime)
+
+            # Convert to UTC # also gotta figure out different time zone handling. What if somone is in eastern time.
+            local_tz = pytz.timezone('America/Denver')
+            localized_datetime = local_tz.localize(combined_datetime)
+
+            # Convert to UTC
+            utc_datetime = localized_datetime.astimezone(pytz.UTC)
+            print("UTC:", utc_datetime)
 
             messages = [
                 ("system", prompt_review_five_star_creator),
@@ -1049,7 +1058,7 @@ def send_email_to_post_later(request):
 
             # Schedule the email to be sent once at the specified date and time
             email_args = (subject, body, ics_file, from_email, to_email, from_password)
-            scheduler.add_job(send_sceduled_email, 'date', run_date=combined_datetime, args=email_args)
+            scheduler.add_job(send_sceduled_email, 'date', run_date=utc_datetime, args=email_args)
 
             return JsonResponse({"content": "Success"})
 
