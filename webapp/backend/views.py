@@ -213,7 +213,7 @@ Response Requirements:
 	2.	Apologize sincerely for the inconvenience caused.
 	3.	Explain any actions you are taking to address the issue or improve.
 	4.	Thank the customer for their feedback and invite them to provide more details if they wish.
-	5.	Offer a resolution or compensation if appropriate, such as a discount or free item on their next visit.
+	5.	Offer a resolution or compensation if specified in the input data. Give exactly what is specified.
     6.  If the answers to the questions are not specified, ask constructive questions for follow ups to try and get constructive feedback.
 
 Input Format:
@@ -1024,6 +1024,7 @@ def send_email_to_post_later(request):
             review_uuid = data.get("reviewUuid", "")
             date = data.get("date", "")
             time = data.get("time", "")
+            send_email_now = data.get("sendEmailNow", False)
             subject = "Your 5 star review ✨"
 
             # Combine date and time to form a datetime object
@@ -1048,9 +1049,9 @@ def send_email_to_post_later(request):
             ai_msg = llm.invoke(messages)
 
             # Store the review data
-            # customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
+            customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
             #mobile url
-            customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
+            # customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
             dataToStore = {
                 "email": to_email,
                 "name": name,
@@ -1078,7 +1079,10 @@ def send_email_to_post_later(request):
 
             # Schedule the email to be sent once at the specified date and time
             email_args = (subject, body, ics_file, from_email, to_email, from_password)
-            scheduler.add_job(send_sceduled_email, 'date', run_date=utc_datetime, args=email_args)
+            if send_email_now:
+                send_sceduled_email(subject, body, ics_file, from_email, to_email, from_password)
+            else:
+                scheduler.add_job(send_sceduled_email, 'date', run_date=utc_datetime, args=email_args)
 
             return JsonResponse({"content": "Success"})
 
@@ -1165,32 +1169,8 @@ def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_pass
       finally:
           # Close the connection to the server
           server.quit()
-@csrf_exempt
-def send_email(request):
-    if request.method == "POST":
-      data = json.loads(request.body)
-      to_email = data.get("userEmailToSend", "")
-      name = data.get("userNameToSend", "")
-      review_body = data.get("userReviewToSend", "")
-      buisness_name = data.get("buisnessName", "")
-      subject = "Your concerns"
-      gpt_body = f'''
-  Buisness Name: {buisness_name}
-  Name: {name}
-  {review_body}
-'''
-      messages = [
-    ("system", prompt_address_email),
-    ("human", gpt_body),
-    ]
-      
-      # Invoke the LLM with the messages
-      ai_msg = llm.invoke(messages)
-      
-      # Return the AI-generated content as a JSON response
-      print(ai_msg.content)
-      
-      body = ai_msg.content
+
+def send_scheduled_concern_email(subject, body, from_email, to_email, from_password):
       from_email = "adnan.karim.dev@gmail.com"
       from_password = google_email_app_password
       # Create the email message
@@ -1227,6 +1207,64 @@ def send_email(request):
       finally:
           # Close the connection to the server
           server.quit()
+
+@csrf_exempt
+def send_email(request):
+    if request.method == "POST":
+      data = json.loads(request.body)
+      to_email = data.get("userEmailToSend", "")
+      name = data.get("userNameToSend", "")
+      review_body = data.get("userReviewToSend", "")
+      buisness_name = data.get("buisnessName", "")
+      place_id = data.get("placeId", "")
+      all_user_data = UserData.objects.all()
+      # Filter results by checking if any place_id from place_ids_list exists in each entry's place_ids
+      matching_settings = [
+            user_data for user_data in all_user_data
+            if place_id in json.loads(user_data.place_ids)  # Check if place_id exists in the place_ids list
+        ]
+      settings = matching_settings[0]
+      if settings.show_complimentary_item == True:
+          gpt_body = f'''
+            Buisness Name: {buisness_name}
+             Name: {name}
+             Complimentary Item: {settings.complimentary_item}
+             {review_body}
+        '''
+      else:
+          gpt_body = f'''
+            Buisness Name: {buisness_name}
+             Name: {name}
+             Complimentary Item: No discount or Complimentary Item
+             {review_body}
+            '''
+           
+
+      subject = "Your concerns"
+      messages = [
+    ("system", prompt_address_email),
+    ("human", gpt_body),
+    ]
+      
+      # Invoke the LLM with the messages
+      ai_msg = llm.invoke(messages)
+      
+      # Return the AI-generated content as a JSON response
+      print(ai_msg.content)
+      #here, we will schedule the new email.
+      
+      body = ai_msg.content
+      from_email = "adnan.karim.dev@gmail.com"
+      from_password = google_email_app_password
+      email_args = (subject, body, from_email, to_email, from_password)
+      
+      utc_datetime = datetime.now(pytz.UTC)
+
+      # Add 5 minutes to the current UTC time
+      #time will be client adjusted.
+      send_date_time = utc_datetime + timedelta(minutes=5)
+      scheduler.add_job(send_scheduled_concern_email, 'date', run_date=send_date_time, args=email_args)
+      return JsonResponse({"content": "Success"})
 
 @csrf_exempt
 def create_review_score(request):
