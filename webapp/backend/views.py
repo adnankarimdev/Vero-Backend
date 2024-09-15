@@ -50,6 +50,7 @@ os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1N
 RESEND_API_KEY = 're_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1'
 SENDGRID_API = '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'
 resend.api_key = RESEND_API_KEY
+MAILGUN_API = "f29f9a6ae5692803b6ff2d2795b4e1da-826eddfb-d93e3829"
 faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
 documents_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl'
 
@@ -289,7 +290,7 @@ Here is the data: which will give insight into what type of business it is and a
 
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
-Generate me 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor.
+Generate me 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
 
 For ratings:
 
@@ -682,7 +683,7 @@ def set_place_ids(request):
         unique_website_urls = list(set(company_website_urls))
         base_url = "http://localhost:4100/clientreviews/"
         in_location_url = "http://localhost:4100/instorereviews/"
-        default_worry_dialog = "We’re truly sorry to hear that your experience didn’t meet your expectations, and we greatly appreciate your feedback. We strive to provide the best possible service to all our customers, and it’s clear we missed the mark this time. We would love the opportunity to make things right and improve your next experience. Please share your name and email with us,and we’ll personally follow up to address any concerns. Your satisfaction is our top priority, and we look forward to hearing from you! "
+        default_worry_dialog = "We’re truly sorry to hear that your experience didn’t meet your expectations, and we greatly appreciate your feedback. Please give us the chance to make it up to you!"
         default_worry_title = "We are sorry 😔"
 
         website_urls = [f"{base_url}{place_id}" for place_id in place_ids]
