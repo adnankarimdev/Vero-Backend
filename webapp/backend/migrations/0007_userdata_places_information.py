@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0006_userdata_user_email'),
+        ("backend", "0006_userdata_user_email"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userdata',
-            name='places_information',
+            model_name="userdata",
+            name="places_information",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

@@ -6,25 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0018_customerreviewinfo_posted_with_in_store_mode'),
+        ("backend", "0018_customerreviewinfo_posted_with_in_store_mode"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ReviewsToPostLater',
+            name="ReviewsToPostLater",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email', models.EmailField(max_length=254, unique=True)),
-                ('name', models.CharField(max_length=100)),
-                ('google_review_url', models.TextField(blank=True, null=True)),
-                ('review_uuid', models.CharField(default='', max_length=255)),
-                ('review_body', models.TextField(blank=True, null=True)),
-                ('customer_url', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254, unique=True)),
+                ("name", models.CharField(max_length=100)),
+                ("google_review_url", models.TextField(blank=True, null=True)),
+                ("review_uuid", models.CharField(default="", max_length=255)),
+                ("review_body", models.TextField(blank=True, null=True)),
+                ("customer_url", models.TextField(blank=True, null=True)),
             ],
         ),
         migrations.AddField(
-            model_name='customerreviewinfo',
-            name='review_uuid',
-            field=models.CharField(default='', max_length=255),
+            model_name="customerreviewinfo",
+            name="review_uuid",
+            field=models.CharField(default="", max_length=255),
         ),
     ]

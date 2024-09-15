@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0007_userdata_places_information'),
+        ("backend", "0007_userdata_places_information"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='userdata',
-            name='website_url',
+            model_name="userdata",
+            name="website_url",
         ),
         migrations.AddField(
-            model_name='userdata',
-            name='website_urls',
+            model_name="userdata",
+            name="website_urls",
             field=models.TextField(blank=True, null=True),
         ),
     ]

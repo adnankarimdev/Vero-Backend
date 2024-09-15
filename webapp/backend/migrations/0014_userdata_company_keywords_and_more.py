@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0013_customerreviewinfo_review_date'),
+        ("backend", "0013_customerreviewinfo_review_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userdata',
-            name='company_keywords',
+            model_name="userdata",
+            name="company_keywords",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='userdata',
-            name='company_website_urls',
+            model_name="userdata",
+            name="company_website_urls",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

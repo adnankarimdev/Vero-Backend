@@ -18,7 +18,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
-from .serializers import UserSerializer, UserDataSerializer, ReviewsToPostLaterSerializer
+from .serializers import (
+    UserSerializer,
+    UserDataSerializer,
+    ReviewsToPostLaterSerializer,
+)
 from rest_framework import status
 from rest_framework.response import Response
 from .models import UserData, CustomerReviewInfo, ReviewsToPostLater
@@ -36,23 +40,143 @@ from backend.scheduler import scheduler
 import pytz
 
 stop_words = [
-    "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves",
-    "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their",
-    "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was",
-    "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and",
-    "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between",
-    "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off",
-    "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any",
-    "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
-    "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"
+    "i",
+    "me",
+    "my",
+    "myself",
+    "we",
+    "our",
+    "ours",
+    "ourselves",
+    "you",
+    "your",
+    "yours",
+    "yourself",
+    "yourselves",
+    "he",
+    "him",
+    "his",
+    "himself",
+    "she",
+    "her",
+    "hers",
+    "herself",
+    "it",
+    "its",
+    "itself",
+    "they",
+    "them",
+    "their",
+    "theirs",
+    "themselves",
+    "what",
+    "which",
+    "who",
+    "whom",
+    "this",
+    "that",
+    "these",
+    "those",
+    "am",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "having",
+    "do",
+    "does",
+    "did",
+    "doing",
+    "a",
+    "an",
+    "the",
+    "and",
+    "but",
+    "if",
+    "or",
+    "because",
+    "as",
+    "until",
+    "while",
+    "of",
+    "at",
+    "by",
+    "for",
+    "with",
+    "about",
+    "against",
+    "between",
+    "into",
+    "through",
+    "during",
+    "before",
+    "after",
+    "above",
+    "below",
+    "to",
+    "from",
+    "up",
+    "down",
+    "in",
+    "out",
+    "on",
+    "off",
+    "over",
+    "under",
+    "again",
+    "further",
+    "then",
+    "once",
+    "here",
+    "there",
+    "when",
+    "where",
+    "why",
+    "how",
+    "all",
+    "any",
+    "both",
+    "each",
+    "few",
+    "more",
+    "most",
+    "other",
+    "some",
+    "such",
+    "no",
+    "nor",
+    "not",
+    "only",
+    "own",
+    "same",
+    "so",
+    "than",
+    "too",
+    "very",
+    "s",
+    "t",
+    "can",
+    "will",
+    "just",
+    "don",
+    "should",
+    "now",
 ]
-os.environ['OPENAI_API_KEY'] = 'sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1'
-RESEND_API_KEY = 're_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1'
-SENDGRID_API = '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'
+os.environ["OPENAI_API_KEY"] = (
+    "sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1"
+)
+RESEND_API_KEY = "re_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1"
+SENDGRID_API = "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"
 resend.api_key = RESEND_API_KEY
 MAILGUN_API = "f29f9a6ae5692803b6ff2d2795b4e1da-826eddfb-d93e3829"
-faiss_index_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s'
-documents_path = '/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl'
+faiss_index_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s"
+documents_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl"
 
 embeddings = OpenAIEmbeddings()
 
@@ -75,7 +199,7 @@ agent = create_csv_agent(
     verbose=True,
     agent_type=AgentType.OPENAI_FUNCTIONS,
     allow_dangerous_code=True,
-    handle_parsing_errors=True
+    handle_parsing_errors=True,
 )
 
 prompt_review_score = """
@@ -162,7 +286,7 @@ prompt_review_adjuster = """
     """
 #  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
-#cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
+# cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
 Task: Transform the provided user badges selected for each section for a [review rating] review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well. You are to only put 2 keywords at a maximum if it goes in naturally.
     
@@ -420,34 +544,40 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 ---
 
 """
+
+
 @csrf_exempt
 def get_reviews_by_client_ids(request):
-    client_ids = request.GET.getlist('clientIds[]')  # Get the list of client IDs from the query parameters
+    client_ids = request.GET.getlist(
+        "clientIds[]"
+    )  # Get the list of client IDs from the query parameters
     if not client_ids:
-        return JsonResponse({'error': 'No client IDs provided'}, status=400)
-    
+        return JsonResponse({"error": "No client IDs provided"}, status=400)
+
     # Query the database
     reviews = CustomerReviewInfo.objects.filter(place_id_from_review__in=client_ids)
-    
+
     # Serialize the data
     data = list(reviews.values())
-    
+
     return JsonResponse(data, safe=False)
+
 
 @csrf_exempt
 def get_place_details(request, place_id):
     # Ensure you have your API key in your settings
     google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
     url = f"https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&key={google_maps_api_key}"
-    
+
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()
     except requests.RequestException as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse(data)
+
 
 @csrf_exempt
 def generate_categories(request):
@@ -460,22 +590,23 @@ def generate_categories(request):
         data = json.loads(request.body)
         user_query = data.get("context", "")
         print(user_query)
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt_five_star_categories_generator),
             ("human", user_query),
         ]
-        
+
         # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
         tokens = tc.num_tokens_from_string(ai_msg.content)
         print(f"GEN CATGORIES OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
-        # return JsonResponse({"content": ai_msg.content})  
-    
+        # return JsonResponse({"content": ai_msg.content})
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 @csrf_exempt
 def generate_five_star_review(request):
@@ -488,22 +619,23 @@ def generate_five_star_review(request):
         print("review data", data)
         user_query = data.get("context", "")
         print(user_query)
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt_review_five_star_creator),
             ("human", user_query),
         ]
-        
+
         # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
         tokens = tc.num_tokens_from_string(ai_msg.content)
         print(f"GEN 5 STAR REVIEW OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
-        # return JsonResponse({"content": ai_msg.content})  
-    
+        # return JsonResponse({"content": ai_msg.content})
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 @csrf_exempt
 def generate_review_questions(request):
@@ -513,20 +645,21 @@ def generate_review_questions(request):
         data = json.loads(request.body)
         user_query = data.get("context", "")
         print(user_query)
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt_review_question_generator),
             ("human", user_query),
         ]
-        
+
         # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
         return JsonResponse({"content": ai_msg.content})
-        # return JsonResponse({"content": ai_msg.content})  
-    
+        # return JsonResponse({"content": ai_msg.content})
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 @csrf_exempt
 def generate_review_template(request):
@@ -536,49 +669,62 @@ def generate_review_template(request):
         data = json.loads(request.body)
         user_query = data.get("context", "")
         print(user_query)
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt_review_template_generator),
             ("human", user_query),
         ]
-        
+
         # # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
         return JsonResponse({"content": ai_msg.content})
-        # return JsonResponse({"content": ai_msg.content})  
-    
+        # return JsonResponse({"content": ai_msg.content})
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
 
-@csrf_exempt 
+
+@csrf_exempt
 def get_place_id_by_email(request, email):
-    if request.method == 'GET':
+    if request.method == "GET":
         try:
             settings = UserData.objects.get(user_email=email)
-            place_ids_as_array = json.loads(settings.place_ids) if settings.place_ids else []
-            website_urls_as_array = json.loads(settings.website_urls) if settings.website_urls else []
-            in_location_urls_as_array = json.loads(settings.in_location_urls) if settings.in_location_urls else []
+            place_ids_as_array = (
+                json.loads(settings.place_ids) if settings.place_ids else []
+            )
+            website_urls_as_array = (
+                json.loads(settings.website_urls) if settings.website_urls else []
+            )
+            in_location_urls_as_array = (
+                json.loads(settings.in_location_urls)
+                if settings.in_location_urls
+                else []
+            )
             data = {
                 "placeIds": place_ids_as_array,
                 "places": settings.places_information,
                 "websiteUrls": website_urls_as_array,
-                "locationUrls": in_location_urls_as_array
+                "locationUrls": in_location_urls_as_array,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
-            return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
+            return JsonResponse(
+                {"error": "Settings not found for the specified placeId."}, status=404
+            )
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
-        
-@csrf_exempt 
+
+
+@csrf_exempt
 def get_review_questions(request, place_id):
-    place_ids_list = place_id.split(',') # Convert place_id to a JSON-encoded string
-    if request.method == 'GET':
+    place_ids_list = place_id.split(",")  # Convert place_id to a JSON-encoded string
+    if request.method == "GET":
         try:
             all_user_data = UserData.objects.all()
             matching_settings = [
-                user_data for user_data in all_user_data
+                user_data
+                for user_data in all_user_data
                 if any(pid in json.loads(user_data.place_ids) for pid in place_ids_list)
             ]
             settings = settings = matching_settings[0]
@@ -596,30 +742,34 @@ def get_review_questions(request, place_id):
                 "questions": settings.questions,
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
-                "websiteUrls" : settings.website_urls,
-                "places" : settings.places_information,
+                "websiteUrls": settings.website_urls,
+                "places": settings.places_information,
                 "keywords": settings.company_keywords,
-                "useBubblePlatform": settings.bubble_rating_platform
+                "useBubblePlatform": settings.bubble_rating_platform,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
-            return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
+            return JsonResponse(
+                {"error": "Settings not found for the specified placeId."}, status=404
+            )
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
-    
-@csrf_exempt 
+
+
+@csrf_exempt
 def get_review_settings(request, place_ids):
-    place_ids_list = place_ids.split(',')
-    if request.method == 'GET':
+    place_ids_list = place_ids.split(",")
+    if request.method == "GET":
         try:
             all_user_data = UserData.objects.all()
 
             # Filter results by checking if any place_id from place_ids_list exists in each entry's place_ids
             matching_settings = [
-                user_data for user_data in all_user_data
+                user_data
+                for user_data in all_user_data
                 if any(pid in json.loads(user_data.place_ids) for pid in place_ids_list)
             ]
-            settings = matching_settings[0] 
+            settings = matching_settings[0]
             data = {
                 "emailIntro": settings.email_intro,
                 "emailSignature": settings.email_signature,
@@ -634,52 +784,59 @@ def get_review_settings(request, place_ids):
                 "questions": settings.questions,
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
-                "websiteUrls" : settings.website_urls,
-                "locationUrls" : settings.in_location_urls,
-                "places" : settings.places_information,
-                "userEmail" : settings.user_email,
-                "keywords" : settings.company_keywords,
-                "companyUrls" : settings.company_website_urls,
-                "useBubblePlatform": settings.bubble_rating_platform
+                "websiteUrls": settings.website_urls,
+                "locationUrls": settings.in_location_urls,
+                "places": settings.places_information,
+                "userEmail": settings.user_email,
+                "keywords": settings.company_keywords,
+                "companyUrls": settings.company_website_urls,
+                "useBubblePlatform": settings.bubble_rating_platform,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
-            return JsonResponse({"error": "Settings not found for the specified placeId."}, status=404)
+            return JsonResponse(
+                {"error": "Settings not found for the specified placeId."}, status=404
+            )
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
-    
+
 
 def extract_words(keywords):
     """
     Extract individual words from a list of keywords, removing special characters.
-    
+
     :param keywords: List of keywords to split into words.
     :return: List of all extracted words.
     """
     all_words = []
-    
+
     for keyword in keywords:
         # Use regular expressions to split by non-word characters and ignore empty strings
-        words = re.findall(r'\b\w+\b', keyword)
+        words = re.findall(r"\b\w+\b", keyword)
         all_words.extend(words)
-    
+
     return all_words
 
-@csrf_exempt  
+
+@csrf_exempt
 def set_place_ids(request):
     global stop_words
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return JsonResponse(
+                {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         # Extract place_id from the data
         print(data)
-        place_ids = [place['place_id'] for place in data.get('places', [])]
-        buisness_names = [place['name'] for place in data.get('places', [])]
-        buisness_tags = [item for sublist in data.get('googleTypes', []) for item in sublist]
-        company_website_urls = [place['websiteUrl'] for place in data.get('places', [])]
+        place_ids = [place["place_id"] for place in data.get("places", [])]
+        buisness_names = [place["name"] for place in data.get("places", [])]
+        buisness_tags = [
+            item for sublist in data.get("googleTypes", []) for item in sublist
+        ]
+        company_website_urls = [place["websiteUrl"] for place in data.get("places", [])]
         unique_website_urls = list(set(company_website_urls))
         base_url = "http://localhost:4100/clientreviews/"
         in_location_url = "http://localhost:4100/instorereviews/"
@@ -692,57 +849,74 @@ def set_place_ids(request):
 
         # extract company websites, make it unique
         # if no company website, just use buisness name and its types
-        # generate keywords based on company website via gpt prompt 
+        # generate keywords based on company website via gpt prompt
         keywords = generate_keywords(website_urls, buisness_names, buisness_tags)
         sub_keywords = extract_words(keywords["keywords"])
-        final_keywords = list(set(keywords["keywords"]+sub_keywords))
-        filtered_keywords = [word for word in final_keywords if word.lower() not in stop_words]
+        final_keywords = list(set(keywords["keywords"] + sub_keywords))
+        filtered_keywords = [
+            word for word in final_keywords if word.lower() not in stop_words
+        ]
 
         if place_ids:
             # Use update_or_create to either update an existing entry or create a new one
             user_data, created = UserData.objects.update_or_create(
                 place_ids=place_ids,
                 defaults={
-                    'questions': data.get('questions', []),
-                    'email_intro': data.get('emailIntro', ''),
-                    'email_signature': data.get('emailSignature', ''),
-                    'email_body': data.get('emailBody', ''),
-                    'email_app_password': data.get('emailAppPassword', ''),
-                    'client_email': data.get('clientEmail', ''),
-                    'worry_rating': data.get('worryRating', 4),
-                    'show_worry_dialog': data.get('showWorryDialog', True),
-                    'place_ids': json.dumps(place_ids),
-                    'show_complimentary_item': data.get('showComplimentaryItem', False),
-                    'complimentary_item': data.get('complimentaryItem', ''),
-                    'worry_dialog_body': default_worry_dialog,
-                    'worry_dialog_title': default_worry_title,
-                    'website_urls': json.dumps(website_urls),
-                    'in_location_urls': json.dumps(in_location_urls),
-                    'user_email': data.get('userEmail', ''),
-                    'places_information': data.get('places', []),
-                    'company_website_urls': unique_website_urls,
-                    'company_keywords': filtered_keywords
-                }
+                    "questions": data.get("questions", []),
+                    "email_intro": data.get("emailIntro", ""),
+                    "email_signature": data.get("emailSignature", ""),
+                    "email_body": data.get("emailBody", ""),
+                    "email_app_password": data.get("emailAppPassword", ""),
+                    "client_email": data.get("clientEmail", ""),
+                    "worry_rating": data.get("worryRating", 4),
+                    "show_worry_dialog": data.get("showWorryDialog", True),
+                    "place_ids": json.dumps(place_ids),
+                    "show_complimentary_item": data.get("showComplimentaryItem", False),
+                    "complimentary_item": data.get("complimentaryItem", ""),
+                    "worry_dialog_body": default_worry_dialog,
+                    "worry_dialog_title": default_worry_title,
+                    "website_urls": json.dumps(website_urls),
+                    "in_location_urls": json.dumps(in_location_urls),
+                    "user_email": data.get("userEmail", ""),
+                    "places_information": data.get("places", []),
+                    "company_website_urls": unique_website_urls,
+                    "company_keywords": filtered_keywords,
+                },
             )
 
             serializer = UserDataSerializer(user_data)
             status_code = status.HTTP_200_OK if not created else status.HTTP_201_CREATED
             return JsonResponse(serializer.data, status=status_code)
         else:
-            return JsonResponse({"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(
+                {"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
     else:
-        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return JsonResponse(
+            {"error": "Only POST requests are allowed"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
 
 def analyze_review(rating, ratingBody, timeTaken):
     global prompt_review_analyzer
-    analyzed_data = "Rating: \n" + str(rating) + "\n" + "Rating Body: \n" + ratingBody + "\n" + "Time taken: \n" + str(timeTaken)
+    analyzed_data = (
+        "Rating: \n"
+        + str(rating)
+        + "\n"
+        + "Rating Body: \n"
+        + ratingBody
+        + "\n"
+        + "Time taken: \n"
+        + str(timeTaken)
+    )
     tokens = tc.num_tokens_from_string(prompt_review_analyzer)
     print(f"ANALYZE REVIEW INPUT: Tokens in the string: {tokens}")
     messages = [
-    ("system", prompt_review_analyzer),
-    ("human", analyzed_data),
+        ("system", prompt_review_analyzer),
+        ("human", analyzed_data),
     ]
-    
+
     ai_msg = llm.invoke(messages)
     tokens = tc.num_tokens_from_string(ai_msg.content)
     print(f"ANALYZE REVIEW OUTPUT: Tokens in the string: {tokens}")
@@ -752,54 +926,71 @@ def analyze_review(rating, ratingBody, timeTaken):
 
 def generate_keywords(business_urls, buisness_names, buisness_tags):
     global prompt_keyword_generator
-    analyzed_data = "Website URL: \n" + "\n".join(business_urls) + "\n" + "Buisness Names: \n" + "\n".join(buisness_names) + "\n" + "Tags: \n" + "\n".join(buisness_tags)
+    analyzed_data = (
+        "Website URL: \n"
+        + "\n".join(business_urls)
+        + "\n"
+        + "Buisness Names: \n"
+        + "\n".join(buisness_names)
+        + "\n"
+        + "Tags: \n"
+        + "\n".join(buisness_tags)
+    )
     messages = [
-    ("system", prompt_keyword_generator),
-    ("human", analyzed_data),
+        ("system", prompt_keyword_generator),
+        ("human", analyzed_data),
     ]
-    
+
     ai_msg = llm.invoke(messages)
     print(ai_msg.content)
     data = json.loads(ai_msg.content)
     return data
 
-@csrf_exempt  
+
+@csrf_exempt
 def save_customer_review(request):
-    if request.method == 'POST':
-        
+    if request.method == "POST":
+
         try:
             body = json.loads(request.body)
             # print(body)
             data = body["data"]
-            location = data.get('location')
-            rating = data.get('rating')
-            badges = json.dumps(data.get('badges', []))
-            posted_to_google_review = data.get('postedToGoogleReview', False)
-            generated_review_body = data.get('generatedReviewBody', '')
-            final_review_body = data.get('finalReviewBody')
-            email_sent_to_company = data.get('emailSentToCompany', False)
-            place_id_from_review = data.get('placeIdFromReview')
-            time_taken_to_write_review_in_seconds = data.get('timeTakenToWriteReview')
-            review_date = data.get('reviewDate')
-            posted_with_bubble_rating_platform = data.get('postedWithBubbleRatingPlatform', False)
-            posted_with_in_store_mode = data.get('postedWithInStoreMode', False)
-            review_uuid = data.get('reviewUuid', '')
-            pending_google_review = data.get('pendingGoogleReview', False)
+            location = data.get("location")
+            rating = data.get("rating")
+            badges = json.dumps(data.get("badges", []))
+            posted_to_google_review = data.get("postedToGoogleReview", False)
+            generated_review_body = data.get("generatedReviewBody", "")
+            final_review_body = data.get("finalReviewBody")
+            email_sent_to_company = data.get("emailSentToCompany", False)
+            place_id_from_review = data.get("placeIdFromReview")
+            time_taken_to_write_review_in_seconds = data.get("timeTakenToWriteReview")
+            review_date = data.get("reviewDate")
+            posted_with_bubble_rating_platform = data.get(
+                "postedWithBubbleRatingPlatform", False
+            )
+            posted_with_in_store_mode = data.get("postedWithInStoreMode", False)
+            review_uuid = data.get("reviewUuid", "")
+            pending_google_review = data.get("pendingGoogleReview", False)
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
             print("location", location)
-            print("rating", rating) #cant be 0?
+            print("rating", rating)  # cant be 0?
             print("place id", place_id_from_review)
 
             if not all([location, rating, place_id_from_review]):
                 print("DIIED HERE 1")
-                return JsonResponse({'error': 'Missing required fields'}, status=400)
-            
-            #do gpt call to analyze reviews; only for free forms. 
-            #low ratings with bubble will imply suggestions based on badges selected.
-            if final_review_body.strip() != '' and not posted_with_bubble_rating_platform:
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            # do gpt call to analyze reviews; only for free forms.
+            # low ratings with bubble will imply suggestions based on badges selected.
+            if (
+                final_review_body.strip() != ""
+                and not posted_with_bubble_rating_platform
+            ):
                 print("DIIED HERE 2")
-                analyzed_review =  analyze_review(rating, final_review_body, time_taken_to_write_review_in_seconds)
+                analyzed_review = analyze_review(
+                    rating, final_review_body, time_taken_to_write_review_in_seconds
+                )
                 print("ANALYZED REVEIEW ", analyzed_review)
             else:
                 print("DIIED HERE 3")
@@ -816,30 +1007,34 @@ def save_customer_review(request):
                 final_review_body=final_review_body,
                 email_sent_to_company=email_sent_to_company,
                 place_id_from_review=place_id_from_review,
-                analyzed_review_details = analyzed_review,
-                time_taken_to_write_review_in_seconds = time_taken_to_write_review_in_seconds,
-                review_date = review_date,
-                posted_with_bubble_rating_platform = posted_with_bubble_rating_platform,
-                posted_with_in_store_mode = posted_with_in_store_mode,
-                review_uuid = review_uuid,
-                pending_google_review = pending_google_review
+                analyzed_review_details=analyzed_review,
+                time_taken_to_write_review_in_seconds=time_taken_to_write_review_in_seconds,
+                review_date=review_date,
+                posted_with_bubble_rating_platform=posted_with_bubble_rating_platform,
+                posted_with_in_store_mode=posted_with_in_store_mode,
+                review_uuid=review_uuid,
+                pending_google_review=pending_google_review,
             )
             review.save()
             print("REVIEWS SAVED")
 
-            return JsonResponse({'message': 'Review saved successfully'}, status=201)
+            return JsonResponse({"message": "Review saved successfully"}, status=201)
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-@csrf_exempt  
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+
+@csrf_exempt
 def save_user_review_question_settings(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return JsonResponse(
+                {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         # Extract place_id from the data
-        user_email = data.get('userEmail')
+        user_email = data.get("userEmail")
         print(data)
 
         if user_email:
@@ -847,46 +1042,54 @@ def save_user_review_question_settings(request):
             user_data, created = UserData.objects.update_or_create(
                 user_email=user_email,
                 defaults={
-                    'questions': data.get('questions', []),
-                    'email_intro': data.get('emailIntro', ''),
-                    'email_signature': data.get('emailSignature', ''),
-                    'email_body': data.get('emailBody', ''),
-                    'email_app_password': data.get('emailAppPassword', ''),
-                    'client_email': data.get('clientEmail', ''),
-                    'worry_rating': data.get('worryRating', 3),
-                    'show_worry_dialog': data.get('showWorryDialog', True),
-                    'place_ids': json.dumps(data.get('placeIds', '')),
-                    'show_complimentary_item': data.get('showComplimentaryItem', False),
-                    'complimentary_item': data.get('complimentaryItem', ''),
-                    'worry_dialog_body': data.get('dialogBody', ''),
-                    'worry_dialog_title': data.get('dialogTitle', ''),
-                    'bubble_rating_platform': data.get('useBubblePlatform', False)
+                    "questions": data.get("questions", []),
+                    "email_intro": data.get("emailIntro", ""),
+                    "email_signature": data.get("emailSignature", ""),
+                    "email_body": data.get("emailBody", ""),
+                    "email_app_password": data.get("emailAppPassword", ""),
+                    "client_email": data.get("clientEmail", ""),
+                    "worry_rating": data.get("worryRating", 3),
+                    "show_worry_dialog": data.get("showWorryDialog", True),
+                    "place_ids": json.dumps(data.get("placeIds", "")),
+                    "show_complimentary_item": data.get("showComplimentaryItem", False),
+                    "complimentary_item": data.get("complimentaryItem", ""),
+                    "worry_dialog_body": data.get("dialogBody", ""),
+                    "worry_dialog_title": data.get("dialogTitle", ""),
+                    "bubble_rating_platform": data.get("useBubblePlatform", False),
                     # 'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
-                }
+                },
             )
 
             serializer = UserDataSerializer(user_data)
             status_code = status.HTTP_200_OK if not created else status.HTTP_201_CREATED
             return JsonResponse(serializer.data, status=status_code)
         else:
-            return JsonResponse({"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(
+                {"error": "placeIds is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
     else:
-        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+        return JsonResponse(
+            {"error": "Only POST requests are allowed"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+
 @csrf_exempt
 def log_in_user(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         if not email or not password:
-            return JsonResponse({"error": "Email and password are required"}, status=400)
+            return JsonResponse(
+                {"error": "Email and password are required"}, status=400
+            )
 
         user = authenticate(request, username=email, password=password)
 
@@ -894,52 +1097,67 @@ def log_in_user(request):
             login(request, user)
 
             # Generate a token (if using JWT)
-            token = jwt.encode({'user_id': user.id}, SECRET_KEY, algorithm='HS256')
+            token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm="HS256")
 
-            return JsonResponse({
-                "message": "Logged in successfully",
-                "token": token,
-                "user": {
-                    "id": user.id,
-                    "email": user.email
-                }
-            }, status=200)
+            return JsonResponse(
+                {
+                    "message": "Logged in successfully",
+                    "token": token,
+                    "user": {"id": user.id, "email": user.email},
+                },
+                status=200,
+            )
         else:
-            return JsonResponse({"error": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+            return JsonResponse(
+                {"error": "Invalid email or password"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
     else:
-        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+        return JsonResponse(
+            {"error": "Only POST requests are allowed"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+
 @csrf_exempt
 def sign_up_user(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
         except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(
+                {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            
+
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return JsonResponse({"error": "Only POST requests are allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+        return JsonResponse(
+            {"error": "Only POST requests are allowed"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+
 def load_data_for_llm():
     global llm
     print("in ere")
-    with open(documents_path, 'rb') as f:
-      documents = pickle.load(f)
+    with open(documents_path, "rb") as f:
+        documents = pickle.load(f)
 
-    vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
+    vectorstore = FAISS.load_local(
+        faiss_index_path, embeddings, allow_dangerous_deserialization=True
+    )
     qa_chain = RetrievalQA.from_chain_type(
-    llm=llm, # Or use another model if you have one
-    chain_type="stuff",
-    retriever=vectorstore.as_retriever()
+        llm=llm,  # Or use another model if you have one
+        chain_type="stuff",
+        retriever=vectorstore.as_retriever(),
     )
     return qa_chain
-  
+
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -948,34 +1166,35 @@ def index(request):
 @csrf_exempt
 def update_review_data(request):
     if request.method == "POST":
-      data = json.loads(request.body)
-      review_uuid = data.get('reviewUuid')
-      final_review_body = data.get('finalReviewBody')
+        data = json.loads(request.body)
+        review_uuid = data.get("reviewUuid")
+        final_review_body = data.get("finalReviewBody")
 
-      review_to_update = CustomerReviewInfo.objects.get(review_uuid=review_uuid)
-      emailed_review_to_update = ReviewsToPostLater.objects.get(review_uuid=review_uuid)
+        review_to_update = CustomerReviewInfo.objects.get(review_uuid=review_uuid)
+        emailed_review_to_update = ReviewsToPostLater.objects.get(
+            review_uuid=review_uuid
+        )
 
-      review_to_update.posted_to_google_review = True
-      review_to_update.final_review_body = final_review_body
-      review_to_update.posted_to_google_after_email_sent = True
-      review_to_update.pending_google_review = False
-      review_to_update.save()
+        review_to_update.posted_to_google_review = True
+        review_to_update.final_review_body = final_review_body
+        review_to_update.posted_to_google_after_email_sent = True
+        review_to_update.pending_google_review = False
+        review_to_update.save()
 
-      emailed_review_to_update.posted_to_google = True
-      emailed_review_to_update.save()
-      response_data = {"message": "Successfully updated existing review!"}
-      return JsonResponse(response_data, status=status.HTTP_200_OK)
+        emailed_review_to_update.posted_to_google = True
+        emailed_review_to_update.save()
+        response_data = {"message": "Successfully updated existing review!"}
+        return JsonResponse(response_data, status=status.HTTP_200_OK)
+
+        # first, update customerReviewInfo by UUID; turn posted to google to true.
+
+        # then, delete reviewtopostlater entry by UUID. I don't see any reason to keep the entry.. or is there a reason?
+        # maybe keep it,
 
 
-      #first, update customerReviewInfo by UUID; turn posted to google to true. 
-
-      #then, delete reviewtopostlater entry by UUID. I don't see any reason to keep the entry.. or is there a reason? 
-      #maybe keep it, 
-
-
-@csrf_exempt 
+@csrf_exempt
 def get_review_by_uuid(request, review_uuid):
-    if request.method == 'GET':
+    if request.method == "GET":
         try:
             review = ReviewsToPostLater.objects.get(review_uuid=review_uuid)
             serializer = ReviewsToPostLaterSerializer(review)
@@ -985,7 +1204,14 @@ def get_review_by_uuid(request, review_uuid):
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
 
-def create_calendar_invite(event_summary: str, event_description: str, event_location: str, start_time: datetime, duration_minutes: int = 1) -> bytes:
+
+def create_calendar_invite(
+    event_summary: str,
+    event_description: str,
+    event_location: str,
+    start_time: datetime,
+    duration_minutes: int = 1,
+) -> bytes:
     """
     Creates a calendar invite (.ics) for an event.
 
@@ -998,18 +1224,21 @@ def create_calendar_invite(event_summary: str, event_description: str, event_loc
     """
     cal = Calendar()
     event = Event()
-    event.add('summary', event_summary)
-    event.add('dtstart', start_time)
-    event.add('dtend', start_time + timedelta(minutes=duration_minutes))  # Event lasts for the specified duration in minutes
-    event.add('dtstamp', datetime.now())
-    event.add('location', event_location)
-    event.add('description', event_description)
-    
+    event.add("summary", event_summary)
+    event.add("dtstart", start_time)
+    event.add(
+        "dtend", start_time + timedelta(minutes=duration_minutes)
+    )  # Event lasts for the specified duration in minutes
+    event.add("dtstamp", datetime.now())
+    event.add("location", event_location)
+    event.add("description", event_description)
+
     # Add the event to the calendar
     cal.add_component(event)
 
     # Return the calendar invite as a byte string
     return cal.to_ical()
+
 
 @csrf_exempt
 def send_email_to_post_later(request):
@@ -1029,11 +1258,13 @@ def send_email_to_post_later(request):
 
             # Combine date and time to form a datetime object
             date_part = date[:10]
-            combined_datetime = datetime.strptime(f"{date_part} {time}", "%Y-%m-%d %I:%M %p")
+            combined_datetime = datetime.strptime(
+                f"{date_part} {time}", "%Y-%m-%d %I:%M %p"
+            )
             print("Naive Datetime:", combined_datetime)
 
             # Convert to UTC # also gotta figure out different time zone handling. What if somone is in eastern time.
-            local_tz = pytz.timezone('America/Denver')
+            local_tz = pytz.timezone("America/Denver")
             localized_datetime = local_tz.localize(combined_datetime)
 
             # Convert to UTC
@@ -1050,7 +1281,7 @@ def send_email_to_post_later(request):
 
             # Store the review data
             customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
-            #mobile url
+            # mobile url
             # customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
             dataToStore = {
                 "email": to_email,
@@ -1059,7 +1290,7 @@ def send_email_to_post_later(request):
                 "review_uuid": review_uuid,
                 "review_body": ai_msg.content,
                 "customer_url": customer_url,
-                "posted_to_google": False
+                "posted_to_google": False,
             }
             serializer = ReviewsToPostLaterSerializer(data=dataToStore)
             if serializer.is_valid():
@@ -1073,16 +1304,22 @@ def send_email_to_post_later(request):
             event_summary = f"Follow up on your 5-star review for {name}"
             event_description = f"Reminder to post your 5-star review for {name} on Google. Here’s your custom link: {googleReviewUrl}"
             start_time = datetime.now() + timedelta(days=1)  # Set to 1 day from now
-            ics_file = create_calendar_invite(event_summary, event_description, googleReviewUrl, start_time)
+            ics_file = create_calendar_invite(
+                event_summary, event_description, googleReviewUrl, start_time
+            )
             from_email = "adnan.karim.dev@gmail.com"
             from_password = google_email_app_password
 
             # Schedule the email to be sent once at the specified date and time
             email_args = (subject, body, ics_file, from_email, to_email, from_password)
             if send_email_now:
-                send_sceduled_email(subject, body, ics_file, from_email, to_email, from_password)
+                send_sceduled_email(
+                    subject, body, ics_file, from_email, to_email, from_password
+                )
             else:
-                scheduler.add_job(send_sceduled_email, 'date', run_date=utc_datetime, args=email_args)
+                scheduler.add_job(
+                    send_sceduled_email, "date", run_date=utc_datetime, args=email_args
+                )
 
             return JsonResponse({"content": "Success"})
 
@@ -1118,153 +1355,159 @@ def send_email_to_post_later(request):
     #       return JsonResponse({"content": "Success"})
 
     #   except Exception as e:
-    #     error_message = str(e) 
+    #     error_message = str(e)
     #     return JsonResponse({
     #         "success": False,
     #         "error": {
     #             "message": error_message
     #         }
-    #     }, status=500) 
+    #     }, status=500)
 
     #   finally:
     #       # Close the connection to the server
     #       server.quit()
 
+
 def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_password):
-      msg = MIMEMultipart()
-      msg['From'] = from_email
-      msg['To'] = to_email
-      msg['Subject'] = subject
+    msg = MIMEMultipart()
+    msg["From"] = from_email
+    msg["To"] = to_email
+    msg["Subject"] = subject
 
-      # Attach the body text
-      msg.attach(MIMEText(body, 'plain'))
+    # Attach the body text
+    msg.attach(MIMEText(body, "plain"))
 
-      # Attach the calendar invite
-      part = MIMEApplication(ics_file, Name="invite.ics")
-      part['Content-Disposition'] = 'attachment; filename="invite.ics"'
-      msg.attach(part)
+    # Attach the calendar invite
+    part = MIMEApplication(ics_file, Name="invite.ics")
+    part["Content-Disposition"] = 'attachment; filename="invite.ics"'
+    msg.attach(part)
 
-      try:
-          # Connect to the Gmail SMTP server
-          server = smtplib.SMTP('smtp.gmail.com', 587)
-          server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+    try:
+        # Connect to the Gmail SMTP server
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
 
-          # Login to the server
-          server.login(from_email, from_password)
+        # Login to the server
+        server.login(from_email, from_password)
 
-          # Send the email
-          server.sendmail(from_email, to_email, msg.as_string())
-          print('Email sent successfully.')
-          return JsonResponse({"content": "Success"})
+        # Send the email
+        server.sendmail(from_email, to_email, msg.as_string())
+        print("Email sent successfully.")
+        return JsonResponse({"content": "Success"})
 
-      except Exception as e:
-        error_message = str(e) 
-        return JsonResponse({
-            "success": False,
-            "error": {
-                "message": error_message
-            }
-        }, status=500) 
+    except Exception as e:
+        error_message = str(e)
+        return JsonResponse(
+            {"success": False, "error": {"message": error_message}}, status=500
+        )
 
-      finally:
-          # Close the connection to the server
-          server.quit()
+    finally:
+        # Close the connection to the server
+        server.quit()
+
 
 def send_scheduled_concern_email(subject, body, from_email, to_email, from_password):
-      from_email = "adnan.karim.dev@gmail.com"
-      from_password = google_email_app_password
-      # Create the email message
-      msg = MIMEMultipart()
-      msg['From'] = from_email
-      msg['To'] = to_email
-      msg['Subject'] = subject
+    from_email = "adnan.karim.dev@gmail.com"
+    from_password = google_email_app_password
+    # Create the email message
+    msg = MIMEMultipart()
+    msg["From"] = from_email
+    msg["To"] = to_email
+    msg["Subject"] = subject
 
-      # Attach the body text
-      msg.attach(MIMEText(body, 'plain'))
+    # Attach the body text
+    msg.attach(MIMEText(body, "plain"))
 
-      try:
-          # Connect to the Gmail SMTP server
-          server = smtplib.SMTP('smtp.gmail.com', 587)
-          server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+    try:
+        # Connect to the Gmail SMTP server
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
 
-          # Login to the server
-          server.login(from_email, from_password)
+        # Login to the server
+        server.login(from_email, from_password)
 
-          # Send the email
-          server.sendmail(from_email, to_email, msg.as_string())
-          print('Email sent successfully.')
-          return JsonResponse({"content": "Success"})
+        # Send the email
+        server.sendmail(from_email, to_email, msg.as_string())
+        print("Email sent successfully.")
+        return JsonResponse({"content": "Success"})
 
-      except Exception as e:
-        error_message = str(e) 
-        return JsonResponse({
-            "success": False,
-            "error": {
-                "message": error_message
-            }
-        }, status=500) 
+    except Exception as e:
+        error_message = str(e)
+        return JsonResponse(
+            {"success": False, "error": {"message": error_message}}, status=500
+        )
 
-      finally:
-          # Close the connection to the server
-          server.quit()
+    finally:
+        # Close the connection to the server
+        server.quit()
+
 
 @csrf_exempt
 def send_email(request):
     if request.method == "POST":
-      data = json.loads(request.body)
-      to_email = data.get("userEmailToSend", "")
-      name = data.get("userNameToSend", "")
-      review_body = data.get("userReviewToSend", "")
-      buisness_name = data.get("buisnessName", "")
-      place_id = data.get("placeId", "")
-      all_user_data = UserData.objects.all()
-      # Filter results by checking if any place_id from place_ids_list exists in each entry's place_ids
-      matching_settings = [
-            user_data for user_data in all_user_data
-            if place_id in json.loads(user_data.place_ids)  # Check if place_id exists in the place_ids list
+        data = json.loads(request.body)
+        to_email = data.get("userEmailToSend", "")
+        name = data.get("userNameToSend", "")
+        review_body = data.get("userReviewToSend", "")
+        buisness_name = data.get("buisnessName", "")
+        place_id = data.get("placeId", "")
+        all_user_data = UserData.objects.all()
+        # Filter results by checking if any place_id from place_ids_list exists in each entry's place_ids
+        matching_settings = [
+            user_data
+            for user_data in all_user_data
+            if place_id
+            in json.loads(
+                user_data.place_ids
+            )  # Check if place_id exists in the place_ids list
         ]
-      settings = matching_settings[0]
-      if settings.show_complimentary_item == True:
-          gpt_body = f'''
+        settings = matching_settings[0]
+        if settings.show_complimentary_item == True:
+            gpt_body = f"""
             Buisness Name: {buisness_name}
              Name: {name}
              Complimentary Item: {settings.complimentary_item}
              {review_body}
-        '''
-      else:
-          gpt_body = f'''
+        """
+        else:
+            gpt_body = f"""
             Buisness Name: {buisness_name}
              Name: {name}
              Complimentary Item: No discount or Complimentary Item
              {review_body}
-            '''
-           
+            """
 
-      subject = "Your concerns"
-      messages = [
-    ("system", prompt_address_email),
-    ("human", gpt_body),
-    ]
-      
-      # Invoke the LLM with the messages
-      ai_msg = llm.invoke(messages)
-      
-      # Return the AI-generated content as a JSON response
-      print(ai_msg.content)
-      #here, we will schedule the new email.
-      
-      body = ai_msg.content
-      from_email = "adnan.karim.dev@gmail.com"
-      from_password = google_email_app_password
-      email_args = (subject, body, from_email, to_email, from_password)
-      
-      utc_datetime = datetime.now(pytz.UTC)
+        subject = "Your concerns"
+        messages = [
+            ("system", prompt_address_email),
+            ("human", gpt_body),
+        ]
 
-      # Add 5 minutes to the current UTC time
-      #time will be client adjusted.
-      send_date_time = utc_datetime + timedelta(minutes=5)
-      scheduler.add_job(send_scheduled_concern_email, 'date', run_date=send_date_time, args=email_args)
-      return JsonResponse({"content": "Success"})
+        # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+
+        # Return the AI-generated content as a JSON response
+        print(ai_msg.content)
+        # here, we will schedule the new email.
+
+        body = ai_msg.content
+        from_email = "adnan.karim.dev@gmail.com"
+        from_password = google_email_app_password
+        email_args = (subject, body, from_email, to_email, from_password)
+
+        utc_datetime = datetime.now(pytz.UTC)
+
+        # Add 5 minutes to the current UTC time
+        # time will be client adjusted.
+        send_date_time = utc_datetime + timedelta(minutes=5)
+        scheduler.add_job(
+            send_scheduled_concern_email,
+            "date",
+            run_date=send_date_time,
+            args=email_args,
+        )
+        return JsonResponse({"content": "Success"})
+
 
 @csrf_exempt
 def create_review_score(request):
@@ -1273,21 +1516,22 @@ def create_review_score(request):
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
         user_review = data.get("userReview", "")
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt_review_score),
             ("human", user_review),
         ]
-        
+
         # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
-        
+
         # Return the AI-generated content as a JSON response
         print(ai_msg.content)
         return JsonResponse({"content": ai_msg.content})
-    
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 @csrf_exempt
 def create_charts(request):
@@ -1297,13 +1541,13 @@ def create_charts(request):
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
         search_query = data.get("query", "")
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt),
             ("human", search_query),
         ]
-        
+
         # # Invoke the LLM with the messages
         # ai_msg = llm.invoke(messages)
         ai_msg = internalLLM({"query": prompt + search_query})
@@ -1311,10 +1555,11 @@ def create_charts(request):
         # print(ai_msg.keys())
         # print(type(ai_msg))
         # Return the AI-generated content as a JSON response
-        return JsonResponse({"content": ai_msg['result']})
-        # return JsonResponse({"content": ai_msg.content})  
-    
+        return JsonResponse({"content": ai_msg["result"]})
+        # return JsonResponse({"content": ai_msg.content})
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 @csrf_exempt
 def create_review(request):
@@ -1323,19 +1568,20 @@ def create_review(request):
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
         all_reviews = data.get("allReviewsToSend", "")
-        
+
         # Messages for the LLM
         messages = [
             ("system", prompt_review_adjuster),
             ("human", all_reviews),
         ]
-        
+
         # Invoke the LLM with the messages
         ai_msg = llm.invoke(messages)
-        
+
         # Return the AI-generated content as a JSON response
         return JsonResponse({"content": ai_msg.content})
-    
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
+
 
 internalLLM = load_data_for_llm()

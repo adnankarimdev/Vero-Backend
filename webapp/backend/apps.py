@@ -3,8 +3,8 @@ from .scheduler import start_scheduler
 
 
 class BackendConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'backend'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "backend"
 
     def ready(self):
         # Start the scheduler when the application is ready

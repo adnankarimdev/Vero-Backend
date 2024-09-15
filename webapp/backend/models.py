@@ -2,41 +2,45 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 import json
 
+
 class CustomerReviewInfo(models.Model):
     location = models.CharField(max_length=255)  # Required string
-    place_id_from_review = models.CharField(max_length=255, default='')
+    place_id_from_review = models.CharField(max_length=255, default="")
     rating = models.IntegerField()  # Required number
     badges = models.JSONField(blank=True, null=True)  # Optional array of strings
     posted_to_google_review = models.BooleanField(default=False)  # Defaults to false
-    generated_review_body = models.TextField(default='')  # Defaults to empty string
-    final_review_body = models.TextField(default='')  # Defaults string
+    generated_review_body = models.TextField(default="")  # Defaults to empty string
+    final_review_body = models.TextField(default="")  # Defaults string
     email_sent_to_company = models.BooleanField(default=False)  # Defaults to false
-    analyzed_review_details = models.JSONField(blank=True, null=True) 
+    analyzed_review_details = models.JSONField(blank=True, null=True)
     time_taken_to_write_review_in_seconds = models.FloatField(blank=True, null=True)
-    review_date = models.CharField(max_length=255, default='')
+    review_date = models.CharField(max_length=255, default="")
     posted_with_bubble_rating_platform = models.BooleanField(default=False)
     posted_with_in_store_mode = models.BooleanField(default=False)
-    review_uuid = models.CharField(max_length=255, default='')
+    review_uuid = models.CharField(max_length=255, default="")
     posted_to_google_after_email_sent = models.BooleanField(default=False)
     pending_google_review = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.location} - {self.rating}"
+
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     business_name = models.CharField(max_length=100)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'business_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "business_name"]
 
     def __str__(self):
         return self.email
-    
+
+
 class ReviewsToPostLater(models.Model):
     email = models.EmailField()
     name = models.CharField(max_length=100)
     google_review_url = models.TextField(blank=True, null=True)
-    review_uuid = models.CharField(max_length=255, default='')
+    review_uuid = models.CharField(max_length=255, default="")
     review_body = models.TextField(blank=True, null=True)
     customer_url = models.TextField(blank=True, null=True)
     posted_to_google = models.BooleanField(default=False)
@@ -58,8 +62,8 @@ class UserData(models.Model):
     complimentary_item = models.CharField(max_length=255, blank=True, null=True)
     worry_dialog_body = models.TextField(blank=True, null=True)
     worry_dialog_title = models.TextField(blank=True, null=True)
-    questions = models.JSONField(blank=True, null=True) 
-    places_information = models.JSONField(blank=True, null=True) 
+    questions = models.JSONField(blank=True, null=True)
+    places_information = models.JSONField(blank=True, null=True)
     website_urls = models.TextField(blank=True, null=True)
     in_location_urls = models.TextField(blank=True, null=True)
     user_email = models.EmailField(blank=True, null=True)
@@ -74,5 +78,6 @@ class UserData(models.Model):
         if self.place_ids:
             return json.loads(self.place_ids)
         return []
+
     def __str__(self):
         return f"Data for {self.client_email}"

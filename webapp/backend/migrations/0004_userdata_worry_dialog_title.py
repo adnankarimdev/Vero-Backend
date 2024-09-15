@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0003_userdata_worry_dialog_body'),
+        ("backend", "0003_userdata_worry_dialog_body"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userdata',
-            name='worry_dialog_title',
+            model_name="userdata",
+            name="worry_dialog_title",
             field=models.TextField(blank=True, null=True),
         ),
     ]

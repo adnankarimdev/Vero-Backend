@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0010_customerreviewinfo_place_id_from_review'),
+        ("backend", "0010_customerreviewinfo_place_id_from_review"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customerreviewinfo',
-            name='analyzed_review_details',
+            model_name="customerreviewinfo",
+            name="analyzed_review_details",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0004_userdata_worry_dialog_title'),
+        ("backend", "0004_userdata_worry_dialog_title"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userdata',
-            name='website_url',
+            model_name="userdata",
+            name="website_url",
             field=models.URLField(blank=True, null=True),
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0020_customerreviewinfo_posted_to_google_after_email_sent'),
+        ("backend", "0020_customerreviewinfo_posted_to_google_after_email_sent"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='reviewstopostlater',
-            name='posted_to_google',
+            model_name="reviewstopostlater",
+            name="posted_to_google",
             field=models.BooleanField(default=False),
         ),
     ]

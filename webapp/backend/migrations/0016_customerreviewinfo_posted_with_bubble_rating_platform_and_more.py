@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0015_alter_userdata_worry_rating'),
+        ("backend", "0015_alter_userdata_worry_rating"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customerreviewinfo',
-            name='posted_with_bubble_rating_platform',
+            model_name="customerreviewinfo",
+            name="posted_with_bubble_rating_platform",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='userdata',
-            name='bubble_rating_platform',
+            model_name="userdata",
+            name="bubble_rating_platform",
             field=models.BooleanField(default=False),
         ),
     ]

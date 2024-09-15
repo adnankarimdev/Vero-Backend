@@ -6,13 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0016_customerreviewinfo_posted_with_bubble_rating_platform_and_more'),
+        (
+            "backend",
+            "0016_customerreviewinfo_posted_with_bubble_rating_platform_and_more",
+        ),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userdata',
-            name='in_location_urls',
+            model_name="userdata",
+            name="in_location_urls",
             field=models.TextField(blank=True, null=True),
         ),
     ]

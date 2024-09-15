@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0009_customerreviewinfo'),
+        ("backend", "0009_customerreviewinfo"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customerreviewinfo',
-            name='place_id_from_review',
-            field=models.CharField(default='', max_length=255),
+            model_name="customerreviewinfo",
+            name="place_id_from_review",
+            field=models.CharField(default="", max_length=255),
         ),
     ]

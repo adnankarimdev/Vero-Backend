@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0017_userdata_in_location_urls'),
+        ("backend", "0017_userdata_in_location_urls"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customerreviewinfo',
-            name='posted_with_in_store_mode',
+            model_name="customerreviewinfo",
+            name="posted_with_in_store_mode",
             field=models.BooleanField(default=False),
         ),
     ]

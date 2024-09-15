@@ -6,25 +6,42 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0001_initial'),
+        ("backend", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UserData',
+            name="UserData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('email_intro', models.TextField(blank=True, null=True)),
-                ('email_signature', models.TextField(blank=True, null=True)),
-                ('email_body', models.TextField(blank=True, null=True)),
-                ('email_app_password', models.CharField(blank=True, max_length=255, null=True)),
-                ('client_email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('worry_rating', models.IntegerField(default=3)),
-                ('show_worry_dialog', models.BooleanField(default=True)),
-                ('place_ids', models.TextField(blank=True, null=True)),
-                ('show_complimentary_item', models.BooleanField(default=False)),
-                ('complimentary_item', models.CharField(blank=True, max_length=255, null=True)),
-                ('questions', models.JSONField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("email_intro", models.TextField(blank=True, null=True)),
+                ("email_signature", models.TextField(blank=True, null=True)),
+                ("email_body", models.TextField(blank=True, null=True)),
+                (
+                    "email_app_password",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "client_email",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                ("worry_rating", models.IntegerField(default=3)),
+                ("show_worry_dialog", models.BooleanField(default=True)),
+                ("place_ids", models.TextField(blank=True, null=True)),
+                ("show_complimentary_item", models.BooleanField(default=False)),
+                (
+                    "complimentary_item",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("questions", models.JSONField(blank=True, null=True)),
             ],
         ),
     ]
