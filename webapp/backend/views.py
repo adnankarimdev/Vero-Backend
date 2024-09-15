@@ -289,7 +289,7 @@ Here is the data: which will give insight into what type of business it is and a
 
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
-Generate me 5 badges for each name for someone who is about to give me [Rating from customer] stars for my business. To start, give me the top 3 most important factors of my business for customers, and add a 4th called Other. Then, fill out badges relevant to that factor.
+Generate me 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor.
 
 For ratings:
 
@@ -299,33 +299,47 @@ For ratings:
 	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “menu options could be better 🧐”, “cleanliness was lacking 🧹”.
 	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “excellent service 😊”, “great atmosphere 🌟”.
 
-Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders.
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
 
 Return it in this format where categories is a key in json. Don't include any random white spaces.:
 {
   "categories": [
     {
       "name": "<factor_1>",
-      "badges": []
+    "badges": [
+      { "rating": 1, "badges": [] },
+      { "rating": 2, "badges": [] },
+      { "rating": 3, "badges": [] },
+      { "rating": 4, "badges": [] },
+      { "rating": 5, "badges": [] }
+    ]
     },
     {
       "name": "<factor_2>",
-      "badges": []
+    "badges": [
+      { "rating": 1, "badges": [] },
+      { "rating": 2, "badges": [] },
+      { "rating": 3, "badges": [] },
+      { "rating": 4, "badges": [] },
+      { "rating": 5, "badges": [] }
+    ]
     },
     {
       "name": "<factor_3>",
-      "badges": []
-    },
-    {
-      "name": "Other",
-      "badges": []
+    "badges": [
+      { "rating": 1, "badges": [] },
+      { "rating": 2, "badges": [] },
+      { "rating": 3, "badges": [] },
+      { "rating": 4, "badges": [] },
+      { "rating": 5, "badges": [] }
+    ]
     }
   ]
 }
 
 NOTE: Just return the key with the values and nothing else. 
 
-Here is the data: which will give insight in terms of what buisness I am and the rating the user gave
+Here is the data: which will give insight in terms of what buisness I am. Please search the internet for what buisness i am, if I don't exist, then find relevant buisnesses based on my buisness name to narrow down.
 
 """
 
@@ -772,6 +786,9 @@ def save_customer_review(request):
             pending_google_review = data.get('pendingGoogleReview', False)
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
+            print("location", location)
+            print("rating", rating) #cant be 0?
+            print("place id", place_id_from_review)
 
             if not all([location, rating, place_id_from_review]):
                 print("DIIED HERE 1")
@@ -1030,7 +1047,9 @@ def send_email_to_post_later(request):
             ai_msg = llm.invoke(messages)
 
             # Store the review data
-            customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
+            # customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
+            #mobile url
+            customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
             dataToStore = {
                 "email": to_email,
                 "name": name,
