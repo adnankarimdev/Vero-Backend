@@ -45,6 +45,7 @@ class ReviewsToPostLater(models.Model):
     review_body = models.TextField(blank=True, null=True)
     customer_url = models.TextField(blank=True, null=True)
     posted_to_google = models.BooleanField(default=False)
+    tone = models.CharField(max_length=255, default="")
 
     def __str__(self):
         return self.email

@@ -306,6 +306,7 @@ You are to create a google review based on the following criteria:
     Instructions:
 	•	Return only the review body.
     •   You can only put a MAXIMUM of 2 keywords in the review body.
+    •   Make it first person. It should NOT sound generated. It should include first person language like 'I' and second person language like 'you'. Use it correctly where it makes sense.
     •	Do not include any emojis even if the badges have emojis.
 	•	Do not include any other text, explanations, or output—only the review body.
 
@@ -314,6 +315,7 @@ You are to create a google review based on the following criteria:
     Rating: [Rating out of 5 star]
     User Selected Badges: [Badges selected by the user]
     Keywords: [Keywords to choose from that fit naturally]
+    Review Tone: [Tone desired]
 
     """
 
@@ -1273,6 +1275,7 @@ def send_email_to_post_later(request):
             time = data.get("time", "")
             send_now = data.get("sendEmailNow", False)
             phone_number = data.get("phoneNumber", "")
+            tone = data.get("tone", "")
             subject = "Your 5 star review ✨"
 
             # Combine date and time to form a datetime object
@@ -1311,6 +1314,7 @@ def send_email_to_post_later(request):
                 "review_body": ai_msg.content,
                 "customer_url": customer_url,
                 "posted_to_google": False,
+                "tone": tone,
             }
             serializer = ReviewsToPostLaterSerializer(data=dataToStore)
             if serializer.is_valid():
