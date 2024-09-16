@@ -38,6 +38,7 @@ from token_count import TokenCount
 from datetime import datetime
 from backend.scheduler import scheduler
 import pytz
+from twilio.rest import Client
 
 stop_words = [
     "i",
@@ -178,6 +179,9 @@ MAILGUN_API = "f29f9a6ae5692803b6ff2d2795b4e1da-826eddfb-d93e3829"
 faiss_index_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s"
 documents_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl"
 
+ACCOUNT_SSID_TWILIO = "AC506ded0e4eedc8c96d4ef37cce931320"
+AUTH_TOKEN_TWILIO = "461a27a99fc2c064264a70d9ebbb0582"
+TWILIO_NUMBER = "+19526495677"
 embeddings = OpenAIEmbeddings()
 
 SECRET_KEY = secrets.token_urlsafe(32)
@@ -1240,6 +1244,16 @@ def create_calendar_invite(
     return cal.to_ical()
 
 
+def send_text(message_body, to_phone_number):
+    client = Client(ACCOUNT_SSID_TWILIO, AUTH_TOKEN_TWILIO)
+    message = client.messages.create(
+        body=message_body, from_=TWILIO_NUMBER, to=to_phone_number
+    )
+
+    # Return the SID of the sent message
+    return message.sid
+
+
 @csrf_exempt
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
@@ -1253,7 +1267,8 @@ def send_email_to_post_later(request):
             review_uuid = data.get("reviewUuid", "")
             date = data.get("date", "")
             time = data.get("time", "")
-            send_email_now = data.get("sendEmailNow", False)
+            send_now = data.get("sendEmailNow", False)
+            phone_number = data.get("phoneNumber", "")
             subject = "Your 5 star review ✨"
 
             # Combine date and time to form a datetime object
@@ -1285,6 +1300,7 @@ def send_email_to_post_later(request):
             # customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
             dataToStore = {
                 "email": to_email,
+                "phone_number": phone_number,
                 "name": name,
                 "google_review_url": googleReviewUrl,
                 "review_uuid": review_uuid,
@@ -1311,15 +1327,36 @@ def send_email_to_post_later(request):
             from_password = google_email_app_password
 
             # Schedule the email to be sent once at the specified date and time
-            email_args = (subject, body, ics_file, from_email, to_email, from_password)
-            if send_email_now:
-                send_sceduled_email(
-                    subject, body, ics_file, from_email, to_email, from_password
-                )
+            # Divert here, if phone number then go to twilio
+            if phone_number:
+                if send_now:
+                    send_text(body, phone_number)
+                else:
+                    phone_args = (body, phone_number)
+                    scheduler.add_job(
+                        send_text, "date", run_date=utc_datetime, args=phone_args
+                    )
+
             else:
-                scheduler.add_job(
-                    send_sceduled_email, "date", run_date=utc_datetime, args=email_args
+                email_args = (
+                    subject,
+                    body,
+                    ics_file,
+                    from_email,
+                    to_email,
+                    from_password,
                 )
+                if send_now:
+                    send_sceduled_email(
+                        subject, body, ics_file, from_email, to_email, from_password
+                    )
+                else:
+                    scheduler.add_job(
+                        send_sceduled_email,
+                        "date",
+                        run_date=utc_datetime,
+                        args=email_args,
+                    )
 
             return JsonResponse({"content": "Success"})
 
