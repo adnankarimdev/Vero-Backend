@@ -71,6 +71,7 @@ class UserData(models.Model):
     company_website_urls = models.JSONField(blank=True, null=True)
     company_keywords = models.JSONField(blank=True, null=True)
     bubble_rating_platform = models.BooleanField(default=True)
+    email_delay = models.IntegerField(default=60)
 
     def set_place_ids(self, place_ids_list):
         self.place_ids = json.dumps(place_ids_list)

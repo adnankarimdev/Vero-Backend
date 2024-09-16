@@ -750,6 +750,7 @@ def get_review_questions(request, place_id):
                 "places": settings.places_information,
                 "keywords": settings.company_keywords,
                 "useBubblePlatform": settings.bubble_rating_platform,
+                "emailDelay": settings.email_delay,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -795,6 +796,7 @@ def get_review_settings(request, place_ids):
                 "keywords": settings.company_keywords,
                 "companyUrls": settings.company_website_urls,
                 "useBubblePlatform": settings.bubble_rating_platform,
+                "emailDelay": settings.email_delay,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -871,7 +873,7 @@ def set_place_ids(request):
                     "email_signature": data.get("emailSignature", ""),
                     "email_body": data.get("emailBody", ""),
                     "email_app_password": data.get("emailAppPassword", ""),
-                    "client_email": data.get("clientEmail", ""),
+                    "client_email": data.get("userEmail", ""),
                     "worry_rating": data.get("worryRating", 4),
                     "show_worry_dialog": data.get("showWorryDialog", True),
                     "place_ids": json.dumps(place_ids),
@@ -885,6 +887,7 @@ def set_place_ids(request):
                     "places_information": data.get("places", []),
                     "company_website_urls": unique_website_urls,
                     "company_keywords": filtered_keywords,
+                    "email_delay": data.get("emailDelay", 60),
                 },
             )
 
@@ -1060,6 +1063,7 @@ def save_user_review_question_settings(request):
                     "worry_dialog_body": data.get("dialogBody", ""),
                     "worry_dialog_title": data.get("dialogTitle", ""),
                     "bubble_rating_platform": data.get("useBubblePlatform", False),
+                    "email_delay": data.get("emailDelay", 60),
                     # 'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },
@@ -1443,7 +1447,9 @@ def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_pass
         server.quit()
 
 
-def send_scheduled_concern_email(subject, body, from_email, to_email, from_password):
+def send_scheduled_concern_email(
+    subject, body, from_email, to_email, from_password, cc_email
+):
     from_email = "adnan.karim.dev@gmail.com"
     from_password = google_email_app_password
     # Create the email message
@@ -1451,9 +1457,12 @@ def send_scheduled_concern_email(subject, body, from_email, to_email, from_passw
     msg["From"] = from_email
     msg["To"] = to_email
     msg["Subject"] = subject
+    msg["Cc"] = cc_email
 
     # Attach the body text
     msg.attach(MIMEText(body, "plain"))
+    recipients = [to_email]
+    recipients.append(cc_email)
 
     try:
         # Connect to the Gmail SMTP server
@@ -1464,7 +1473,7 @@ def send_scheduled_concern_email(subject, body, from_email, to_email, from_passw
         server.login(from_email, from_password)
 
         # Send the email
-        server.sendmail(from_email, to_email, msg.as_string())
+        server.sendmail(from_email, recipients, msg.as_string())
         print("Email sent successfully.")
         return JsonResponse({"content": "Success"})
 
@@ -1530,13 +1539,14 @@ def send_email(request):
         body = ai_msg.content
         from_email = "adnan.karim.dev@gmail.com"
         from_password = google_email_app_password
-        email_args = (subject, body, from_email, to_email, from_password)
+        cc_email = settings.client_email
+        email_args = (subject, body, from_email, to_email, from_password, cc_email)
 
         utc_datetime = datetime.now(pytz.UTC)
 
         # Add 5 minutes to the current UTC time
         # time will be client adjusted.
-        send_date_time = utc_datetime + timedelta(minutes=5)
+        send_date_time = utc_datetime + timedelta(minutes=settings.email_delay)
         scheduler.add_job(
             send_scheduled_concern_email,
             "date",
