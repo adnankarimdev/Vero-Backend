@@ -515,7 +515,7 @@ You are an expert in search engine optimization (SEO) and keyword analysis. I ne
    Business Name: [Insert Business Name Here]
    Tags: [Insert Tags Here]
 
-Also, add other keywords you feel would be extremely beneficial to the buisness for SEO. Provide your response as a list of keywords. Your output should be the following structure:
+Keywords should not contain the buisness name. Instead, they should be general terms that users search. For example, "best coffee calgary" would be a vital keyword for a cofee shop. Also, add other keywords you feel would be extremely beneficial to the buisness for SEO. Provide your response as a list of keywords. Your output should be the following structure:
 
 {
   "keywords": [keywords_you_found],
@@ -857,8 +857,8 @@ def set_place_ids(request):
         # if no company website, just use buisness name and its types
         # generate keywords based on company website via gpt prompt
         keywords = generate_keywords(website_urls, buisness_names, buisness_tags)
-        sub_keywords = extract_words(keywords["keywords"])
-        final_keywords = list(set(keywords["keywords"] + sub_keywords))
+        # sub_keywords = extract_words(keywords["keywords"])
+        final_keywords = list(set(keywords["keywords"]))
         filtered_keywords = [
             word for word in final_keywords if word.lower() not in stop_words
         ]
