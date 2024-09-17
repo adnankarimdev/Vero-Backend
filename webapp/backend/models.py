@@ -65,6 +65,7 @@ class UserData(models.Model):
     worry_dialog_body = models.TextField(blank=True, null=True)
     worry_dialog_title = models.TextField(blank=True, null=True)
     questions = models.JSONField(blank=True, null=True)
+    categories = models.JSONField(blank=True, null=True)
     places_information = models.JSONField(blank=True, null=True)
     website_urls = models.TextField(blank=True, null=True)
     in_location_urls = models.TextField(blank=True, null=True)

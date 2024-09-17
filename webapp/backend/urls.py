@@ -22,6 +22,7 @@ from .views import (
     send_email_to_post_later,
     get_review_by_uuid,
     update_review_data,
+    get_client_catgories,
 )
 
 urlpatterns = [
@@ -40,6 +41,11 @@ urlpatterns = [
         "get-review-settings/<str:place_ids>/",
         get_review_settings,
         name="get_review_settings",
+    ),
+    path(
+        "get-client-categories/<str:place_id>/",
+        get_client_catgories,
+        name="get_client_catgories",
     ),
     path(
         "get-place-id-by-email/<str:email>/",

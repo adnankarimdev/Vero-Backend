@@ -799,6 +799,7 @@ def get_review_settings(request, place_ids):
                 "companyUrls": settings.company_website_urls,
                 "useBubblePlatform": settings.bubble_rating_platform,
                 "emailDelay": settings.email_delay,
+                "categories": settings.categories,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -890,6 +891,7 @@ def set_place_ids(request):
                     "company_website_urls": unique_website_urls,
                     "company_keywords": filtered_keywords,
                     "email_delay": data.get("emailDelay", 60),
+                    "categories": data.get("categories", []),
                 },
             )
 
@@ -1066,6 +1068,7 @@ def save_user_review_question_settings(request):
                     "worry_dialog_title": data.get("dialogTitle", ""),
                     "bubble_rating_platform": data.get("useBubblePlatform", False),
                     "email_delay": data.get("emailDelay", 60),
+                    "categories": data.get("categories", []),
                     # 'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },
@@ -1490,6 +1493,32 @@ def send_scheduled_concern_email(
     finally:
         # Close the connection to the server
         server.quit()
+
+
+@csrf_exempt
+def get_client_catgories(
+    request, place_id
+):  # Convert place_id to a JSON-encoded string
+    if request.method == "GET":
+        try:
+            all_user_data = UserData.objects.all()
+            matching_settings = [
+                user_data
+                for user_data in all_user_data
+                if place_id
+                in json.loads(
+                    user_data.place_ids
+                )  # Check if place_id exists in the place_ids list
+            ]
+            settings = matching_settings[0]
+            data = {"categories": settings.categories}
+            return JsonResponse(data, status=200)
+        except UserData.DoesNotExist:
+            return JsonResponse(
+                {"error": "Settings not found for the specified placeId."}, status=404
+            )
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
 
 
 @csrf_exempt
