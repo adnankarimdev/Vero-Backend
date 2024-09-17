@@ -847,8 +847,8 @@ def set_place_ids(request):
         ]
         company_website_urls = [place["websiteUrl"] for place in data.get("places", [])]
         unique_website_urls = list(set(company_website_urls))
-        base_url = "http://localhost:4100/clientreviews/"
-        in_location_url = "http://localhost:4100/instorereviews/"
+        base_url = "https://vero-reviews.vercel.app/clientreviews/"
+        in_location_url = "https://vero-reviews.vercel.app/instorereviews/"
         default_worry_dialog = "We’re truly sorry to hear that your experience didn’t meet your expectations, and we greatly appreciate your feedback. Please give us the chance to make it up to you!"
         default_worry_title = "We are sorry 😔"
 
@@ -1069,7 +1069,7 @@ def save_user_review_question_settings(request):
                     "bubble_rating_platform": data.get("useBubblePlatform", False),
                     "email_delay": data.get("emailDelay", 60),
                     "categories": data.get("categories", []),
-                    # 'website_url': "http://localhost:4100/clientreviews/" + data.get('placeIds', ''),
+                    # 'website_url': "https://vero-reviews.vercel.app/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },
             )
@@ -1305,7 +1305,9 @@ def send_email_to_post_later(request):
             ai_msg = llm.invoke(messages)
 
             # Store the review data
-            customer_url = "http://localhost:4100/customer/" + f"{review_uuid}"
+            customer_url = (
+                "https://vero-reviews.vercel.app/customer/" + f"{review_uuid}"
+            )
             # mobile url
             # customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
             dataToStore = {
