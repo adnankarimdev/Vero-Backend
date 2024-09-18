@@ -197,15 +197,6 @@ llm = ChatOpenAI(
 
 tc = TokenCount(model_name="gpt-4o")
 
-agent = create_csv_agent(
-    llm,
-    "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/reviews.csv",
-    verbose=True,
-    agent_type=AgentType.OPENAI_FUNCTIONS,
-    allow_dangerous_code=True,
-    handle_parsing_errors=True,
-)
-
 prompt_review_score = """
 You are to evaluate the helpfulness of a given review based on the following criteria:
 	1.	Informative and Insightful (20%)
@@ -1666,4 +1657,3 @@ def create_review(request):
     return JsonResponse({"error": "Invalid request method"}, status=400)
 
 
-internalLLM = load_data_for_llm()
