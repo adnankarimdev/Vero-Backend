@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     "192.168.1.226",
     "e79f-2604-3d09-1c77-8cb0-61dc-c59a-c01b-4aac.ngrok-free.app",
     "vero.ngrok.dev",
+    ".vercel.app",
 ]
 
 GOOGLE_MAPS_API_KEY = "AIzaSyDEJBvbJXfBOqam_dohKIp-9OT6ZBYB2rY"
