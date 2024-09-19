@@ -1,0 +1,15 @@
+New screen : screen -S mysession
+
+
+The above is for running Django server on AWS -> run django 
+
+Running server, ctrl A, then D by it self
+
+
+In first screen, run ngork (assuming everything is setup: follow this Step 1: https://ngrok.com/docs/guides/device-gateway/linux/)
+
+ngrok http 8021 --domain vero.ec2.ngrok.app
+
+
+TEST PORT: https://vero.ngrok.dev/
+PROD PORT: https://vero.ec2.ngrok.app/
