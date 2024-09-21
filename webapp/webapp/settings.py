@@ -94,13 +94,23 @@ WSGI_APPLICATION = "webapp.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'vero-test',  # Replace with your database name
+        'USER': 'postgres',  # Replace with your database user
+        'PASSWORD': 'veroadmin',  # Replace with your user's password
+        'HOST': 'localhost',  # Default host for local PostgreSQL
+        'PORT': '5433',  # Default PostgreSQL port
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
