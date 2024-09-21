@@ -35,7 +35,9 @@ ALLOWED_HOSTS = [
     "vero.ngrok.dev",
     "vero.ec2.ngrok.app",
     "3.137.148.202",
-    "ec2-3-137-148-202.us-east-2.compute.amazonaws.com"
+    "ec2-3-137-148-202.us-east-2.compute.amazonaws.com",
+    "vero-io.com",
+    "www.vero-io.com"
 ]
 
 GOOGLE_MAPS_API_KEY = "AIzaSyDEJBvbJXfBOqam_dohKIp-9OT6ZBYB2rY"
