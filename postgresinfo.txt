@@ -2,3 +2,15 @@ postgres:
 superuser: postgres
 Password: veroadmin
 Port: 5433
+ ------ BELOW IS PROD, ABOVE IS TEST
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'veroprod',  # Replace with your database name
+        'USER': 'postgres',  # Replace with your database user
+        'PASSWORD': 'veroadmin',  # Replace with your user's password
+        'HOST': 'localhost',  # Default host for local PostgreSQL
+        'PORT': '5432',  # Default PostgreSQL port
+    }
+}
