@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 import os
+from dotenv import load_dotenv
 import re
 import json
 import hashlib
@@ -169,6 +170,7 @@ stop_words = [
     "should",
     "now",
 ]
+load_dotenv()
 os.environ["OPENAI_API_KEY"] = (
     "sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1"
 )
@@ -542,6 +544,7 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 
 """
 
+env_customer_url = os.environ.get('ENV_CUSTOMER_URL')
 
 @csrf_exempt
 def get_reviews_by_client_ids(request):
@@ -821,6 +824,7 @@ def extract_words(keywords):
 @csrf_exempt
 def set_place_ids(request):
     global stop_words
+    global env_customer_url
     if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
@@ -838,8 +842,12 @@ def set_place_ids(request):
         ]
         company_website_urls = [place["websiteUrl"] for place in data.get("places", [])]
         unique_website_urls = list(set(company_website_urls))
-        base_url = "https://vero-reviews.vercel.app/clientreviews/"
-        in_location_url = "https://vero-reviews.vercel.app/instorereviews/"
+        if env_customer_url == "LOCAL":
+            base_url = "http://localhost:4100/clientreviews/"
+            in_location_url = "http://localhost:4100/instorereviews/"
+        else:
+            base_url = "https://vero-reviews.vercel.app/clientreviews/"
+            in_location_url = "https://vero-reviews.vercel.app/instorereviews/"
         default_worry_dialog = "We’re truly sorry to hear that your experience didn’t meet your expectations, and we greatly appreciate your feedback. Please give us the chance to make it up to you!"
         default_worry_title = "We are sorry 😔"
 
@@ -1257,6 +1265,7 @@ def send_text(message_body, to_phone_number):
 @csrf_exempt
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
+    global env_customer_url
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -1296,9 +1305,10 @@ def send_email_to_post_later(request):
             ai_msg = llm.invoke(messages)
 
             # Store the review data
-            customer_url = (
-                "https://vero-reviews.vercel.app/customer/" + f"{review_uuid}"
-            )
+            if env_customer_url == "LOCAL":
+                customer_url = f"http://localhost:4100/customer/{review_uuid}"
+            else:
+                customer_url = f"https://vero-reviews.vercel.app/customer/{review_uuid}"
             # mobile url
             # customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
             dataToStore = {

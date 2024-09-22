@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -73,6 +76,7 @@ MIDDLEWARE = [
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4000',  # If you want to allow requests from your local environment
+    'http://localhost:4100', 
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -114,17 +118,42 @@ WSGI_APPLICATION = "webapp.wsgi.application"
 #     }
 # }
 
-#LOCAL
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vero-test',  # Replace with your database name
-        'USER': 'postgres',  # Replace with your database user
-        'PASSWORD': 'veroadmin',  # Replace with your user's password
-        'HOST': 'localhost',  # Default host for local PostgreSQL
-        'PORT': '5433',  # Default PostgreSQL port
+
+# Check if we're in production or local
+if os.getenv('ENV') == 'production':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('PROD_DB_NAME'),
+            'USER': os.getenv('PROD_DB_USER'),
+            'PASSWORD': os.getenv('PROD_DB_PASSWORD'),
+            'HOST': os.getenv('PROD_DB_HOST'),
+            'PORT': os.getenv('PROD_DB_PORT'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('LOCAL_DB_NAME'),
+            'USER': os.getenv('LOCAL_DB_USER'),
+            'PASSWORD': os.getenv('LOCAL_DB_PASSWORD'),
+            'HOST': os.getenv('LOCAL_DB_HOST'),
+            'PORT': os.getenv('LOCAL_DB_PORT'),
+        }
+    }
+
+#LOCAL
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'vero-test',  # Replace with your database name
+#         'USER': 'postgres',  # Replace with your database user
+#         'PASSWORD': 'veroadmin',  # Replace with your user's password
+#         'HOST': 'localhost',  # Default host for local PostgreSQL
+#         'PORT': '5433',  # Default PostgreSQL port
+#     }
+# }
 
 #PROD
 # DATABASES = {

@@ -13,3 +13,5 @@ ngrok http 8021 --domain vero.ec2.ngrok.app
 
 TEST PORT: https://vero.ngrok.dev/
 PROD PORT: https://vero.ec2.ngrok.app/
+
+OUTDATED
