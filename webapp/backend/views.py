@@ -1125,8 +1125,6 @@ def log_in_user(request):
 
 @csrf_exempt
 def sign_up_user(request):
-    if request.method == "OPTIONS":
-        return JsonResponse({})
     if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
