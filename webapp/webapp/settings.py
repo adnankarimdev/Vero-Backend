@@ -72,6 +72,12 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-requested-with",
+]
+
 ROOT_URLCONF = "webapp.urls"
 
 TEMPLATES = [
