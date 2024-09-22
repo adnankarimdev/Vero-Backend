@@ -70,7 +70,10 @@ MIDDLEWARE = [
 ]
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4000',  # If you want to allow requests from your local environment
+]
 
 CORS_ALLOW_HEADERS = [
     "content-type",
@@ -78,9 +81,7 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:4000',  # If you want to allow requests from your local environment
-]
+
 
 ROOT_URLCONF = "webapp.urls"
 
@@ -113,6 +114,7 @@ WSGI_APPLICATION = "webapp.wsgi.application"
 #     }
 # }
 
+#LOCAL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -123,6 +125,18 @@ DATABASES = {
         'PORT': '5433',  # Default PostgreSQL port
     }
 }
+
+#PROD
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'veroprod',  # Replace with your database name
+#         'USER': 'postgres',  # Replace with your database user
+#         'PASSWORD': 'veroadmin',  # Replace with your user's password
+#         'HOST': 'database-test-vero.cx8im6akuajo.us-east-2.rds.amazonaws.com',  # Default host for local PostgreSQL
+#         'PORT': '5432',  # Default PostgreSQL port
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
