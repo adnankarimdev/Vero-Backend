@@ -78,6 +78,10 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:4000',  # If you want to allow requests from your local environment
+]
+
 ROOT_URLCONF = "webapp.urls"
 
 TEMPLATES = [
