@@ -120,7 +120,7 @@ WSGI_APPLICATION = "webapp.wsgi.application"
 
 
 # Check if we're in production or local
-if os.getenv('ENV') == 'production':
+if os.getenv('ENV_DATABASE') == 'PROD':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
