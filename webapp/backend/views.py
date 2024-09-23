@@ -190,14 +190,14 @@ SECRET_KEY = secrets.token_urlsafe(32)
 
 google_email_app_password = "jmym xiii qzgc qnhc"
 llm = ChatOpenAI(
-    model="gpt-4o",
-    temperature=0,
+    model="gpt-4o-mini",
+    temperature=1,
     max_tokens=None,
     timeout=None,
     max_retries=2,
 )
 
-tc = TokenCount(model_name="gpt-4o")
+tc = TokenCount(model_name="gpt-4o-mini")
 
 prompt_review_score = """
 You are to evaluate the helpfulness of a given review based on the following criteria:
@@ -413,7 +413,7 @@ Here is the data: which will give insight into what type of business it is and a
 
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
-Generate me 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
+Generate EXACTLY 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
 
 For ratings:
 
@@ -431,31 +431,31 @@ Return it in this format where categories is a key in json. Don't include any ra
     {
       "name": "<factor_1>",
     "badges": [
-      { "rating": 1, "badges": [] },
-      { "rating": 2, "badges": [] },
-      { "rating": 3, "badges": [] },
-      { "rating": 4, "badges": [] },
-      { "rating": 5, "badges": [] }
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
     ]
     },
     {
       "name": "<factor_2>",
     "badges": [
-      { "rating": 1, "badges": [] },
-      { "rating": 2, "badges": [] },
-      { "rating": 3, "badges": [] },
-      { "rating": 4, "badges": [] },
-      { "rating": 5, "badges": [] }
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
     ]
     },
     {
       "name": "<factor_3>",
     "badges": [
-      { "rating": 1, "badges": [] },
-      { "rating": 2, "badges": [] },
-      { "rating": 3, "badges": [] },
-      { "rating": 4, "badges": [] },
-      { "rating": 5, "badges": [] }
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
     ]
     }
   ]
