@@ -1102,6 +1102,7 @@ def save_user_review_question_settings(request):
                     "bubble_rating_platform": data.get("useBubblePlatform", False),
                     "email_delay": data.get("emailDelay", 60),
                     "categories": data.get("categories", []),
+                    "company_keywords": data.get("keywords", [])
                     # 'website_url': "https://vero-reviews.vercel.app/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },
