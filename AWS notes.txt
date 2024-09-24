@@ -1,2 +1,11 @@
 AWS:
 VeroSecurityServerGroup
+
+GOOD TO KNOW: 
+If you upgrade instance type create a new image backup. Ask GPT.
+
+If randomly stopped responding, check public ip address of ec2 instance. Sometimes randomly changes. 
+
+If so, need to add new public ip address to ALLOWED_HOST in settings.py
+Also add A RECORD In name cheap with the new public ip address.
+
