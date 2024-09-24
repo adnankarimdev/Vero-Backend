@@ -12,8 +12,8 @@ from langchain_openai import ChatOpenAI
 from langchain.agents.agent_types import AgentType
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import pickle
-from langchain.vectorstores import FAISS
-from langchain.embeddings import OpenAIEmbeddings
+# from langchain.vectorstores import FAISS
+# from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 import smtplib
 from email.mime.text import MIMEText
@@ -184,7 +184,7 @@ documents_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/Google
 ACCOUNT_SSID_TWILIO = "AC506ded0e4eedc8c96d4ef37cce931320"
 AUTH_TOKEN_TWILIO = "461a27a99fc2c064264a70d9ebbb0582"
 TWILIO_NUMBER = "+19526495677"
-embeddings = OpenAIEmbeddings()
+# embeddings = OpenAIEmbeddings()
 
 SECRET_KEY = secrets.token_urlsafe(32)
 
@@ -1189,21 +1189,21 @@ def sign_up_user(request):
         )
 
 
-def load_data_for_llm():
-    global llm
-    print("in ere")
-    with open(documents_path, "rb") as f:
-        documents = pickle.load(f)
+# def load_data_for_llm():
+#     global llm
+#     print("in ere")
+#     with open(documents_path, "rb") as f:
+#         documents = pickle.load(f)
 
-    vectorstore = FAISS.load_local(
-        faiss_index_path, embeddings, allow_dangerous_deserialization=True
-    )
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,  # Or use another model if you have one
-        chain_type="stuff",
-        retriever=vectorstore.as_retriever(),
-    )
-    return qa_chain
+#     vectorstore = FAISS.load_local(
+#         faiss_index_path, embeddings, allow_dangerous_deserialization=True
+#     )
+#     qa_chain = RetrievalQA.from_chain_type(
+#         llm=llm,  # Or use another model if you have one
+#         chain_type="stuff",
+#         retriever=vectorstore.as_retriever(),
+#     )
+#     return qa_chain
 
 
 def index(request):
