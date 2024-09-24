@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
     "vero.ec2.ngrok.app",
     "3.137.148.202",
     "3.134.83.89",
+    "52.14.232.28", #t3.medium new ip ec2
     "ec2-3-137-148-202.us-east-2.compute.amazonaws.com",
     "vero-io.com",
     "www.vero-io.com"
