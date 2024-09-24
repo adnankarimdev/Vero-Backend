@@ -413,7 +413,7 @@ Here is the data: which will give insight into what type of business it is and a
 
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
-Generate EXACTLY 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
+Generate EXACTLY 4 badges for each rating based on the overall rating of my business. To start, give me the top 3 most important factors for customers. Then, fill out badges relevant to the overall rating. No badges should have the same meaning.
 
 For ratings:
 
@@ -429,27 +429,7 @@ Return it in this format where categories is a key in json. Don't include any ra
 {
   "categories": [
     {
-      "name": "<factor_1>",
-    "badges": [
-      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
-    ]
-    },
-    {
-      "name": "<factor_2>",
-    "badges": [
-      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
-    ]
-    },
-    {
-      "name": "<factor_3>",
+      "name": "Your Rating",
     "badges": [
       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
@@ -466,6 +446,60 @@ NOTE: Just return the key with the values and nothing else.
 Here is the data: which will give insight in terms of what buisness I am. Please search the internet for what buisness i am, if I don't exist, then find relevant buisnesses based on my buisness name to narrow down.
 
 """
+# prompt_five_star_categories_generator = """
+# Generate EXACTLY 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
+
+# For ratings:
+
+# 	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns. Examples: “service was terrible 😡”, “product quality was unacceptable 😠”.
+# 	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “staff were unhelpful 😕”, “experience was disappointing 😞”.
+# 	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “ambiance could be improved 😐”, “service was slow ⏳”.
+# 	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “menu options could be better 🧐”, “cleanliness was lacking 🧹”.
+# 	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “excellent service 😊”, “great atmosphere 🌟”.
+
+# Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
+
+# Return it in this format where categories is a key in json. Don't include any random white spaces.:
+# {
+#   "categories": [
+#     {
+#       "name": "<factor_1>",
+#     "badges": [
+#       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+#     ]
+#     },
+#     {
+#       "name": "<factor_2>",
+#     "badges": [
+#       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+#     ]
+#     },
+#     {
+#       "name": "<factor_3>",
+#     "badges": [
+#       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+#       { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+#     ]
+#     }
+#   ]
+# }
+
+# NOTE: Just return the key with the values and nothing else. 
+
+# Here is the data: which will give insight in terms of what buisness I am. Please search the internet for what buisness i am, if I don't exist, then find relevant buisnesses based on my buisness name to narrow down.
+
+# """
 
 prompt_review_analyzer = """
  
