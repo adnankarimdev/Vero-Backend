@@ -446,60 +446,60 @@ NOTE: Just return the key with the values and nothing else.
 Here is the data: which will give insight in terms of what buisness I am. Please search the internet for what buisness i am, if I don't exist, then find relevant buisnesses based on my buisness name to narrow down.
 
 """
-# prompt_five_star_categories_generator = """
-# Generate EXACTLY 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
+prompt_five_star_multiple_categories_generator = """
+Generate EXACTLY 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
 
-# For ratings:
+For ratings:
 
-# 	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns. Examples: “service was terrible 😡”, “product quality was unacceptable 😠”.
-# 	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “staff were unhelpful 😕”, “experience was disappointing 😞”.
-# 	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “ambiance could be improved 😐”, “service was slow ⏳”.
-# 	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “menu options could be better 🧐”, “cleanliness was lacking 🧹”.
-# 	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “excellent service 😊”, “great atmosphere 🌟”.
+	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns. Examples: “service was terrible 😡”, “product quality was unacceptable 😠”.
+	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “staff were unhelpful 😕”, “experience was disappointing 😞”.
+	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “ambiance could be improved 😐”, “service was slow ⏳”.
+	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “menu options could be better 🧐”, “cleanliness was lacking 🧹”.
+	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “excellent service 😊”, “great atmosphere 🌟”.
 
-# Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
 
-# Return it in this format where categories is a key in json. Don't include any random white spaces.:
-# {
-#   "categories": [
-#     {
-#       "name": "<factor_1>",
-#     "badges": [
-#       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
-#     ]
-#     },
-#     {
-#       "name": "<factor_2>",
-#     "badges": [
-#       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
-#     ]
-#     },
-#     {
-#       "name": "<factor_3>",
-#     "badges": [
-#       { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
-#       { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
-#     ]
-#     }
-#   ]
-# }
+Return it in this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "<factor_1>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    },
+    {
+      "name": "<factor_2>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    },
+    {
+      "name": "<factor_3>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    }
+  ]
+}
 
-# NOTE: Just return the key with the values and nothing else. 
+NOTE: Just return the key with the values and nothing else. 
 
-# Here is the data: which will give insight in terms of what buisness I am. Please search the internet for what buisness i am, if I don't exist, then find relevant buisnesses based on my buisness name to narrow down.
+Here is the data: which will give insight in terms of what buisness I am. Please search the internet for what buisness i am, if I don't exist, then find relevant buisnesses based on my buisness name to narrow down.
 
-# """
+"""
 
 prompt_review_analyzer = """
  
@@ -616,6 +616,7 @@ def get_place_details(request, place_id):
 @csrf_exempt
 def generate_categories(request):
     global prompt_five_star_categories_generator
+    global prompt_five_star_multiple_categories_generator
     tokens = tc.num_tokens_from_string(prompt_five_star_categories_generator)
     print(f"GEN CATGORIES INPUT: Tokens in the string: {tokens}")
 
@@ -623,11 +624,18 @@ def generate_categories(request):
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
         user_query = data.get("context", "")
+        user_radio_type = data.get("type", "")
         print(user_query)
+        print(user_radio_type)
 
         # Messages for the LLM
+        if user_radio_type == "overall":
+            prompt_to_use = prompt_five_star_categories_generator
+        else:
+            prompt_to_use = prompt_five_star_multiple_categories_generator
+
         messages = [
-            ("system", prompt_five_star_categories_generator),
+            ("system", prompt_to_use),
             ("human", user_query),
         ]
 
