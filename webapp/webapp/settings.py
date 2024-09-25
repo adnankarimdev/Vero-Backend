@@ -84,6 +84,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:4000',  # If you want to allow requests from your local environment
     'http://localhost:4100', 
+    "https://vero-main.vercel.app",
 ]
 
 CORS_ALLOW_HEADERS = [
