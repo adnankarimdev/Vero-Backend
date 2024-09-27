@@ -183,7 +183,7 @@ documents_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/Google
 
 ACCOUNT_SSID_TWILIO = "AC506ded0e4eedc8c96d4ef37cce931320"
 AUTH_TOKEN_TWILIO = "461a27a99fc2c064264a70d9ebbb0582"
-TWILIO_NUMBER = "+19526495677"
+TWILIO_NUMBER = "+15873172396"
 # embeddings = OpenAIEmbeddings()
 
 SECRET_KEY = secrets.token_urlsafe(32)
@@ -1323,6 +1323,7 @@ def send_email_to_post_later(request):
             phone_number = data.get("phoneNumber", "")
             tone = data.get("tone", "")
             subject = "Your 5 star review ✨"
+            business_name = data.get("buisnessName", "")
 
             # Combine date and time to form a datetime object
             date_part = date[:10]
@@ -1373,9 +1374,11 @@ def send_email_to_post_later(request):
                 print("Serializer errors:", serializer.errors)
 
             # Create the calendar invite
-            body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nWant to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️"
-            event_summary = f"Follow up on your 5-star review for {name}"
-            event_description = f"Reminder to post your 5-star review for {name} on Google. Here’s your custom link: {googleReviewUrl}"
+            # ugh, 4 segments for this message.
+            twilio_body = f"Hey {name}! Your 30 second review is ready for {business_name}: {customer_url}. Thank you for being so awesome. 🤗"
+            body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nWant to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️\n Thank you for being so awesome. 🤗"
+            event_summary = f"Follow up on your 5-star review for {business_name}"
+            event_description = f"Reminder to post your 5-star review for {business_name} on Google. Here’s your custom link: {googleReviewUrl}"
             start_time = datetime.now() + timedelta(days=1)  # Set to 1 day from now
             ics_file = create_calendar_invite(
                 event_summary, event_description, googleReviewUrl, start_time
@@ -1387,9 +1390,9 @@ def send_email_to_post_later(request):
             # Divert here, if phone number then go to twilio
             if phone_number:
                 if send_now:
-                    send_text(body, phone_number)
+                    send_text(twilio_body, phone_number)
                 else:
-                    phone_args = (body, phone_number)
+                    phone_args = (twilio_body, phone_number)
                     scheduler.add_job(
                         send_text, "date", run_date=utc_datetime, args=phone_args
                     )
