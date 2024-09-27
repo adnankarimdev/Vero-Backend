@@ -1023,6 +1023,7 @@ def save_customer_review(request):
             posted_with_in_store_mode = data.get("postedWithInStoreMode", False)
             review_uuid = data.get("reviewUuid", "")
             pending_google_review = data.get("pendingGoogleReview", False)
+            text_sent_for_review = data.get("textSentForReview", False)
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
             print("location", location)
@@ -1058,6 +1059,7 @@ def save_customer_review(request):
                 generated_review_body=generated_review_body,
                 final_review_body=final_review_body,
                 email_sent_to_company=email_sent_to_company,
+                text_sent_for_review=text_sent_for_review,
                 place_id_from_review=place_id_from_review,
                 analyzed_review_details=analyzed_review,
                 time_taken_to_write_review_in_seconds=time_taken_to_write_review_in_seconds,
