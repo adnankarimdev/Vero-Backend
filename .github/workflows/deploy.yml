@@ -1,0 +1,32 @@
+name: Deploy Vero Backend to EC2 👨‍💻
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code 🤞
+        uses: actions/checkout@v3
+
+      - name: Add SSH key 🗝️
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_VERO_SSH_KEY }}
+
+      - name: Deploy to EC2 🕸️
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@3.12.68.212 << 'EOF'
+            cd /home/ubuntu/GoogleReviewDashboardBackend/webapp  # Navigate to your project directory
+            git pull origin main  # Pull the latest changes
+            source /home/ubuntu/env/bin/activate  # Activate virtual environment
+            pip3 install -r requirements.txt  # Install any new dependencies
+            python3 manage.py migrate  # Apply database migrations
+            python3 manage.py collectstatic --noinput  # Collect static files
+            sudo systemctl restart gunicorn  # Restart Gunicorn to apply changes
+            sudo systemctl restart nginx  # Restart Nginx to apply any config changes
+          EOF
