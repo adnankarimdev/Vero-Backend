@@ -42,4 +42,5 @@ class ReviewsToPostLaterSerializer(serializers.ModelSerializer):
             "customer_url",
             "posted_to_google",
             "tone",
+            "badges",
         ]

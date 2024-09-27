@@ -12,7 +12,7 @@ class CustomerReviewInfo(models.Model):
     generated_review_body = models.TextField(default="")  # Defaults to empty string
     final_review_body = models.TextField(default="")  # Defaults string
     email_sent_to_company = models.BooleanField(default=False)  # Defaults to false
-    text_sent_for_review = models.BooleanField(default=False) 
+    text_sent_for_review = models.BooleanField(default=False)
     analyzed_review_details = models.JSONField(blank=True, null=True)
     time_taken_to_write_review_in_seconds = models.FloatField(blank=True, null=True)
     review_date = models.CharField(max_length=255, default="")
@@ -47,6 +47,7 @@ class ReviewsToPostLater(models.Model):
     customer_url = models.TextField(blank=True, null=True)
     posted_to_google = models.BooleanField(default=False)
     tone = models.CharField(max_length=255, default="")
+    badges = models.JSONField(blank=True, null=True)  # Optional array of strings
 
     def __str__(self):
         return self.email

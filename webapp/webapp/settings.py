@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-y^#=%lxy#+mt4v0kvvperrim1&82h5h4q1w6@z33_4q9+&wtt)"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -41,13 +41,13 @@ ALLOWED_HOSTS = [
     "3.134.83.89",
     "18.116.234.208",
     "ec2-18-116-234-208.us-east-2.compute.amazonaws.com",
-    "52.14.232.28", #t3.medium new ip ec2
-    "ec2-52-14-232-28.us-east-2.compute.amazonaws.com", #t3.medium new web add ec2
+    "52.14.232.28",  # t3.medium new ip ec2
+    "ec2-52-14-232-28.us-east-2.compute.amazonaws.com",  # t3.medium new web add ec2
     "ec2-3-137-148-202.us-east-2.compute.amazonaws.com",
-    "3.12.68.212", #elastic ip vero server
-    "ec2-3-12-68-212.us-east-2.compute.amazonaws.com", #elastic dns vero server 
+    "3.12.68.212",  # elastic ip vero server
+    "ec2-3-12-68-212.us-east-2.compute.amazonaws.com",  # elastic dns vero server
     "vero-io.com",
-    "www.vero-io.com"
+    "www.vero-io.com",
 ]
 
 GOOGLE_MAPS_API_KEY = "AIzaSyDEJBvbJXfBOqam_dohKIp-9OT6ZBYB2rY"
@@ -82,8 +82,8 @@ MIDDLEWARE = [
 
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:4000',  # If you want to allow requests from your local environment
-    'http://localhost:4100', 
+    "http://localhost:4000",  # If you want to allow requests from your local environment
+    "http://localhost:4100",
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -91,7 +91,6 @@ CORS_ALLOW_HEADERS = [
     "authorization",
     "x-requested-with",
 ]
-
 
 
 ROOT_URLCONF = "webapp.urls"
@@ -127,30 +126,30 @@ WSGI_APPLICATION = "webapp.wsgi.application"
 
 
 # Check if we're in production or local
-if os.getenv('ENV_DATABASE') == 'PROD':
+if os.getenv("ENV_DATABASE") == "PROD":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('PROD_DB_NAME'),
-            'USER': os.getenv('PROD_DB_USER'),
-            'PASSWORD': os.getenv('PROD_DB_PASSWORD'),
-            'HOST': os.getenv('PROD_DB_HOST'),
-            'PORT': os.getenv('PROD_DB_PORT'),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("PROD_DB_NAME"),
+            "USER": os.getenv("PROD_DB_USER"),
+            "PASSWORD": os.getenv("PROD_DB_PASSWORD"),
+            "HOST": os.getenv("PROD_DB_HOST"),
+            "PORT": os.getenv("PROD_DB_PORT"),
         }
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('LOCAL_DB_NAME'),
-            'USER': os.getenv('LOCAL_DB_USER'),
-            'PASSWORD': os.getenv('LOCAL_DB_PASSWORD'),
-            'HOST': os.getenv('LOCAL_DB_HOST'),
-            'PORT': os.getenv('LOCAL_DB_PORT'),
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("LOCAL_DB_NAME"),
+            "USER": os.getenv("LOCAL_DB_USER"),
+            "PASSWORD": os.getenv("LOCAL_DB_PASSWORD"),
+            "HOST": os.getenv("LOCAL_DB_HOST"),
+            "PORT": os.getenv("LOCAL_DB_PORT"),
         }
     }
 
-#LOCAL
+# LOCAL
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -162,7 +161,7 @@ else:
 #     }
 # }
 
-#PROD
+# PROD
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',

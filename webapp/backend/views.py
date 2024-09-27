@@ -12,6 +12,7 @@ from langchain_openai import ChatOpenAI
 from langchain.agents.agent_types import AgentType
 from langchain_experimental.agents.agent_toolkits import create_csv_agent
 import pickle
+
 # from langchain.vectorstores import FAISS
 # from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
@@ -578,7 +579,8 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 
 """
 
-env_customer_url = os.environ.get('ENV_CUSTOMER_URL')
+env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
+
 
 @csrf_exempt
 def get_reviews_by_client_ids(request):
@@ -1112,7 +1114,7 @@ def save_user_review_question_settings(request):
                     "bubble_rating_platform": data.get("useBubblePlatform", False),
                     "email_delay": data.get("emailDelay", 60),
                     "categories": data.get("categories", []),
-                    "company_keywords": data.get("keywords", [])
+                    "company_keywords": data.get("keywords", []),
                     # 'website_url': "https://vero-reviews.vercel.app/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },
@@ -1326,6 +1328,7 @@ def send_email_to_post_later(request):
             tone = data.get("tone", "")
             subject = "Your 5 star review ✨"
             business_name = data.get("buisnessName", "")
+            badges = json.dumps(data.get("badges", []))
 
             # Combine date and time to form a datetime object
             date_part = date[:10]
@@ -1367,6 +1370,7 @@ def send_email_to_post_later(request):
                 "customer_url": customer_url,
                 "posted_to_google": False,
                 "tone": tone,
+                "badges": badges,
             }
             serializer = ReviewsToPostLaterSerializer(data=dataToStore)
             if serializer.is_valid():
@@ -1713,5 +1717,3 @@ def create_review(request):
         return JsonResponse({"content": ai_msg.content})
 
     return JsonResponse({"error": "Invalid request method"}, status=400)
-
-
