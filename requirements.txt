@@ -195,7 +195,7 @@ pyobjc-framework-Metal==10.3.1; sys_platform == "darwin"
 pyobjc-framework-MetalFX==10.3.1; sys_platform == "darwin"
 pyobjc-framework-MetalKit==10.3.1; sys_platform == "darwin"
 pyobjc-framework-MetalPerformanceShaders==10.3.1; sys_platform == "darwin"
-pyobjc-framework-MetalPerformanceShadersGraph==10.3.1; sys_platform == "darwin
+pyobjc-framework-MetalPerformanceShadersGraph==10.3.1; sys_platform == "darwin"
 
 pyparsing==3.1.2
 PySocks==1.7.1
