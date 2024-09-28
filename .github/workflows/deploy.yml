@@ -23,7 +23,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@3.12.68.212 << 'EOF'
             cd /home/ubuntu/GoogleReviewDashboardBackend/webapp  # Navigate to your project directory
             git pull origin main  # Pull the latest changes
-            source /home/ubuntu/env/bin/activate  # Activate virtual environment
+            source /home/ubuntu/VeroProdEnv/bin/activate  # Activate virtual environment 
             pip3 install -r requirements.txt  # Install any new dependencies
             python3 manage.py migrate  # Apply database migrations
             sudo systemctl restart gunicorn  # Restart Gunicorn to apply changes

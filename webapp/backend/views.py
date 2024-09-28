@@ -31,7 +31,6 @@ from .models import UserData, CustomerReviewInfo, ReviewsToPostLater
 import jwt
 import secrets
 import googlemaps
-import resend
 import requests
 from django.conf import settings
 from icalendar import Calendar, Event
@@ -175,9 +174,7 @@ load_dotenv()
 os.environ["OPENAI_API_KEY"] = (
     "sk-proj-BkqMCfMCu8aJz0M19aj9T3BlbkFJCqFGN85AiM1NP2lJyrF1"
 )
-RESEND_API_KEY = "re_VYEfvwUq_9RHP4LozziYowAutf7YMhDC1"
 SENDGRID_API = "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"
-resend.api_key = RESEND_API_KEY
 MAILGUN_API = "f29f9a6ae5692803b6ff2d2795b4e1da-826eddfb-d93e3829"
 faiss_index_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_index_p&s"
 documents_path = "/Users/adnankarim/Desktop/DevTipsNotes/PersonalProjects/GoogleReviewDashboard/GoogleReviewDashboardBackend/scripts/faiss_documents_p&s.pkl"
