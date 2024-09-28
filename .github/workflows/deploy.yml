@@ -26,6 +26,7 @@ jobs:
             source /home/ubuntu/VeroProdEnv/bin/activate  # Activate virtual environment 
             pip3 install -r requirements.txt  # Install any new dependencies
             python3 manage.py migrate  # Apply database migrations
+            sudo systemctl daemon-reload  # Reload systemd manager configuration
             sudo systemctl restart gunicorn  # Restart Gunicorn to apply changes
             sudo systemctl restart nginx  # Restart Nginx to apply any config changes
           EOF
