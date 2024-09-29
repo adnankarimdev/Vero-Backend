@@ -294,19 +294,23 @@ You are to create a google review based on the following criteria:
 	6.	Privacy and Professionalism (10%): No personal or professional info; no conflict of interest.
 	7.	Focus on Experience (10%): Focused on personal experience; avoids irrelevant commentary.
 
-    Instructions:
-	•	Return only the review body.
-    •   You can only put a MAXIMUM of 2 keywords in the review body.
-    •   Make it first person. It should NOT sound generated. It should include first person language like 'I' and second person language like 'you'. Use it correctly where it makes sense.
-    •	Do not include any emojis even if the badges have emojis.
-	•	Do not include any other text, explanations, or output—only the review body.
+Instructions:
+- Return only the review body.
+- You can only put a MAXIMUM of 2 keywords in the review body.
+- Make it first person. It should NOT sound generated. It should include first person language like 'I' and second person language like 'you'. Use it correctly where it makes sense.
+- Do not include any emojis even if the badges have emojis.
+- Do not include any other text, explanations, or output—only the review body.
+- Vary the opening sentence for each review. Avoid always starting with "I recently visited..." Use a diverse range of opening structures.
+- Aim for a high uniqueness score. Each review should have a distinct voice and structure.
+- Vary the length of the review. Aim for between 50-150 words, but let it flow naturally.
 
-    Input Format:
-    Buisness Name: [Name of Buisness]
-    Rating: [Rating out of 5 star]
-    User Selected Badges: [Badges selected by the user]
-    Keywords: [Keywords to choose from that fit naturally]
-    Review Tone: [Tone desired]
+Opening sentence examples (use these for inspiration, not verbatim):
+- "What a pleasant surprise..."
+- "If you're looking for..."
+- "My experience at [Business Name] was..."
+- "From the moment I walked in..."
+- "I've been a regular at [Business Name] for..."
+- "Let me tell you about my visit to..."
 
     """
 
