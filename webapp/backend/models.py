@@ -87,3 +87,13 @@ class UserData(models.Model):
 
     def __str__(self):
         return f"Data for {self.client_email}"
+
+class ScheduledJob(models.Model):
+    job_id = models.CharField(max_length=100, unique=True)
+    run_date = models.DateTimeField()
+    args = models.JSONField()  # Store args as JSON
+    job_name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.job_name
+    

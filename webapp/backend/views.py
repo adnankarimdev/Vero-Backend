@@ -27,7 +27,7 @@ from .serializers import (
 )
 from rest_framework import status
 from rest_framework.response import Response
-from .models import UserData, CustomerReviewInfo, ReviewsToPostLater
+from .models import UserData, CustomerReviewInfo, ReviewsToPostLater, ScheduledJob
 import jwt
 import secrets
 import googlemaps
@@ -1386,12 +1386,6 @@ def send_email_to_post_later(request):
             # ugh, 4 segments for this message.
             twilio_body = f"Hey {name}! Your 30 second review is ready for {business_name}: {customer_url}. Thank you for being so awesome. 🤗"
             body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nWant to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️\n Thank you for being so awesome. 🤗"
-            event_summary = f"Follow up on your 5-star review for {business_name}"
-            event_description = f"Reminder to post your 5-star review for {business_name} on Google. Here’s your custom link: {googleReviewUrl}"
-            start_time = datetime.now() + timedelta(days=1)  # Set to 1 day from now
-            ics_file = create_calendar_invite(
-                event_summary, event_description, googleReviewUrl, start_time
-            )
             from_email = "reviews@vero-io.com"
             from_password = google_email_reviews_app_password
 
@@ -1402,29 +1396,42 @@ def send_email_to_post_later(request):
                     send_text(twilio_body, phone_number)
                 else:
                     phone_args = (twilio_body, phone_number)
-                    scheduler.add_job(
+                    job = scheduler.add_job(
                         send_text, "date", run_date=utc_datetime, args=phone_args
                     )
+                    ScheduledJob.objects.create(
+                        job_id=job.id,  # Store the job ID from APScheduler
+                        job_name='send_text',
+                        run_date=utc_datetime,
+                        args=json.dumps(phone_args),  # Store args as JSON string
+                    )
+
 
             else:
                 email_args = (
                     subject,
                     body,
-                    ics_file,
                     from_email,
                     to_email,
                     from_password,
                 )
                 if send_now:
                     send_sceduled_email(
-                        subject, body, ics_file, from_email, to_email, from_password
+                        subject, body, from_email, to_email, from_password
                     )
                 else:
-                    scheduler.add_job(
+                    job = scheduler.add_job(
                         send_sceduled_email,
                         "date",
                         run_date=utc_datetime,
                         args=email_args,
+                    )
+                    # Store the job in the database
+                    ScheduledJob.objects.create(
+                        job_id=job.id,  # Store the job ID from APScheduler
+                        job_name='send_scheduled_email',
+                        run_date=utc_datetime,
+                        args=json.dumps(email_args),  # Store args as JSON string
                     )
 
             return JsonResponse({"content": "Success"})
@@ -1474,7 +1481,7 @@ def send_email_to_post_later(request):
     #       server.quit()
 
 
-def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_password):
+def send_sceduled_email(subject, body, from_email, to_email, from_password):
     msg = MIMEMultipart()
     msg["From"] = from_email
     msg["To"] = to_email
@@ -1482,11 +1489,6 @@ def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_pass
 
     # Attach the body text
     msg.attach(MIMEText(body, "plain"))
-
-    # Attach the calendar invite
-    part = MIMEApplication(ics_file, Name="invite.ics")
-    part["Content-Disposition"] = 'attachment; filename="invite.ics"'
-    msg.attach(part)
 
     try:
         # Connect to the Gmail SMTP server
@@ -1638,11 +1640,18 @@ def send_email(request):
         # Add 5 minutes to the current UTC time
         # time will be client adjusted.
         send_date_time = utc_datetime + timedelta(minutes=settings.email_delay)
-        scheduler.add_job(
+        job = scheduler.add_job(
             send_scheduled_concern_email,
             "date",
             run_date=send_date_time,
             args=email_args,
+        )
+            # Store the job in the database
+        ScheduledJob.objects.create(
+            job_id=job.id,  # Store the job ID from APScheduler
+            job_name='send_scheduled_concern_email',
+            run_date=send_date_time,
+            args=json.dumps(email_args),  # Store args as JSON string
         )
         return JsonResponse({"content": "Success"})
 
