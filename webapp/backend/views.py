@@ -187,6 +187,8 @@ TWILIO_NUMBER = "+15873172396"
 SECRET_KEY = secrets.token_urlsafe(32)
 
 google_email_app_password = "jmym xiii qzgc qnhc"
+google_email_reviews_app_password = "jziu dafb uzex otqm"
+google_email_concerns_app_password = "gcir oozn qkju ryzw"
 llm = ChatOpenAI(
     model="gpt-4o-mini",
     temperature=1,
@@ -1390,8 +1392,8 @@ def send_email_to_post_later(request):
             ics_file = create_calendar_invite(
                 event_summary, event_description, googleReviewUrl, start_time
             )
-            from_email = "adnan.karim.dev@gmail.com"
-            from_password = google_email_app_password
+            from_email = "reviews@vero-io.com"
+            from_password = google_email_reviews_app_password
 
             # Schedule the email to be sent once at the specified date and time
             # Divert here, if phone number then go to twilio
@@ -1513,8 +1515,8 @@ def send_sceduled_email(subject, body, ics_file, from_email, to_email, from_pass
 def send_scheduled_concern_email(
     subject, body, from_email, to_email, from_password, cc_email
 ):
-    from_email = "adnan.karim.dev@gmail.com"
-    from_password = google_email_app_password
+    from_email = "concerns@vero-io.com"
+    from_password = google_email_concerns_app_password
     # Create the email message
     msg = MIMEMultipart()
     msg["From"] = from_email
@@ -1626,8 +1628,8 @@ def send_email(request):
         # here, we will schedule the new email.
 
         body = ai_msg.content
-        from_email = "adnan.karim.dev@gmail.com"
-        from_password = google_email_app_password
+        from_email = "concerns@vero-io.com"
+        from_password = google_email_concerns_app_password
         cc_email = settings.client_email
         email_args = (subject, body, from_email, to_email, from_password, cc_email)
 
