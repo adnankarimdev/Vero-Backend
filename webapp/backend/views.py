@@ -417,7 +417,8 @@ Here is the data: which will give insight into what type of business it is and a
 
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
-Generate EXACTLY 4 badges for each rating based on the overall rating of my business. To start, give me the top 3 most important factors for customers. Then, fill out badges relevant to the overall rating. No badges should have the same meaning.
+Generate EXACTLY 4 badges for each rating based on the overall rating of my business. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.
+To start, give me the top 3 most important factors for customers. Then, fill out badges relevant to the overall rating. No badges should have the same meaning.
 
 For ratings:
 
@@ -451,7 +452,8 @@ Here is the data: which will give insight in terms of what buisness I am. Please
 
 """
 prompt_five_star_multiple_categories_generator = """
-Generate EXACTLY 4 badges for each name for my business. To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
+Generate EXACTLY 4 badges for each name for my business. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.
+To start, give me the top 3 most important factors of my business for customers. Then, fill out badges relevant to that factor. No badges should have the same meaning. 
 
 For ratings:
 
