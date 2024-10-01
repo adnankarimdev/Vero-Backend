@@ -197,6 +197,15 @@ llm = ChatOpenAI(
     max_retries=2,
 )
 
+
+llm_chat = ChatOpenAI(
+    model="gpt-4o",
+    temperature=1,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+)
+
 tc = TokenCount(model_name="gpt-4o-mini")
 
 
@@ -204,27 +213,17 @@ prompt_chatbot = """
 You are an AI assistant tasked with analyzing customer feedback for a business and suggesting improvements. You will be given an array of feedback strings, where each string represents a piece of customer feedback, often accompanied by a relevant emoji.
 Your task is to:
 
-Analyze the given feedback array.
-Identify common themes or recurring issues.
-Suggest specific, actionable improvements based on the feedback.
-Prioritize the suggestions based on their frequency and potential impact.
-Provide a concise summary of the overall feedback sentiment.
+Analyze the given feedback array based soley on the user query.
 
 When responding:
-
-- Group similar feedback items together.
-- If directly asked, offer practical solutions that address the identified issues.
-- If directly asked, be specific in your recommendations, avoiding vague or generic advice.
-- If there are conflicting pieces of feedback, acknowledge this and suggest a balanced approach.
-- Use a professional and constructive tone throughout your response.
-- Incorporate the emojis from the feedback in your response where relevant, as they often provide additional context.
 - Do not include any markdown syntax, such as bullet points, italics, or headings. Your response will be displayed in a text bubble, so please format it as plain text.
 - Use the newline character "\\n" to indicate where you want to suggest new lines in the response for better readability, instead of formatting like bold or numbered lists.
 
 Example input:
-['lighting was dim 🕯️', 'coffee could be fresher 🌱', 'coffee could be fresher 🌱', 'great atmosphere 🎵', 'service was slow ⏳', 'loved the pastries 🥐', 'tables were dirty 🧽', 'music too loud 🔊']
+User Query: Which baristas stood out with their service?
+User Badges: ['lighting was dim 🕯️', 'coffee could be fresher 🌱', 'coffee could be fresher 🌱', 'great atmosphere 🎵', 'service was slow ⏳', 'loved the pastries 🥐', 'tables were dirty 🧽', 'music too loud 🔊']
 
-Remember to tailor your response to the specific feedback provided and focus on actionable improvements that the business can implement. Avoid any formatting that would not be suitable for a plain text display.
+Remember to tailor your response to the specific user query and badges provided. Avoid any formatting that would not be suitable for a plain text display.
 """
 
 prompt_review_score = """
@@ -657,7 +656,8 @@ def chat_with_badges(request):
     if request.method == "POST":
         # Parse the JSON data sent from the frontend
         data = json.loads(request.body)
-        user_query = data.get("context", "")
+        user_input = data.get("inputMessage", "")
+        user_query = "User Query: " +  user_input + "\n" + "User Badges: " + json.dumps(data.get("context", ""))
         print(user_query)
 
         messages = [
@@ -669,6 +669,7 @@ def chat_with_badges(request):
         ai_msg = llm.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
         tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(ai_msg.content)
         print(f"Chat with badges  OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
         # return JsonResponse({"content": ai_msg.content})
