@@ -23,6 +23,7 @@ from .views import (
     get_review_by_uuid,
     update_review_data,
     get_client_catgories,
+    chat_with_badges,
 )
 
 urlpatterns = [
@@ -94,4 +95,5 @@ urlpatterns = [
         name="get_review_by_uuid",
     ),
     path("update-review-data/", update_review_data, name="update_review_data"),
+    path("chat-with-badges/", chat_with_badges, name="chat_with_badges"),
 ]

@@ -20,12 +20,10 @@ else:
     db_port = os.getenv("LOCAL_DB_PORT")
 
 # Create the database URL
-database_url = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+database_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 # Configure job stores with the constructed URL
-jobstores = {
-    'default': SQLAlchemyJobStore(url=database_url)
-}
+jobstores = {"default": SQLAlchemyJobStore(url=database_url)}
 
 # Initialize the scheduler
 scheduler = BackgroundScheduler(jobstores=jobstores)
