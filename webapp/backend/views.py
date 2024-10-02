@@ -1065,7 +1065,7 @@ def send_email_to_post_later(request):
             # Create the calendar invite
             # ugh, 4 segments for this message.
             twilio_body = f"Hey {name}! Your 30 second review is ready for {business_name}: {customer_url}. Thank you for being so awesome. 🤗"
-            body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nWant to do it later? We also sent you a calendar invite so you won't miss a beat! 🗓️\n Thank you for being so awesome. 🤗"
+            body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nThank you for being so awesome. 🤗"
             from_email = "reviews@vero-io.com"
             from_password = google_email_reviews_app_password
 
