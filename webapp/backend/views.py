@@ -562,6 +562,7 @@ def set_place_ids(request):
 
         # Extract place_id from the data
         print(data)
+
         place_ids = [place["place_id"] for place in data.get("places", [])]
         buisness_names = [place["name"] for place in data.get("places", [])]
         buisness_tags = [
@@ -569,7 +570,21 @@ def set_place_ids(request):
         ]
         company_website_urls = [place["websiteUrl"] for place in data.get("places", [])]
         unique_website_urls = list(set(company_website_urls))
-        if env_customer_url == "LOCAL":
+        formatted_address = [
+            place["formatted_address"] for place in data.get("places", [])
+        ]
+
+        # Only insta businesses will have this
+        # Always the same for local and prod
+        if "instagram_place" in formatted_address:
+            if env_customer_url == "LOCAL":
+                base_url = "http://localhost:4100/instagram/"
+                in_location_url = "http://localhost:4100/instagram/"
+            else:
+                base_url = "https://vero-reviews.vercel.app/instagram/"
+                in_location_url = "https://vero-reviews.vercel.app/instagram/"
+
+        elif env_customer_url == "LOCAL":
             base_url = "http://localhost:4100/clientreviews/"
             in_location_url = "http://localhost:4100/instorereviews/"
         else:
@@ -845,7 +860,11 @@ def log_in_user(request):
                 {
                     "message": "Logged in successfully",
                     "token": token,
-                    "user": {"id": user.id, "email": user.email},
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "account_type": user.account_type,
+                    },
                 },
                 status=200,
             )
