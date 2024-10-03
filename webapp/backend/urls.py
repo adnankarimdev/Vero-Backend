@@ -24,6 +24,7 @@ from .views import (
     update_review_data,
     get_client_catgories,
     chat_with_badges,
+    get_user_data,
 )
 
 urlpatterns = [
@@ -96,4 +97,9 @@ urlpatterns = [
     ),
     path("update-review-data/", update_review_data, name="update_review_data"),
     path("chat-with-badges/", chat_with_badges, name="chat_with_badges"),
+    path(
+        "get-user-data/<str:email>/",
+        get_user_data,
+        name="get_user_data",
+    ),
 ]

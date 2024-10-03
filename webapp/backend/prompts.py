@@ -227,6 +227,189 @@ NOTE: Just return the key with the values and nothing else.
 Here is the data: which will give insight into what type of business it is and areas to focus on. If no specific area is provided, create your own relevant questions using the rules above:
 """
 
+prompt_five_star_categories_generator_influencer = """
+Generate EXACTLY 4 badges for each rating based on the overall feedback of the content I post on my social media account. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or immediate reactions, rather than logical analysis.
+
+To start, give me the top 3 most important factors for followers when they engage with my content. Then, fill out badges relevant to the overall rating. No badges should have the same meaning.
+
+For ratings:
+
+	•	1 star: Badges should focus on gathering feedback about major dissatisfaction with my content. Examples: “didn’t connect with the post 😡”, “content felt off or forced 😠”.
+	•	2 stars: Badges should address significant concerns and gather feedback on what didn’t work. Examples: “felt too repetitive 😕”, “didn’t like the tone 😞”.
+	•	3 stars: Badges should gather feedback on areas that were okay but could be improved. Examples: “could be more creative 😐”, “not engaging enough ⏳”.
+	•	4 stars: Badges should collect constructive feedback on minor things that could be better. Examples: “almost perfect, but needs a tweak 🧐”, “caption could be improved ✍️”.
+	•	5 stars: Badges should celebrate what people loved about my content and gather feedback on why it resonated. Examples: “loved the vibe 😊”, “super relatable 🔥”.
+
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as personal and specific as possible.
+
+Return it in this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "Your Rating",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    }
+  ]
+}
+
+NOTE: Just return the key with the values and nothing else. 
+
+Here is the data:
+"""
+
+prompt_five_star_multiple_categories_generator_influencer = """
+Generate EXACTLY 4 badges for each type of content posted on my social media accounts. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.
+
+To start, give me the top 3 most important factors for my followers when engaging with my content. Then, fill out badges relevant to each factor. No badges should have the same meaning.
+
+For ratings:
+
+	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns with the content. Examples: “content felt irrelevant 😡”, “visuals were unappealing 😠”.
+	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “message was confusing 😕”, “post lacked engagement 😞”.
+	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “content could be more relatable 😐”, “timing of posts could improve ⏳”.
+	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “more variety in topics would help 🧐”, “captions could be clearer 📝”.
+	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects of the content were most satisfying. Examples: “loved the creativity in the posts 😊”, “great insights shared 🌟”.
+
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
+
+Return it in this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "<factor_1>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    },
+    {
+      "name": "<factor_2>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    },
+    {
+      "name": "<factor_3>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    }
+  ]
+}
+
+NOTE: Just return the key with the values and nothing else. 
+
+Here is the data:
+"""
+
+prompt_five_star_categories_generator_online_business = """
+Generate EXACTLY 4 badges for each rating based on the overall feedback of my online business. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.
+
+To start, give me the top 3 most important factors for customers when engaging with my online business. Then, fill out badges relevant to the overall rating. No badges should have the same meaning.
+
+For ratings:
+
+	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns. Examples: “shipping was delayed and frustrating 😡”, “product was not as described 😠”.
+	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “customer support was unhelpful 😕”, “return process was confusing 😞”.
+	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “website navigation could be improved 😐”, “product selection was limited ⏳”.
+	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “checkout process could be smoother 🧐”, “descriptions could be more detailed ✍️”.
+	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “fantastic product quality 😊”, “quick and reliable shipping 🌟”.
+
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
+
+Return it in this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "Your Rating",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    }
+  ]
+}
+
+NOTE: Just return the key with the values and nothing else. 
+
+Here is the data:
+"""
+
+prompt_five_star_multiple_categories_generator_online_business = """
+Generate EXACTLY 4 badges for each name for my online business. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.
+
+To start, give me the top 3 most important factors for customers when engaging with my online business. Then, fill out badges relevant to those factors. No badges should have the same meaning.
+
+For ratings:
+
+	•	1 star: Badges should focus on collecting detailed feedback about severe issues or major concerns. Examples: “shipping was a nightmare 😡”, “product didn’t match description 😠”.
+	•	2 stars: Badges should address significant issues and gather feedback on notably problematic aspects. Examples: “customer service was unresponsive 😕”, “website was hard to navigate 😞”.
+	•	3 stars: Badges should gather feedback on areas of moderate concern or dissatisfaction. Examples: “checkout process was confusing 😐”, “selection could be better ⏳”.
+	•	4 stars: Badges should collect constructive feedback on minor issues or areas for improvement. Examples: “images could be clearer 🧐”, “return policy needs clarity ✍️”.
+	•	5 stars: Badges should celebrate positive feedback and gather information on what aspects were most satisfying. Examples: “fast shipping made my day 😊”, “loved the product quality 🌟”.
+
+Badges should be short statements, not questions, and should include an emoji that represents the badge at the end of the sentence. Do not include any sentence enders. Make them as specific as possible.
+
+Return it in this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "<factor_1>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    },
+    {
+      "name": "<factor_2>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    },
+    {
+      "name": "<factor_3>",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    }
+  ]
+}
+
+NOTE: Just return the key with the values and nothing else. 
+
+Here is the data:
+"""
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
 Generate EXACTLY 4 badges for each rating based on the overall rating of my business. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.

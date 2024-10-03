@@ -21,6 +21,10 @@ from backend.prompts import (
     # Category generation
     prompt_five_star_categories_generator,
     prompt_five_star_multiple_categories_generator,
+    prompt_five_star_categories_generator_influencer,
+    prompt_five_star_multiple_categories_generator_influencer,
+    prompt_five_star_categories_generator_online_business,
+    prompt_five_star_multiple_categories_generator_online_business,
     # Keyword and question generation
     prompt_keyword_generator,
     prompt_review_question_generator,
@@ -44,7 +48,13 @@ from .serializers import (
 )
 from rest_framework import status
 from rest_framework.response import Response
-from .models import UserData, CustomerReviewInfo, ReviewsToPostLater, ScheduledJob
+from .models import (
+    UserData,
+    CustomerReviewInfo,
+    ReviewsToPostLater,
+    ScheduledJob,
+    CustomUser,
+)
 import jwt
 import secrets
 import googlemaps
@@ -299,6 +309,21 @@ def chat_with_badges(request):
 
 
 @csrf_exempt
+def get_user_data(request, email):
+    if request.method == "GET":
+        try:
+            user_data = CustomUser.objects.get(username=email)
+            data = {
+                "account_type": user_data.account_type,
+            }
+            return JsonResponse(data, status=200)
+        except UserData.DoesNotExist:
+            return JsonResponse({"error": "User not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+
+
+@csrf_exempt
 def generate_categories(request):
     global prompt_five_star_categories_generator
     global prompt_five_star_multiple_categories_generator
@@ -310,14 +335,38 @@ def generate_categories(request):
         data = json.loads(request.body)
         user_query = data.get("context", "")
         user_radio_type = data.get("type", "")
+        user_account_type = data.get("accountType", "")
         print(user_query)
         print(user_radio_type)
+        print(user_account_type)
 
         # Messages for the LLM
-        if user_radio_type == "overall":
-            prompt_to_use = prompt_five_star_categories_generator
+        if user_account_type == "google-business":
+            if user_radio_type == "overall":
+                prompt_to_use = prompt_five_star_categories_generator
+            else:
+                prompt_to_use = prompt_five_star_multiple_categories_generator
+
+        elif user_account_type == "influencer":
+            if user_radio_type == "overall":
+                prompt_to_use = prompt_five_star_categories_generator_influencer
+            else:
+                prompt_to_use = (
+                    prompt_five_star_multiple_categories_generator_influencer
+                )
+
+        elif user_account_type == "online-business":
+            if user_radio_type == "overall":
+                prompt_to_use = prompt_five_star_categories_generator_online_business
+            else:
+                prompt_to_use = (
+                    prompt_five_star_multiple_categories_generator_online_business
+                )
         else:
-            prompt_to_use = prompt_five_star_multiple_categories_generator
+            if user_radio_type == "overall":
+                prompt_to_use = prompt_five_star_categories_generator
+            else:
+                prompt_to_use = prompt_five_star_multiple_categories_generator
 
         messages = [
             ("system", prompt_to_use),
@@ -576,14 +625,21 @@ def set_place_ids(request):
 
         # Only insta businesses will have this
         # Always the same for local and prod
-        if "instagram_place" in formatted_address:
+        if "online_place" in formatted_address:
             if env_customer_url == "LOCAL":
-                base_url = "http://localhost:4100/instagram/"
-                in_location_url = "http://localhost:4100/instagram/"
+                base_url = "http://localhost:4100/social-business/"
+                in_location_url = "http://localhost:4100/social-business/"
             else:
-                base_url = "https://vero-reviews.vercel.app/instagram/"
-                in_location_url = "https://vero-reviews.vercel.app/instagram/"
+                base_url = "https://vero-reviews.vercel.app/social-business/"
+                in_location_url = "https://vero-reviews.vercel.app/social-business/"
 
+        elif "influencer_place" in formatted_address:
+            if env_customer_url == "LOCAL":
+                base_url = "http://localhost:4100/social-icon/"
+                in_location_url = "http://localhost:4100/social-icon/"
+            else:
+                base_url = "https://vero-reviews.vercel.app/social-icon/"
+                in_location_url = "https://vero-reviews.vercel.app/social-icon/"
         elif env_customer_url == "LOCAL":
             base_url = "http://localhost:4100/clientreviews/"
             in_location_url = "http://localhost:4100/instorereviews/"
