@@ -92,6 +92,9 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = (
+    None  # Need to investigate. For /backend/save-review-settings/
+)
 
 ROOT_URLCONF = "webapp.urls"
 

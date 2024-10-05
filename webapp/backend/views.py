@@ -583,7 +583,6 @@ def get_review_questions(request, place_id):
                 "placeIds": settings.place_ids,
                 "showComplimentaryItem": settings.show_complimentary_item,
                 "complimentaryItem": settings.complimentary_item,
-                "questions": settings.questions,
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
                 "websiteUrls": settings.website_urls,
@@ -591,6 +590,7 @@ def get_review_questions(request, place_id):
                 "keywords": settings.company_keywords,
                 "useBubblePlatform": settings.bubble_rating_platform,
                 "emailDelay": settings.email_delay,
+                "card_description": settings.card_description,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -626,7 +626,6 @@ def get_review_settings(request, place_ids):
                 "placeIds": settings.place_ids,
                 "showComplimentaryItem": settings.show_complimentary_item,
                 "complimentaryItem": settings.complimentary_item,
-                "questions": settings.questions,
                 "dialogBody": settings.worry_dialog_body,
                 "dialogTitle": settings.worry_dialog_title,
                 "websiteUrls": settings.website_urls,
@@ -638,6 +637,7 @@ def get_review_settings(request, place_ids):
                 "useBubblePlatform": settings.bubble_rating_platform,
                 "emailDelay": settings.email_delay,
                 "categories": settings.categories,
+                "card_description": settings.card_description,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -736,7 +736,6 @@ def set_place_ids(request):
             user_data, created = UserData.objects.update_or_create(
                 place_ids=place_ids,
                 defaults={
-                    "questions": data.get("questions", []),
                     "email_intro": data.get("emailIntro", ""),
                     "email_signature": data.get("emailSignature", ""),
                     "email_body": data.get("emailBody", ""),
@@ -757,6 +756,9 @@ def set_place_ids(request):
                     "company_keywords": filtered_keywords,
                     "email_delay": data.get("emailDelay", 60),
                     "categories": data.get("categories", []),
+                    "card_description": data.get(
+                        "cardDescription", "How did we do? 🤔"
+                    ),
                 },
             )
 
@@ -905,6 +907,7 @@ def save_customer_review(request):
 def save_user_review_question_settings(request):
     if request.method == "POST":
         try:
+            print("size of request load: ", len(request.body))
             data = json.loads(request.body)  # Parse the JSON body of the request
         except json.JSONDecodeError:
             return JsonResponse(
@@ -913,14 +916,13 @@ def save_user_review_question_settings(request):
 
         # Extract place_id from the data
         user_email = data.get("userEmail")
-        print(data)
+        print(data.get("cardDescription"))
 
         if user_email:
             # Use update_or_create to either update an existing entry or create a new one
             user_data, created = UserData.objects.update_or_create(
                 user_email=user_email,
                 defaults={
-                    "questions": data.get("questions", []),
                     "email_intro": data.get("emailIntro", ""),
                     "email_signature": data.get("emailSignature", ""),
                     "email_body": data.get("emailBody", ""),
@@ -937,6 +939,9 @@ def save_user_review_question_settings(request):
                     "email_delay": data.get("emailDelay", 60),
                     "categories": data.get("categories", []),
                     "company_keywords": data.get("keywords", []),
+                    "card_description": data.get(
+                        "cardDescription", "How did we do? 🤔"
+                    ),
                     # 'website_url': "https://vero-reviews.vercel.app/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },
@@ -1393,7 +1398,10 @@ def get_client_catgories(
                 )  # Check if place_id exists in the place_ids list
             ]
             settings = matching_settings[0]
-            data = {"categories": settings.categories}
+            data = {
+                "categories": settings.categories,
+                "card_description": settings.card_description,
+            }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
             return JsonResponse(

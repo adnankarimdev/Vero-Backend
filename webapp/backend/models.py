@@ -67,7 +67,6 @@ class UserData(models.Model):
     complimentary_item = models.CharField(max_length=255, blank=True, null=True)
     worry_dialog_body = models.TextField(blank=True, null=True)
     worry_dialog_title = models.TextField(blank=True, null=True)
-    questions = models.JSONField(blank=True, null=True)
     categories = models.JSONField(blank=True, null=True)
     places_information = models.JSONField(blank=True, null=True)
     website_urls = models.TextField(blank=True, null=True)
@@ -77,6 +76,7 @@ class UserData(models.Model):
     company_keywords = models.JSONField(blank=True, null=True)
     bubble_rating_platform = models.BooleanField(default=True)
     email_delay = models.IntegerField(default=60)
+    card_description = models.CharField(blank=True, default="How did we do? 🤔")
 
     def set_place_ids(self, place_ids_list):
         self.place_ids = json.dumps(place_ids_list)
