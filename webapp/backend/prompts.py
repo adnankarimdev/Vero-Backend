@@ -410,6 +410,31 @@ NOTE: Just return the key with the values and nothing else.
 
 Here is the data:
 """
+
+prompt_translate_badge = """
+translate the given word to english. Keep the emoji if it exists and don't include any sentence stoppers. Just return exactly the translation.
+Input:
+"""
+prompt_translate_categories = """
+Translate the given input to the requested language. 
+
+Return it in exactly this format where categories is a key in json. Don't include any random white spaces.:
+{
+  "categories": [
+    {
+      "name": "Your Rating",
+    "badges": [
+      { "rating": 1, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 2, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 3, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 4, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] },
+      { "rating": 5, "badges": ["badge 1", "badge 2", "badge 3", "badge 4"] }
+    ]
+    }
+  ]
+}
+
+"""
 # Try to adjust query so its song names/lyrics for spotify platform. Will need to adjust accordingly, probs create a whole new prompt.
 prompt_five_star_categories_generator = """
 Generate EXACTLY 4 badges for each rating based on the overall rating of my business. These badges must engage System 1 thinking to encourage quick, instinctive responses based on personal feelings, perceptions, or observations, rather than logical analysis.

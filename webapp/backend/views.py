@@ -31,6 +31,9 @@ from backend.prompts import (
     # Chatbot and email prompts
     prompt_chatbot,
     prompt_address_email,
+    # Other
+    prompt_translate_categories,
+    prompt_translate_badge,
 )
 import pickle
 
@@ -378,6 +381,71 @@ def generate_categories(request):
         # ai_msg = agent.invoke(prompt + search_query)
         tokens = tc.num_tokens_from_string(ai_msg.content)
         print(f"GEN CATGORIES OUTPUT: Tokens in the string: {tokens}")
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+@csrf_exempt
+def translate_badge(request):
+    global prompt_translate_badge
+    tokens = tc.num_tokens_from_string(prompt_translate_badge)
+    print(f"TRANSLATE BADGE INPUT: Tokens in the string: {tokens}")
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_badge = data.get("badge", "")
+        finalQuery = user_badge
+
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_translate_badge),
+            ("human", finalQuery),
+        ]
+
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(f"TRANSLATE OUTPUT: Tokens in the string: {tokens}")
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+@csrf_exempt
+def translate_language(request):
+    global prompt_translate_categories
+    tokens = tc.num_tokens_from_string(prompt_translate_categories)
+    print(f"TRANSLATE INPUT: Tokens in the string: {tokens}")
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_query = data.get("context", "")
+        user_requested_language = data.get("language", "english")
+        print(user_query)
+        finalQuery = (
+            "Context: "
+            + "\n"
+            + json.dumps(user_query)
+            + "\n"
+            + "Requested Language:"
+            + user_requested_language
+        )
+
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_translate_categories),
+            ("human", finalQuery),
+        ]
+
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(f"TRANSLATE OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
         # return JsonResponse({"content": ai_msg.content})
 

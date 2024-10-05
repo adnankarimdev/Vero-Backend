@@ -25,6 +25,8 @@ from .views import (
     get_client_catgories,
     chat_with_badges,
     get_user_data,
+    translate_language,
+    translate_badge,
 )
 
 urlpatterns = [
@@ -102,4 +104,6 @@ urlpatterns = [
         get_user_data,
         name="get_user_data",
     ),
+    path("translate-language/", translate_language, name="translate_language"),
+    path("translate-badge/", translate_badge, name="translate_badge"),
 ]
