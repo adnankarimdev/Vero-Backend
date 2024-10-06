@@ -18,6 +18,7 @@ from backend.prompts import (
     prompt_review_five_star_creator,
     prompt_review_score,
     prompt_review_template_generator,
+    prompt_google_review_response,
     # Category generation
     prompt_five_star_categories_generator,
     prompt_five_star_multiple_categories_generator,
@@ -318,6 +319,7 @@ def get_user_data(request, email):
             user_data = CustomUser.objects.get(username=email)
             data = {
                 "account_type": user_data.account_type,
+                "business_name": user_data.business_name,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -446,6 +448,46 @@ def translate_language(request):
         # ai_msg = agent.invoke(prompt + search_query)
         tokens = tc.num_tokens_from_string(ai_msg.content)
         print(f"TRANSLATE OUTPUT: Tokens in the string: {tokens}")
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+@csrf_exempt
+def generate_google_review_response(request):
+    global prompt_google_review_response
+    tokens = tc.num_tokens_from_string(prompt_google_review_response)
+    print(f"GEN 5 STAR REVIEW RESPONSE INPUT: Tokens in the string: {tokens}")
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        review_name = data.get("name", "")
+        review_rating = data.get("rating", "")
+        review_body = data.get("body", "")
+        business_name = data.get("businessName", "")
+        final_query = (
+            "Customer Name: "
+            + review_name
+            + "\n Customer Rating: "
+            + review_rating
+            + "\n Customer Review Body: "
+            + review_body
+            + "\n Business Name: "
+            + business_name
+        )
+
+        # Messages for the LLM
+        messages = [
+            ("system", prompt_google_review_response),
+            ("human", final_query),
+        ]
+
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(f"GEN 5 STAR REVIEW RESPONSE OUTPUT: Tokens in the string: {tokens}")
         return JsonResponse({"content": ai_msg.content})
         # return JsonResponse({"content": ai_msg.content})
 

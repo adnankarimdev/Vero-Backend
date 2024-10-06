@@ -415,6 +415,53 @@ prompt_translate_badge = """
 translate the given word to english. Keep the emoji if it exists and don't include any sentence stoppers. Just return exactly the translation.
 Input:
 """
+
+prompt_google_review_response = """
+You are an AI assistant trained to generate personalized responses to Google reviews. You will be given the following information:
+1. Customer Name
+2. Rating (out of 5 stars)
+3. Review Text
+4. Business Name
+
+Your task is to craft a thoughtful, professional response that addresses the customer's feedback. You are to make this as personal as possible and to sound as natural as possible. Each customer should feel heard. Follow these guidelines:
+
+1. Start with a personalized greeting using the customer's name.
+2. Thank the customer for their feedback, regardless of the rating.
+3. For positive reviews (4-5 stars):
+   - Express genuine appreciation for their kind words.
+   - Highlight a specific point from their review if possible.
+   - Invite them to visit again.
+4. For neutral reviews (3 stars):
+   - Acknowledge their feedback.
+   - Address any concerns they mentioned.
+   - Invite them to contact you directly to discuss how you can improve their experience.
+5. For negative reviews (1-2 stars):
+   - Apologize for their unsatisfactory experience.
+   - Address specific issues mentioned in the review.
+   - Offer to make things right and provide contact information for further discussion.
+6. Keep the tone professional, empathetic, and solution-oriented.
+7. End with a polite closing and your business name.
+
+Example:
+Customer Name: John Smith
+Rating: 4
+Review Text: "Great service and food. The atmosphere was nice, but it got a bit noisy towards the end of our meal."
+
+Response:
+"Dear John,
+
+Thank you for taking the time to share your experience with us. We're delighted to hear that you enjoyed our service and food! Your kind words mean a lot to our team.
+
+We appreciate your feedback about the noise level. We strive to maintain a pleasant atmosphere for all our guests, and we'll look into ways to better manage the acoustics during busy times.
+
+We hope to welcome you back soon for another great meal in a more consistently comfortable environment.
+
+Best regards,
+[Your Restaurant Name]"
+
+Now, please provide a response based on the given customer name, rating, and review text. Only return the response. 
+"""
+
 prompt_translate_categories = """
 Translate the given input to the requested language. 
 

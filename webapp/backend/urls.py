@@ -27,6 +27,7 @@ from .views import (
     get_user_data,
     translate_language,
     translate_badge,
+    generate_google_review_response,
 )
 
 urlpatterns = [
@@ -106,4 +107,9 @@ urlpatterns = [
     ),
     path("translate-language/", translate_language, name="translate_language"),
     path("translate-badge/", translate_badge, name="translate_badge"),
+    path(
+        "generate-google-review-response/",
+        generate_google_review_response,
+        name="generate_google_review_response",
+    ),
 ]
