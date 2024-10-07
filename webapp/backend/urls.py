@@ -28,6 +28,8 @@ from .views import (
     translate_language,
     translate_badge,
     generate_google_review_response,
+    product_page,
+    stripe_webhook,
 )
 
 urlpatterns = [
@@ -112,4 +114,7 @@ urlpatterns = [
         generate_google_review_response,
         name="generate_google_review_response",
     ),
+    path("product-page/", product_page, name="product_page"),
+    # cant have appending slash for stripe (?)
+    path("stripe_webhook", stripe_webhook, name="stripe_webhook"),
 ]

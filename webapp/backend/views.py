@@ -1,9 +1,11 @@
 from django.http import HttpResponse
 import os
 from dotenv import load_dotenv
+import time
 import re
 import json
 import hashlib
+import stripe
 from django.db.models import Q
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
@@ -241,6 +243,135 @@ tc = TokenCount(model_name="gpt-4o-mini")
 
 
 env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
+
+
+@csrf_exempt
+def product_page(request):
+    # Set your Stripe secret key
+    stripe.api_key = settings.STRIPE_TEST_KEY
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        # Get the product ID and quantity from the request (you could pass this from the front-end)
+        product_id = data.get("product_id", "")
+        quantity = int(data.get("quantity", 1))  # Default to 1 if not provided
+        email = data.get("email", "")
+
+        try:
+            # Fetch the product price from Stripe
+            product = stripe.Product.retrieve(product_id)
+            price_data = stripe.Price.list(
+                product=product_id, limit=1
+            )  # Get the price for the product
+
+            if not price_data or not price_data["data"]:
+                return JsonResponse(
+                    {"error": "No price found for the product"}, status=400
+                )
+
+            price_id = price_data["data"][0]["id"]  # Get the first price ID
+
+            # Create a Stripe Checkout session
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                customer_email=email,
+                billing_address_collection="required",
+                line_items=[
+                    {
+                        "price": price_id,  # Dynamically pass the price ID
+                        "quantity": quantity,
+                    },
+                ],
+                mode="subscription",
+                # customer_creation='always',  # Automatically create a customer for each session
+                success_url=settings.REDIRECT_STRIPE_SUCCESS_URL
+                + "/paymentsuccessful/{CHECKOUT_SESSION_ID}",
+                cancel_url=settings.REDIRECT_STRIPE_SUCCESS_URL
+                + "/paymentfail/{CHECKOUT_SESSION_ID}",
+            )
+
+            # customer_creation = 'always',
+            # success_url = settings.REDIRECT_DOMAIN + '/payment_successful?session_id={CHECKOUT_SESSION_ID}',
+            # cancel_url = settings.REDIRECT_DOMAIN + '/payment_cancelled',
+            # Redirect to Stripe Checkout page
+            return JsonResponse({"url": checkout_session.url}, status=303)
+
+        except stripe.error.StripeError as e:
+            # Handle Stripe API errors
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+## use Stripe dummy card: 4242 4242 4242 4242
+@csrf_exempt
+def stripe_webhook(request):
+    stripe.api_key = settings.STRIPE_TEST_KEY
+    payload = request.body
+    signature_header = request.META["HTTP_STRIPE_SIGNATURE"]
+    event = None
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, signature_header, settings.STRIPE_WEBHOOK_SECRET_TEST
+        )
+    except ValueError as e:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        return HttpResponse(status=400)
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        session_id = session.get("id", None)
+        session_customer_email = session.get("customer_email", "")
+        invoice_id = session.get("invoice", None)
+        print("my session details", session)
+        user_account = CustomUser.objects.get(email=session_customer_email)
+        user_account.account_subscription = "premium"
+        user_account.save()
+        # Fetch the invoice and send it via email
+        if invoice_id:
+            send_invoice_email(invoice_id, session_customer_email)
+    return HttpResponse(status=200)
+
+
+def send_invoice_email(invoice_id, to_email):
+    from_email = "reviews@vero-io.com"
+    from_password = google_email_reviews_app_password  # Your app password here
+    subject = "Your Invoice from Vero"
+    body = "Thank you for your payment! Please find your invoice attached."
+
+    try:
+        # Retrieve the invoice from Stripe
+        invoice = stripe.Invoice.retrieve(invoice_id)
+        invoice_pdf_url = invoice.get(
+            "invoice_pdf", None
+        )  # Get the PDF URL for the invoice
+        print("invoice url ", invoice_pdf_url)
+
+        # Prepare the email
+        msg = MIMEMultipart()
+        msg["From"] = from_email
+        msg["To"] = to_email
+        msg["Subject"] = subject
+
+        # Attach the body text
+        msg.attach(MIMEText(body, "plain"))
+
+        # Attach the invoice PDF
+        if invoice_pdf_url:
+            pdf_response = requests.get(invoice_pdf_url)
+            if pdf_response.status_code == 200:
+                msg.attach(MIMEText(pdf_response.content, "application/pdf"))
+            else:
+                print(f"Failed to retrieve PDF from Stripe: {pdf_response.status_code}")
+
+        # Send the email
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(from_email, from_password)
+            server.sendmail(from_email, [to_email], msg.as_string())
+
+        print(f"Invoice sent to {to_email}")
+
+    except Exception as e:
+        print(f"Failed to send invoice email: {e}")
 
 
 @csrf_exempt
