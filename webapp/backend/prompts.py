@@ -97,38 +97,41 @@ prompt_review_adjuster = """
         •   Avoid general commentary: Certain locations may become the subject of larger public debate or conversation due to recent news coverage or current events. While we respect and value your opinion, Local Reviews are not meant for social or political commentary. Forums, like blogs or social networks, are much more appropriate for those types of conversations. Please write about your firsthand experience with the place and not general commentary on the place in relation to recent news.
         •   You are to ONLY return the review body you have generated. No stars, just the new review you have created.
     """
-#  •	Where appropriate and natural, incorporate the following business keywords: [latte, best coffee shop, artisan].
 
 # cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
-Task: Transform the provided user badges selected for each section for a [review rating] review into a polished Google review. The buisness name will also be provided that you will be generating a review for. Finally, the keywords that are important to the buisness will be provided as well. You are to only put 2 keywords at a maximum if it goes in naturally.
-    
-You are to create a google review based on the following criteria:
-	1.	Informative and Insightful (16%): Specific and valuable; unique insights.
-	2.	Authenticity (16%): Honest, detailed reflection of the experience.
-	3.	Integration of Keywords (10%): Relevant keywords used naturally.
-	4.	Respectfulness (16%): Constructive, respectful, and avoids profanity.
-	5.	Writing Style (16%): Well-written, correct grammar and spelling.
-	6.	Privacy and Professionalism (10%): No personal or professional info; no conflict of interest.
-	7.	Focus on Experience (10%): Focused on personal experience; avoids irrelevant commentary.
+Task: Craft an authentic Google review for [Business Name] based on the provided user badges and rating. Incorporate up to 2 keywords naturally if possible, and the keywords should not be repeated ever. We do not want to ever do anyform of keyword stuffing!
 
-Instructions:
-- Return only the review body.
-- You can only put a MAXIMUM of 2 keywords in the review body.
-- Make it first person. It should NOT sound generated. It should include first person language like 'I' and second person language like 'you'. Use it correctly where it makes sense.
-- Do not include any emojis even if the badges have emojis.
-- Do not include any other text, explanations, or output—only the review body.
-- Vary the opening sentence for each review. Avoid always starting with "I recently visited..." Use a diverse range of opening structures.
-- Aim for a high uniqueness score. Each review should have a distinct voice and structure.
-- Vary the length of the review. Aim for between 50-150 words, but let it flow naturally.
+Review Criteria:
+- Insightful and specific (16%)
+- Genuine reflection of experience (16%)
+- Well-written with correct grammar (16%)
+- Constructive and respectful (16%)
+- Focused on personal experience (10%)
+- Natural use of relevant keywords (10%)
+- Professional, avoiding personal details (10%)
 
-Opening sentence examples (use these for inspiration, not verbatim):
-- "What a pleasant surprise..."
-- "If you're looking for..."
-- "My experience at [Business Name] was..."
-- "From the moment I walked in..."
-- "I've been a regular at [Business Name] for..."
-- "Let me tell you about my visit to..."
+Guidelines:
+- Write only the review body, 50-150 words.
+- Use first-person perspective and natural language.
+- Vary structure, tone, and focus for each review.
+- Avoid formulaic openings; be creative with how you start.
+- Each review should have a distinct voice and flow.
+- Don't use emojis or explain the review process.
+
+Inspiration for Diverse Approaches:
+- Focus on a specific aspect that stood out
+- Tell a brief story about your visit
+- Contrast expectations with reality
+- Describe the atmosphere or vibe
+- Highlight a unique feature or offering
+- Mention how the experience made you feel
+- Compare to past experiences (without naming competitors)
+- Discuss value for money or quality of service
+- Describe interactions with staff or other customers
+- Reflect on how the experience impacted your day
+
+Remember: Each review should feel like it comes from a different person with a unique perspective and writing style.
 
     """
 
