@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
             business_name=validated_data["business_name"],
             account_type=validated_data["account_type"],
+            account_subscription=validated_data["account_subscription"],
         )
         return user
 

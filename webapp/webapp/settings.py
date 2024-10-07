@@ -25,6 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-y^#=%lxy#+mt4v0kvvperrim1&82h5h4q1w6@z33_4q9+&wtt)"
+STRIPE_TEST_KEY = "sk_test_51Q5Mm9AsZEWtxmQuVUA94bLrSn51OVJEoVnbVHqcpw9z4X2FrZRXiJGsrmIyFakjzmko6kiFvytgQTmqNygPjNIu00hv6VAhUK"
+STRIPE_WEBHOOK_SECRET_TEST = (
+    "whsec_381d7d4ae9cac00c0f309f26875417b8c7ef42c12bdefa747fea585a7d2c7973"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
@@ -129,6 +133,11 @@ WSGI_APPLICATION = "webapp.wsgi.application"
 
 
 # Check if we're in production or local
+if os.getenv("ENV_DATABASE") == "PROD":
+    REDIRECT_STRIPE_SUCCESS_URL = "https://vero-main.vercel.app"
+else:
+    REDIRECT_STRIPE_SUCCESS_URL = "http://localhost:4000"
+
 if os.getenv("ENV_DATABASE") == "PROD":
     DATABASES = {
         "default": {
