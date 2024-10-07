@@ -335,32 +335,35 @@ def send_invoice_email(invoice_id, to_email):
     from_email = "reviews@vero-io.com"
     from_password = google_email_reviews_app_password  # Your app password here
     subject = "Your Invoice from Vero"
-    body = "Thank you for your payment! Please find your invoice attached."
+    body = "Thank you for your payment! Please find your invoice attached in the pdf link below: \n"
 
     try:
         # Retrieve the invoice from Stripe
         invoice = stripe.Invoice.retrieve(invoice_id)
-        invoice_pdf_url = invoice.get(
-            "invoice_pdf", None
+        print(invoice)
+        hosted_invoice_url = invoice.get(
+            "hosted_invoice_url", None
         )  # Get the PDF URL for the invoice
-        print("invoice url ", invoice_pdf_url)
+        print("invoice url ", hosted_invoice_url)
 
         # Prepare the email
         msg = MIMEMultipart()
         msg["From"] = from_email
         msg["To"] = to_email
         msg["Subject"] = subject
+        body = body + hosted_invoice_url
 
         # Attach the body text
         msg.attach(MIMEText(body, "plain"))
 
         # Attach the invoice PDF
-        if invoice_pdf_url:
-            pdf_response = requests.get(invoice_pdf_url)
-            if pdf_response.status_code == 200:
-                msg.attach(MIMEText(pdf_response.content, "application/pdf"))
-            else:
-                print(f"Failed to retrieve PDF from Stripe: {pdf_response.status_code}")
+        # Attaching as pdf is a little buggy. need to investigate. 
+        # if invoice_pdf_url:
+        #     pdf_response = requests.get(invoice_pdf_url)
+        #     if pdf_response.status_code == 200:
+        #         msg.attach(MIMEText(pdf_response.content, "application/pdf"))
+        #     else:
+        #         print(f"Failed to retrieve PDF from Stripe: {pdf_response.status_code}")
 
         # Send the email
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
