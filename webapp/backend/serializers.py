@@ -5,7 +5,7 @@ from .models import CustomUser, UserData, CustomerReviewInfo, ReviewsToPostLater
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ("id", "email", "password", "business_name", "account_type")
+        fields = ("id", "email", "password", "business_name", "account_type", "account_subscription")
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):

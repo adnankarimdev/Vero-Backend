@@ -1187,6 +1187,7 @@ def sign_up_user(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
+            data['account_subscription'] = "free-trial"
         except json.JSONDecodeError:
             return JsonResponse(
                 {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST

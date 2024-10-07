@@ -31,7 +31,6 @@ class CustomUser(AbstractUser):
     business_name = models.CharField(max_length=100)
     account_type = models.CharField(max_length=100, default="google-business")
     account_subscription = models.CharField(max_length=100, default="free-trial")
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "business_name"]
 
