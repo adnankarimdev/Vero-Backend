@@ -51,6 +51,7 @@ from .serializers import (
     UserSerializer,
     UserDataSerializer,
     ReviewsToPostLaterSerializer,
+    CustomerSerializer,
 )
 from rest_framework import status
 from rest_framework.response import Response
@@ -60,6 +61,7 @@ from .models import (
     ReviewsToPostLater,
     ScheduledJob,
     CustomUser,
+    CustomerUser,
 )
 import jwt
 import secrets
@@ -357,7 +359,7 @@ def send_invoice_email(invoice_id, to_email):
         msg.attach(MIMEText(body, "plain"))
 
         # Attach the invoice PDF
-        # Attaching as pdf is a little buggy. need to investigate. 
+        # Attaching as pdf is a little buggy. need to investigate.
         # if invoice_pdf_url:
         #     pdf_response = requests.get(invoice_pdf_url)
         #     if pdf_response.status_code == 200:
@@ -1186,17 +1188,88 @@ def log_in_user(request):
 
 
 @csrf_exempt
+def log_in_customer(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+
+        email = data.get("email")
+        password = data.get("password")
+
+        if not email or not password:
+            return JsonResponse(
+                {"error": "Email and password are required"}, status=400
+            )
+
+        try:
+            user = CustomerUser.objects.get(email=email)
+        except CustomerUser.DoesNotExist:
+            return JsonResponse({"error": "Invalid email or password"}, status=401)
+
+        if user.check_password(password):
+            login(request, user)
+
+            # Generate a token (if using JWT)
+            token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm="HS256")
+
+            return JsonResponse(
+                {
+                    "message": "Logged in successfully",
+                    "token": token,
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "username": user.username,
+                    },
+                },
+                status=200,
+            )
+        else:
+            return JsonResponse({"error": "Invalid email or password"}, status=401)
+
+    return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+
+@csrf_exempt
 def sign_up_user(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)  # Parse the JSON body of the request
-            data['account_subscription'] = "free-trial"
+            data["account_subscription"] = "free-trial"
         except json.JSONDecodeError:
             return JsonResponse(
                 {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse(
+            {"error": "Only POST requests are allowed"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+
+@csrf_exempt
+def sign_up_customer(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Parse the JSON body of the request
+            print(data)
+            data["user_score"] = 0
+            data["user_reviews"] = {}
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"error": "Invalid JSON data"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = CustomerSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
 

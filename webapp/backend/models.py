@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 import json
 
@@ -33,6 +33,26 @@ class CustomUser(AbstractUser):
     account_subscription = models.CharField(max_length=100, default="free-trial")
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "business_name"]
+
+    def __str__(self):
+        return self.email
+
+
+class CustomerUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=100)
+    user_score = models.IntegerField(default=0)
+    user_reviews = models.JSONField(blank=True, null=True)
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["username", "email"]
+    groups = models.ManyToManyField(
+        Group, related_name="customeruser_groups", blank=True  # Different related_name
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="customeruser_permissions",  # Different related_name
+        blank=True,
+    )
 
     def __str__(self):
         return self.email
