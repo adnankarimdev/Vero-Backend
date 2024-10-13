@@ -46,6 +46,9 @@ class CustomerUser(AbstractUser):
     places_reviewed = models.JSONField(default=list)
     user_google_reviews = models.IntegerField(default=0)
     user_regular_reviews = models.IntegerField(default=0)
+    google_reviewed_places = models.JSONField(default=list)
+    place_review_dates = models.JSONField(default=dict)
+
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["username", "email"]
     groups = models.ManyToManyField(

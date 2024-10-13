@@ -9,6 +9,7 @@ import hashlib
 import stripe
 from collections import Counter
 from django.db.models import Q
+from django.utils import timezone
 from django.core import serializers
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
@@ -1102,22 +1103,65 @@ def get_customer_reviewed_places(request, email):
 def update_customer_score(
     customer_email, posted_to_google_review, place_id_from_review, review_date
 ):
-    # what we will need to do is this:
-    # if the customer is posting a review for the first time on google, increase score
-    # however, if its the same location, and they're trying to post a google review, tell them they can't.
-    # probably on the front end we can just ensure they can't if they've already posted. Google is pretty anal about same account posting twice.
-    # so, we'll need to potentially allow them to edit their review if they want... not sure how to direct them to that.
-    # for the other reviews, there needs to be a cool down period. So they don't spam the reviews with the same account to increase rewards.
-    # im thinking once a week to start.
     customer = CustomerUser.objects.filter(email=customer_email).first()
+
+    if not customer:
+        return None, "Customer not found"
+
+    if isinstance(review_date, str):
+        try:
+            review_date = datetime.strptime(review_date, "%B %d, %Y at %I:%M:%S %p")
+        except ValueError:
+            return None, "Invalid date format"
+
+    # Ensure the datetime is timezone-aware
+    if timezone.is_naive(review_date):
+        review_date = timezone.make_aware(review_date)
+    else:
+        review_date = timezone.localtime(review_date)
+
+    # Check if the customer has already reviewed this place
+    if place_id_from_review in customer.places_reviewed:
+        last_review_date = customer.place_review_dates.get(place_id_from_review)
+        if last_review_date:
+            last_review_date = datetime.fromisoformat(last_review_date)
+            if timezone.is_naive(last_review_date):
+                last_review_date = timezone.make_aware(last_review_date)
+            else:
+                last_review_date = timezone.localtime(last_review_date)
+
+        if posted_to_google_review:
+            if place_id_from_review in customer.google_reviewed_places:
+                print("You've already posted a Google review for this location")
+                return None, "You've already posted a Google review for this location"
+        else:
+            # Check for cooldown period (1 week) for non-Google reviews
+            if last_review_date and (review_date - last_review_date).days < 7:
+                print(
+                    "Please wait a week before posting another review for this location"
+                )
+                return (
+                    None,
+                    "Please wait a week before posting another review for this location",
+                )
+
+    # Update score and review counts
     if posted_to_google_review:
-        customer.user_score += 1
-        customer.user_google_reviews += 1
+        if place_id_from_review not in customer.google_reviewed_places:
+            customer.user_score += 1
+            customer.user_google_reviews += 1
+            customer.google_reviewed_places.append(place_id_from_review)
     else:
         customer.user_score += 0.5
         customer.user_regular_reviews += 1
+
+    # Add the place_id to places_reviewed if it's not already there
     if place_id_from_review not in customer.places_reviewed:
         customer.places_reviewed.append(place_id_from_review)
+
+    # Update the review date for this place
+    customer.place_review_dates[place_id_from_review] = review_date.isoformat()
+
     customer.save()
 
 
