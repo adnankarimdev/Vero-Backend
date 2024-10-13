@@ -1,12 +1,15 @@
 from django.http import HttpResponse
 import os
 from dotenv import load_dotenv
+from collections import defaultdict
 import time
 import re
 import json
 import hashlib
 import stripe
+from collections import Counter
 from django.db.models import Q
+from django.core import serializers
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -245,6 +248,83 @@ tc = TokenCount(model_name="gpt-4o-mini")
 
 
 env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
+
+
+@csrf_exempt
+def get_review_data_customer(request):
+    if request.method == "GET":
+        reviews = CustomerReviewInfo.objects.all()
+        serialized_data = serializers.serialize("json", reviews)
+        data = json.loads(serialized_data)
+
+        # Update location_data to include total rating and review count for average calculation
+        location_data = defaultdict(
+            lambda: {
+                "total_rating": 0,
+                "review_count": 0,
+                "ratings_data": defaultdict(lambda: {"badges": [], "reviews": []}),
+            }
+        )
+
+        # Process the reviews
+        for review in data:
+            fields = review["fields"]
+            location = fields["location"]
+            rating = fields["rating"]
+            badges = json.loads(fields["badges"])  # convert badges string to list
+            final_review_body = fields["final_review_body"]  # get the review body
+
+            # Update location data with rating-specific entries
+            location_data[location]["ratings_data"][rating]["badges"].extend(badges)
+
+            # Only add the review body if it is not empty
+            if final_review_body:
+                location_data[location]["ratings_data"][rating]["reviews"].append(
+                    final_review_body
+                )
+
+            # Update total rating and review count for average rating calculation
+            location_data[location]["total_rating"] += rating
+            location_data[location]["review_count"] += 1
+
+        # Create the final result structure
+        result = []
+        for location, location_info in location_data.items():
+            ratings_summary = []
+            for rating, data in location_info["ratings_data"].items():
+                # Count badge appearances
+                badge_counts = Counter(data["badges"])
+                # Get the top 3 badges
+                top_badges = badge_counts.most_common(3)
+
+                ratings_summary.append(
+                    {
+                        "rating": rating,
+                        "badges": [badge for badge, count in top_badges],
+                        "reviews": data["reviews"],
+                    }
+                )
+
+            # Sort the ratings_summary by rating in descending order
+            ratings_summary.sort(key=lambda x: x["rating"], reverse=True)
+            # Calculate average rating
+            average_rating = (
+                location_info["total_rating"] / location_info["review_count"]
+            )
+
+            result.append(
+                {
+                    "location": location,
+                    "total_reviews": location_info["review_count"],
+                    "average_rating": average_rating,  # Include the average rating
+                    "ratings_summary": ratings_summary,
+                }
+            )
+
+        # Return the serialized data as a JSON response
+        return JsonResponse(result, safe=False)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
 
 
 @csrf_exempt

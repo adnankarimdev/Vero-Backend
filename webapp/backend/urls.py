@@ -32,6 +32,7 @@ from .views import (
     generate_google_review_response,
     product_page,
     stripe_webhook,
+    get_review_data_customer,
 )
 
 urlpatterns = [
@@ -121,4 +122,9 @@ urlpatterns = [
     path("product-page/", product_page, name="product_page"),
     # cant have appending slash for stripe (?)
     path("stripe_webhook", stripe_webhook, name="stripe_webhook"),
+    path(
+        "get-review-data-customer/",
+        get_review_data_customer,
+        name="get_review_data_customer",
+    ),
 ]
