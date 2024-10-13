@@ -41,8 +41,11 @@ class CustomUser(AbstractUser):
 class CustomerUser(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=100)
-    user_score = models.IntegerField(default=0)
+    user_score = models.FloatField(default=0.0)
     user_reviews = models.JSONField(blank=True, null=True)
+    places_reviewed = models.JSONField(default=list)
+    user_google_reviews = models.IntegerField(default=0)
+    user_regular_reviews = models.IntegerField(default=0)
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["username", "email"]
     groups = models.ManyToManyField(

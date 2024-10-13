@@ -262,6 +262,7 @@ def get_review_data_customer(request):
             lambda: {
                 "total_rating": 0,
                 "review_count": 0,
+                "place_id": "",
                 "ratings_data": defaultdict(lambda: {"badges": [], "reviews": []}),
             }
         )
@@ -270,6 +271,7 @@ def get_review_data_customer(request):
         for review in data:
             fields = review["fields"]
             location = fields["location"]
+            place_id = fields["place_id_from_review"]
             rating = fields["rating"]
             badges = json.loads(fields["badges"])  # convert badges string to list
             final_review_body = fields["final_review_body"]  # get the review body
@@ -286,6 +288,7 @@ def get_review_data_customer(request):
             # Update total rating and review count for average rating calculation
             location_data[location]["total_rating"] += rating
             location_data[location]["review_count"] += 1
+            location_data[location]["place_id"] = place_id
 
         # Create the final result structure
         result = []
@@ -315,6 +318,7 @@ def get_review_data_customer(request):
             result.append(
                 {
                     "location": location,
+                    "place_id": location_info["place_id"],
                     "total_reviews": location_info["review_count"],
                     "average_rating": average_rating,  # Include the average rating
                     "ratings_summary": ratings_summary,
@@ -1084,6 +1088,33 @@ def generate_keywords(business_urls, buisness_names, buisness_tags):
 
 
 @csrf_exempt
+def get_customer_reviewed_places(request, email):
+    customer = CustomerUser.objects.filter(email=email).first()
+    customer_reviewed_locations = customer.places_reviewed
+    return JsonResponse(
+        {
+            "data": customer_reviewed_locations,
+        },
+        status=200,
+    )
+
+
+def update_customer_score(
+    customer_email, posted_to_google_review, place_id_from_review
+):
+    customer = CustomerUser.objects.filter(email=customer_email).first()
+    if posted_to_google_review:
+        customer.user_score += 1
+        customer.user_google_reviews += 1
+    else:
+        customer.user_score += 0.5
+        customer.user_regular_reviews += 1
+    if place_id_from_review not in customer.places_reviewed:
+        customer.places_reviewed.append(place_id_from_review)
+    customer.save()
+
+
+@csrf_exempt
 def save_customer_review(request):
     if request.method == "POST":
 
@@ -1108,6 +1139,15 @@ def save_customer_review(request):
             review_uuid = data.get("reviewUuid", "")
             pending_google_review = data.get("pendingGoogleReview", False)
             text_sent_for_review = data.get("textSentForReview", False)
+            customer_email = data.get("customerEmail", "")
+
+            # if customer email comes from the review data,
+            # that means they submitted a review logged in.
+            # hence, update score.
+            if customer_email and customer_email != "":
+                update_customer_score(
+                    customer_email, posted_to_google_review, place_id_from_review
+                )
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
             print("location", location)

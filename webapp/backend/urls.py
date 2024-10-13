@@ -33,6 +33,7 @@ from .views import (
     product_page,
     stripe_webhook,
     get_review_data_customer,
+    get_customer_reviewed_places,
 )
 
 urlpatterns = [
@@ -126,5 +127,10 @@ urlpatterns = [
         "get-review-data-customer/",
         get_review_data_customer,
         name="get_review_data_customer",
+    ),
+    path(
+        "get-customer-reviewed-places/<str:email>/",
+        get_customer_reviewed_places,
+        name="get_customer_reviewed_places",
     ),
 ]
