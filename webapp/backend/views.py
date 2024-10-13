@@ -1100,8 +1100,15 @@ def get_customer_reviewed_places(request, email):
 
 
 def update_customer_score(
-    customer_email, posted_to_google_review, place_id_from_review
+    customer_email, posted_to_google_review, place_id_from_review, review_date
 ):
+    # what we will need to do is this:
+    # if the customer is posting a review for the first time on google, increase score
+    # however, if its the same location, and they're trying to post a google review, tell them they can't.
+    # probably on the front end we can just ensure they can't if they've already posted. Google is pretty anal about same account posting twice.
+    # so, we'll need to potentially allow them to edit their review if they want... not sure how to direct them to that.
+    # for the other reviews, there needs to be a cool down period. So they don't spam the reviews with the same account to increase rewards.
+    # im thinking once a week to start.
     customer = CustomerUser.objects.filter(email=customer_email).first()
     if posted_to_google_review:
         customer.user_score += 1
@@ -1146,7 +1153,10 @@ def save_customer_review(request):
             # hence, update score.
             if customer_email and customer_email != "":
                 update_customer_score(
-                    customer_email, posted_to_google_review, place_id_from_review
+                    customer_email,
+                    posted_to_google_review,
+                    place_id_from_review,
+                    review_date,
                 )
 
             print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
