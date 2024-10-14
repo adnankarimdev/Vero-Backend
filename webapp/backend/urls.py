@@ -35,6 +35,7 @@ from .views import (
     get_review_data_customer,
     get_customer_reviewed_places,
     get_personal_reviews,
+    already_posted_to_google,
 )
 
 urlpatterns = [
@@ -138,5 +139,10 @@ urlpatterns = [
         "get-personal-reviews/<str:email>/",
         get_personal_reviews,
         name="get_personal_reviews",
+    ),
+    path(
+        "already-posted-to-google/",
+        already_posted_to_google,
+        name="already_posted_to_google",
     ),
 ]
