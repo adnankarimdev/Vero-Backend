@@ -482,6 +482,13 @@ def get_reviews_by_client_ids(request):
 
 
 @csrf_exempt
+def get_personal_reviews(request, email):
+    customer_reviews = CustomerReviewInfo.objects.filter(customer_email=email)
+    data = list(customer_reviews.values())
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
 def get_place_details(request, place_id):
     # Ensure you have your API key in your settings
     google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
@@ -1103,6 +1110,8 @@ def get_customer_reviewed_places(request, email):
 def update_customer_score(
     customer_email, posted_to_google_review, place_id_from_review, review_date
 ):
+    score_received = 0.0
+    no_score = False
     customer = CustomerUser.objects.filter(email=customer_email).first()
 
     if not customer:
@@ -1132,28 +1141,28 @@ def update_customer_score(
 
         if posted_to_google_review:
             if place_id_from_review in customer.google_reviewed_places:
+                no_score = True
                 print("You've already posted a Google review for this location")
-                return None, "You've already posted a Google review for this location"
         else:
             # Check for cooldown period (1 week) for non-Google reviews
             if last_review_date and (review_date - last_review_date).days < 7:
+                no_score = True
                 print(
                     "Please wait a week before posting another review for this location"
                 )
-                return (
-                    None,
-                    "Please wait a week before posting another review for this location",
-                )
 
     # Update score and review counts
-    if posted_to_google_review:
+    if posted_to_google_review and not no_score:
         if place_id_from_review not in customer.google_reviewed_places:
             customer.user_score += 1
             customer.user_google_reviews += 1
             customer.google_reviewed_places.append(place_id_from_review)
+            score_received = 1.0
     else:
-        customer.user_score += 0.5
-        customer.user_regular_reviews += 1
+        if not no_score:
+            customer.user_score += 0.5
+            customer.user_regular_reviews += 1
+            score_received = 0.5
 
     # Add the place_id to places_reviewed if it's not already there
     if place_id_from_review not in customer.places_reviewed:
@@ -1163,10 +1172,12 @@ def update_customer_score(
     customer.place_review_dates[place_id_from_review] = review_date.isoformat()
 
     customer.save()
+    return score_received
 
 
 @csrf_exempt
 def save_customer_review(request):
+    score_received = 0.0
     if request.method == "POST":
 
         try:
@@ -1196,7 +1207,7 @@ def save_customer_review(request):
             # that means they submitted a review logged in.
             # hence, update score.
             if customer_email and customer_email != "":
-                update_customer_score(
+                score_received = update_customer_score(
                     customer_email,
                     posted_to_google_review,
                     place_id_from_review,
@@ -1246,6 +1257,8 @@ def save_customer_review(request):
                 posted_with_in_store_mode=posted_with_in_store_mode,
                 review_uuid=review_uuid,
                 pending_google_review=pending_google_review,
+                customer_email=customer_email,
+                score_received=score_received,
             )
             review.save()
             print("REVIEWS SAVED")

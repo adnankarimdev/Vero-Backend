@@ -21,6 +21,8 @@ class CustomerReviewInfo(models.Model):
     review_uuid = models.CharField(max_length=255, default="")
     posted_to_google_after_email_sent = models.BooleanField(default=False)
     pending_google_review = models.BooleanField(default=False)
+    customer_email = models.CharField(max_length=255, default="")
+    score_received = models.FloatField(default=0.0)
 
     def __str__(self):
         return f"{self.location} - {self.rating}"

@@ -34,6 +34,7 @@ from .views import (
     stripe_webhook,
     get_review_data_customer,
     get_customer_reviewed_places,
+    get_personal_reviews,
 )
 
 urlpatterns = [
@@ -132,5 +133,10 @@ urlpatterns = [
         "get-customer-reviewed-places/<str:email>/",
         get_customer_reviewed_places,
         name="get_customer_reviewed_places",
+    ),
+    path(
+        "get-personal-reviews/<str:email>/",
+        get_personal_reviews,
+        name="get_personal_reviews",
     ),
 ]
