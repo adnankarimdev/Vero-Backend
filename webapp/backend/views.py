@@ -1108,6 +1108,18 @@ def get_customer_reviewed_places(request, email):
 
 
 @csrf_exempt
+def get_customer_score(request, email):
+    customer = CustomerUser.objects.filter(email=email).first()
+    customer_score = customer.user_score
+    return JsonResponse(
+        {
+            "data": customer_score,
+        },
+        status=200,
+    )
+
+
+@csrf_exempt
 def already_posted_to_google(request):
     if request.method == "POST":
         try:
