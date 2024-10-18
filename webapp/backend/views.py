@@ -1197,6 +1197,7 @@ def update_customer_score(
                 print("You've already posted a Google review for this location")
         else:
             # Check for cooldown period (1 week) for non-Google reviews
+            # this also means if they posted to google, gotta wait 7 days
             if last_review_date and (review_date - last_review_date).days < 7:
                 no_score = True
                 print(
@@ -1555,13 +1556,19 @@ def update_review_data(request):
             review_uuid=review_uuid
         )
 
+        if not review_to_update.customer_email:
+            review_to_update.customer_email = emailed_review_to_update.email
         review_to_update.posted_to_google_review = True
         review_to_update.score_received = 1.0
         review_to_update.final_review_body = final_review_body
         review_to_update.posted_to_google_after_email_sent = True
         review_to_update.pending_google_review = False
         update_customer_score(
-            customer_email=review_to_update.customer_email,
+            customer_email=(
+                review_to_update.customer_email
+                if review_to_update.customer_email
+                else emailed_review_to_update.email
+            ),
             posted_to_google_review=True,
             place_id_from_review=review_to_update.place_id_from_review,
             review_date=review_to_update.review_date,
