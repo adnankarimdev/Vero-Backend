@@ -37,6 +37,7 @@ from .views import (
     get_personal_reviews,
     already_posted_to_google,
     get_customer_score,
+    get_place_information,
 )
 
 urlpatterns = [
@@ -130,6 +131,11 @@ urlpatterns = [
         "get-review-data-customer/",
         get_review_data_customer,
         name="get_review_data_customer",
+    ),
+    path(
+        "get-place-information/",
+        get_place_information,
+        name="get_place_information",
     ),
     path(
         "get-customer-score/<str:email>/",

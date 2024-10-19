@@ -252,6 +252,15 @@ env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
 
 
 @csrf_exempt
+def get_place_information(request):
+    if request.method == "GET":
+        places = list(UserData.objects.values_list("places_information", flat=True))
+        return JsonResponse(places, safe=False)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+
+
+@csrf_exempt
 def get_review_data_customer(request):
     if request.method == "GET":
         reviews = CustomerReviewInfo.objects.all()
