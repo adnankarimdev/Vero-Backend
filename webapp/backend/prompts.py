@@ -100,7 +100,7 @@ prompt_review_adjuster = """
 
 # cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
-Task: Craft an authentic Google review for [Business Name] based on the provided user badges and rating. Incorporate up to 2 keywords naturally if possible, and the keywords should not be repeated ever. We do not want to ever do anyform of keyword stuffing!
+Task: Generate 3 authentic Google review for [Business Name] based on the provided user badges and rating. The review should incorporate up to 2 badge-related sentences naturally, ensuring that they do not repeat any keywords.
 
 Review Criteria:
 - Insightful and specific (16%)
@@ -131,9 +131,30 @@ Inspiration for Diverse Approaches:
 - Describe interactions with staff or other customers
 - Reflect on how the experience impacted your day
 
-Remember: Each review should feel like it comes from a different person with a unique perspective and writing style.
+Generate sentences related to each badge to construct a Google review using categories based on the badges given. Here is an example for a coffee shop:
 
-    """
+{
+  "sentences": [
+    "The rich aroma of the espresso filled the air as soon as I walked in.",
+    "Their latte was creamy and perfectly balanced, just what I needed.",
+    "The croissants here are fresh, buttery, and a perfect pairing with my coffee.",
+        "The staff were incredibly friendly and efficient, making my experience even better.",
+    "It's the perfect spot to relax after a long day or even to get some work done in peace.",
+    "I’d definitely recommend this place to anyone who loves a unique coffee experience.",
+  ],
+}
+
+Return it in this format ALWAYS, in json. Don't include any random white spaces. The userBadges should be the selected badges from the user and at most 5 sentences:
+{
+  "sentences": [
+    "sentence 1",
+    "sentence 2",
+    "sentence 3",
+   "sentence 4",
+    "sentence 5",
+  ],
+}
+"""
 
 prompt_address_email = """
 You are a customer service representative for [Business Name]. You have received a negative review from a customer, and you want to craft a personalized response based on the details provided. Below is the review and the customer’s answers to specific questions you asked. Use this information to write a thoughtful and empathetic response.
