@@ -1654,6 +1654,25 @@ def send_text(message_body, to_phone_number):
     return message.sid
 
 
+def already_posted_to_google_email(customer_email, place_id_from_review):
+    try:
+        # Check if customer exists
+        customer = CustomerUser.objects.filter(email=customer_email).first()
+        if not customer:
+            return JsonResponse(
+                {"data": False, "message": "Customer not found"}, status=404
+            )
+
+        # Check if place_id is in google_reviewed_places
+        if place_id_from_review in customer.google_reviewed_places:
+            print("You've already posted a Google review for this location")
+            return True
+        else:
+            return False
+
+    except:
+        return False
+    
 @csrf_exempt
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
@@ -1671,9 +1690,11 @@ def send_email_to_post_later(request):
             send_now = data.get("sendEmailNow", False)
             phone_number = data.get("phoneNumber", "")
             tone = data.get("tone", "")
-            subject = "Your 5 star review ✨"
             business_name = data.get("buisnessName", "")
             badges = json.dumps(data.get("badges", []))
+            place_id_from_review = data.get("placeIdFromReview", "")
+
+            already_posted_to_google_before = already_posted_to_google_email(to_email, place_id_from_review)
 
             # Combine date and time to form a datetime object
             date_part = date[:10]
@@ -1703,33 +1724,39 @@ def send_email_to_post_later(request):
                 customer_url = f"http://localhost:4100/customer/{review_uuid}"
             else:
                 customer_url = f"https://vero-reviews.vercel.app/customer/{review_uuid}"
-            # mobile url
-            # customer_url = "http://192.168.1.92:4100/customer/" + f"{review_uuid}"
-            dataToStore = {
-                "email": to_email,
-                "phone_number": phone_number,
-                "name": name,
-                "google_review_url": googleReviewUrl,
-                "review_uuid": review_uuid,
-                "review_body": ai_msg.content,
-                "customer_url": customer_url,
-                "posted_to_google": False,
-                "tone": tone,
-                "badges": badges,
-            }
-            serializer = ReviewsToPostLaterSerializer(data=dataToStore)
-            if serializer.is_valid():
-                serializer.save()
-            else:
-                # Print or log the validation errors
-                print("Serializer errors:", serializer.errors)
 
-            # Create the calendar invite
-            # ugh, 4 segments for this message.
-            twilio_body = f"Hey {name}! Your 30 second review is ready for {business_name}: {customer_url}. Thank you for being so awesome. 🤗"
-            body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nThank you for being so awesome. 🤗"
+            # save in db if first time posting to google
+            if not already_posted_to_google_before:
+                dataToStore = {
+                    "email": to_email,
+                    "phone_number": phone_number,
+                    "name": name,
+                    "google_review_url": googleReviewUrl,
+                    "review_uuid": review_uuid,
+                    "review_body": ai_msg.content,
+                    "customer_url": customer_url,
+                    "posted_to_google": False,
+                    "tone": tone,
+                    "badges": badges,
+                }
+                serializer = ReviewsToPostLaterSerializer(data=dataToStore)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    # Print or log the validation errors
+                    print("Serializer errors:", serializer.errors)
+
             from_email = "reviews@vero-io.com"
             from_password = google_email_reviews_app_password
+            # ugh, 4 segments for this message.
+            if not already_posted_to_google_before:
+                twilio_body = f"Hey {name}! Your 30 second review is ready for {business_name}: {customer_url}. Thank you for being so awesome. 🤗"
+                body = f"Hey {name}! \nHere's your five star review! Just go ahead and open the link provided below. It'll take less than a minute! (We aren't even kidding) \n{customer_url} \nThank you for being so awesome. 🤗"
+                subject = "Your 5 star review ✨"
+            else:
+                twilio_body = f"Hey {name}! You've already posted a google review for {business_name}! Thank you for being so awesome. :)"
+                body = f"Hey {name}! You've already posted a google review for {business_name}! Thank you for being so awesome. 🤗"
+                subject = "You're too Amazing 🥳"
 
             # Schedule the email to be sent once at the specified date and time
             # Divert here, if phone number then go to twilio
