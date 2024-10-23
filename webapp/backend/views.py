@@ -1659,9 +1659,7 @@ def already_posted_to_google_email(customer_email, place_id_from_review):
         # Check if customer exists
         customer = CustomerUser.objects.filter(email=customer_email).first()
         if not customer:
-            return JsonResponse(
-                {"data": False, "message": "Customer not found"}, status=404
-            )
+            return False
 
         # Check if place_id is in google_reviewed_places
         if place_id_from_review in customer.google_reviewed_places:
