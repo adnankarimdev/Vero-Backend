@@ -41,6 +41,7 @@ from backend.prompts import (
     # Other
     prompt_translate_categories,
     prompt_translate_badge,
+    prompt_customer_journey_analyzer,
 )
 import pickle
 
@@ -249,6 +250,36 @@ tc = TokenCount(model_name="gpt-4o-mini")
 
 
 env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
+
+
+@csrf_exempt
+def customer_journey_analysis(request):
+    global prompt_customer_journey_analyzer
+    tokens = tc.num_tokens_from_string(prompt_customer_journey_analyzer)
+    print(f"journey analysis with badges INPUT: Tokens in the string: {tokens}")
+
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        user_query = data.get("chartData", "")
+
+        print(user_query)
+
+        messages = [
+            ("system", prompt_customer_journey_analyzer),
+            ("human", json.dumps(user_query)),
+        ]
+
+        # # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        # ai_msg = agent.invoke(prompt + search_query)
+        tokens = tc.num_tokens_from_string(ai_msg.content)
+        print(ai_msg.content)
+        print(f"journey analysis OUTPUT: Tokens in the string: {tokens}")
+        return JsonResponse({"content": ai_msg.content})
+        # return JsonResponse({"content": ai_msg.content})
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 
 
 @csrf_exempt
@@ -1670,7 +1701,8 @@ def already_posted_to_google_email(customer_email, place_id_from_review):
 
     except:
         return False
-    
+
+
 @csrf_exempt
 def send_email_to_post_later(request):
     global prompt_review_five_star_creator
@@ -1692,7 +1724,9 @@ def send_email_to_post_later(request):
             badges = json.dumps(data.get("badges", []))
             place_id_from_review = data.get("placeIdFromReview", "")
 
-            already_posted_to_google_before = already_posted_to_google_email(to_email, place_id_from_review)
+            already_posted_to_google_before = already_posted_to_google_email(
+                to_email, place_id_from_review
+            )
 
             # Combine date and time to form a datetime object
             date_part = date[:10]

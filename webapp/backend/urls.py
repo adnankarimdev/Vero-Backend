@@ -38,6 +38,7 @@ from .views import (
     already_posted_to_google,
     get_customer_score,
     get_place_information,
+    customer_journey_analysis,
 )
 
 urlpatterns = [
@@ -156,5 +157,10 @@ urlpatterns = [
         "already-posted-to-google/",
         already_posted_to_google,
         name="already_posted_to_google",
+    ),
+    path(
+        "customer-journey-analysis/",
+        customer_journey_analysis,
+        name="customer_journey_analysis",
     ),
 ]

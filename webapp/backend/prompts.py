@@ -182,6 +182,34 @@ Return it in this format ALWAYS, in json. Don't include any random white spaces.
 }
 """
 
+prompt_customer_journey_analyzer = """
+You are an expert customer experience analyst. I'll provide you with a customer's feedback history that includes badges (their key comments/concerns), ratings, and timestamps in chronological order. Tell me the story of this customer's evolving relationship with us:
+
+Journey Analysis:
+
+If their ratings improved: What turned their experience around? What positive changes or interventions seem to have worked?
+If their ratings declined: Where did we lose them? What specific moments appear to have damaged their experience?
+If their ratings fluctuate: What patterns emerge in their satisfaction? Are there consistent triggers for good or bad experiences?
+
+
+Customer Psychology:
+
+Based on their feedback progression, what seems to matter most to this customer?
+How have their expectations evolved over time?
+What emotions are reflected in their changing feedback?
+
+
+Actionable Next Steps:
+
+Given their trajectory, what's the most appropriate intervention?
+For improving customers: How do we maintain and build on this positive momentum?
+For declining customers: What's our best opportunity to rebuild trust?
+For fluctuating customers: How can we create more consistency in their experience?
+
+
+Please analyze this journey as a narrative that helps us understand both where this customer has been and where they're likely headed. Focus on the story their ratings and feedback tell us about their changing relationship with our brand.
+Here's the customer's feedback history: [Insert chronological feedback data here]
+"""
 prompt_address_email = """
 You are a customer service representative for [Business Name]. You have received a negative review from a customer, and you want to craft a personalized response based on the details provided. Below is the review and the customer’s answers to specific questions you asked. Use this information to write a thoughtful and empathetic response.
 
