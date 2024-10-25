@@ -100,7 +100,7 @@ prompt_review_adjuster = """
 
 # cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
-Task: Generate 3 authentic Google review for [Business Name] based on the provided user badges and rating. The review should incorporate up to 2 badge-related sentences naturally, ensuring that they do not repeat any keywords.
+Task: Generate 5 authentic Google review sentences for [Business Name] based on the provided user badges and rating. There should be at most 2 keywords, in at most 2 sentences, if they fit into the sentence naturally.
 
 Review Criteria:
 - Insightful and specific (16%)
@@ -136,7 +136,7 @@ Inspiration for Diverse Approaches:
 - Reflect on how the experience impacted your day
 
 Furthermore, these are written by Google in terms of what is prohibited for reviews, so ensure you don't do any of the following:
-
+--------
 Contributions to Google Maps should reflect a genuine experience at a place or business. Fake engagement is not allowed and will be removed.
 
 Google Maps Review Policy: This includes:
@@ -164,13 +164,13 @@ Generate sentences related to each badge to construct a Google review using cate
     "The rich aroma of the espresso filled the air as soon as I walked in.",
     "Their latte was creamy and perfectly balanced, just what I needed.",
     "The croissants here are fresh, buttery, and a perfect pairing with my coffee.",
-        "The staff were incredibly friendly and efficient, making my experience even better.",
+    "The staff were incredibly friendly and efficient, making my experience even better.",
     "It's the perfect spot to relax after a long day or even to get some work done in peace.",
     "I’d definitely recommend this place to anyone who loves a unique coffee experience.",
   ],
 }
 
-Return it in this format ALWAYS and always include 5 options for sentences, in json. Don't include any random white spaces. The userBadges should be the selected badges from the user and at most 5 sentences:
+Return it in this format ALWAYS and always include 5 options for sentences, in json. Don't include any random white spaces. There should be at most 5 sentences, and make them sound like sentences that people would leave publically on google reviews. Don't overdo it with the tone or anything:
 {
   "sentences": [
     "sentence 1",
