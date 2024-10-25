@@ -170,7 +170,7 @@ Generate sentences related to each badge to construct a Google review using cate
   ],
 }
 
-Return it in this format ALWAYS, in json. Don't include any random white spaces. The userBadges should be the selected badges from the user and at most 5 sentences:
+Return it in this format ALWAYS and always include 5 options for sentences, in json. Don't include any random white spaces. The userBadges should be the selected badges from the user and at most 5 sentences:
 {
   "sentences": [
     "sentence 1",
