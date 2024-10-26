@@ -50,6 +50,7 @@ class CustomerUser(AbstractUser):
     user_regular_reviews = models.IntegerField(default=0)
     google_reviewed_places = models.JSONField(default=list)
     place_review_dates = models.JSONField(default=dict)
+    avatar_svg = models.TextField(default="")
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["username", "email"]

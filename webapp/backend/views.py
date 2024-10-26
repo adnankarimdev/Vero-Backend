@@ -545,6 +545,46 @@ def get_place_details(request, place_id):
 
 
 @csrf_exempt
+def get_customer_svgs(request):
+    emails = request.GET.getlist(
+        "emails[]"
+    )  # Get the list of client IDs from the query parameters
+    if not emails:
+        return JsonResponse({"error": "No client IDs provided"}, status=400)
+
+    # Query the database
+    customer_data = CustomerUser.objects.filter(email__in=emails).values(
+        "email", "avatar_svg"
+    )
+
+    # Serialize the data
+    data = list(customer_data)
+
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def save_user_avatar(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_email = data.get("email", "")
+            user_svg_string = data.get("svg", "")
+
+            customer = CustomerUser.objects.get(email=user_email)
+            if customer.avatar_svg != user_svg_string:
+                customer.avatar_svg = user_svg_string
+                customer.save()
+
+            return JsonResponse(
+                {"status": "success", "message": "Avatar saved successfully"}
+            )
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
+@csrf_exempt
 def chat_with_badges(request):
     global prompt_chatbot
     tokens = tc.num_tokens_from_string(prompt_chatbot)

@@ -39,11 +39,14 @@ from .views import (
     get_customer_score,
     get_place_information,
     customer_journey_analysis,
+    save_user_avatar,
+    get_customer_svgs,
 )
 
 urlpatterns = [
     path("create-charts/", create_charts, name="create_charts"),
     path("create-review/", create_review, name="create_review"),
+    path("save-user-avatar/", save_user_avatar, name="save_user_avatar"),
     path("create-review-score/", create_review_score, name="create_review_score"),
     path("send-email/", send_email, name="send_email"),
     path("sign-up/", sign_up_user, name="sign_up_user"),
@@ -100,6 +103,11 @@ urlpatterns = [
         "get-reviews-by-client-ids/",
         get_reviews_by_client_ids,
         name="get_reviews_by_client_ids",
+    ),
+    path(
+        "get-customer-svgs/",
+        get_customer_svgs,
+        name="get_customer_svgs",
     ),
     path(
         "send-email-to-post-later/",
