@@ -41,6 +41,7 @@ from .views import (
     customer_journey_analysis,
     save_user_avatar,
     get_customer_svgs,
+    get_customer_information
 )
 
 urlpatterns = [
@@ -150,6 +151,11 @@ urlpatterns = [
         "get-customer-score/<str:email>/",
         get_customer_score,
         name="get_customer_score",
+    ),
+    path(
+        "get-customer-information/<str:email>/",
+        get_customer_information,
+        name="get_customer_information",
     ),
     path(
         "get-customer-reviewed-places/<str:email>/",

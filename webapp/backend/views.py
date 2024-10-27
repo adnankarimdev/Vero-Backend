@@ -10,8 +10,10 @@ import stripe
 from collections import Counter
 from django.db.models import Q
 from django.utils import timezone
+from django.forms.models import model_to_dict
 from django.core import serializers
 from django.contrib.auth import authenticate, login
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from langchain_openai import ChatOpenAI
@@ -1197,6 +1199,15 @@ def get_customer_score(request, email):
         },
         status=200,
     )
+
+@csrf_exempt
+def get_customer_information(request, email):
+    try:
+        customer = CustomerUser.objects.get(email=email)
+        customer_dict = model_to_dict(customer)
+        return JsonResponse({"data": customer_dict}, status=200)
+    except ObjectDoesNotExist:
+        return JsonResponse({"error": "Customer not found"}, status=404)
 
 
 @csrf_exempt
