@@ -1184,6 +1184,7 @@ def get_customer_reviewed_places(request, email):
     return JsonResponse(
         {
             "data": customer_reviewed_locations,
+            "reviewDates": customer.place_review_dates
         },
         status=200,
     )
