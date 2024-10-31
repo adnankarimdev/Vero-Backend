@@ -199,12 +199,12 @@ How have their expectations evolved over time?
 What emotions are reflected in their changing feedback?
 
 
-Actionable Next Steps:
+Actionable Next Steps for This Customer:
 
-Given their trajectory, what's the most appropriate intervention?
-For improving customers: How do we maintain and build on this positive momentum?
-For declining customers: What's our best opportunity to rebuild trust?
-For fluctuating customers: How can we create more consistency in their experience?
+	•	Given their recent interactions, what’s the most appropriate next step to support their experience?
+	•	For this customer showing improvement: How can we maintain and build on their positive momentum?
+	•	For this customer who may be declining: What’s our best opportunity to rebuild trust with them?
+	•	For this customer with fluctuating experiences: How can we create a more consistent, reliable experience for them?
 
 
 Please analyze this journey as a narrative that helps us understand both where this customer has been and where they're likely headed. Focus on the story their ratings and feedback tell us about their changing relationship with our brand.
