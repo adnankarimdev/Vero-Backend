@@ -2060,7 +2060,7 @@ def send_email(request):
             gpt_body = f"""
             Buisness Name: {buisness_name}
              Name: {name}
-             Complimentary Item: {settings.complimentary_item}
+             Complimentary Item: No discount or Complimentary Item
              {review_body}
         """
         else:
