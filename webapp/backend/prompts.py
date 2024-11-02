@@ -100,84 +100,28 @@ prompt_review_adjuster = """
 
 # cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
-Task: Generate 5 authentic Google review sentences for [Business Name] based on the provided user badges and rating. There should be at most 2 keywords, in at most 2 sentences, if they fit into the sentence naturally.
+Task: Generate 3 authentic Google review sentences for [Business Name] based on the provided user badges and rating. There should be at most 2 keywords, in at most 2 sentences, if they fit into the sentence naturally.
 
-Review Criteria:
-- Insightful and specific (16%)
-- Genuine reflection of experience (16%)
-- Well-written with correct grammar (16%)
-- Constructive and respectful (16%)
-- Focused on personal experience (10%)
-- Natural use of relevant keywords (10%)
-- Professional, avoiding personal details (10%)
 
-Guidelines:
-- Write only the review body, 50-150 words.
-- Use first-person perspective and natural language.
-- Vary structure, tone, and focus for each review.
-- Avoid formulaic openings; be creative with how you start.
-- Each review should have a distinct voice and flow.
-- Don't use emojis or explain the review process.
-- The tone doesn't only have to be professional, randomly choose. Make it sound GenZ, GenX, fun, exciting, anything that is positive.
-- Make sure to use exclamation marks and period marks in the sentences where appropriate.
-- Assume each sentence is its own sentence, not related to any other sentence. So don't use words or phrases like "I even" or "Not to mention".
-- Make each sentence as unique as possible, assume everytime you're generating sentence, its different from all other sentences you've generated.
-
-Inspiration for Diverse Approaches:
-- Focus on a specific aspect that stood out
-- Tell a brief story about your visit
-- Contrast expectations with reality
-- Describe the atmosphere or vibe
-- Highlight a unique feature or offering
-- Mention how the experience made you feel
-- Compare to past experiences (without naming competitors)
-- Discuss value for money or quality of service
-- Describe interactions with staff or other customers
-- Reflect on how the experience impacted your day
-
-Furthermore, these are written by Google in terms of what is prohibited for reviews, so ensure you don't do any of the following:
---------
-Contributions to Google Maps should reflect a genuine experience at a place or business. Fake engagement is not allowed and will be removed.
-
-Google Maps Review Policy: This includes:
-
-Content that is not based on a real experience and does not accurately represent the location or product in question. 
-Content that has been posted due to an incentive offered by a business - such as payment, discounts, free goods and/or services.
-This includes content posted following requests for revision or removal of a negative review in exchange for an incentive.
-Content that has been posted from multiple accounts to manipulate a place’s rating.
-Content that has been posted using an emulator or other device tampering service, modified operating system, or other method to mimic genuine engagement, manipulate sensor data or results, or otherwise thwart or confuse normal operations.
-We do not allow merchants to:
-
-Solicit or encourage the posting of content that does not represent a genuine experience.
-Offer incentives – such as payment, discounts, free goods and/or services - in exchange for posting any review or revision or removal of a negative review.
-Discourage or prohibit negative reviews, or selectively solicit positive reviews from customers
-Post content on a competitor’s place to undermine that business’ or product’s reputation.
-We do allow merchants to:
-
-Solicit or encourage the posting of content that does represent a genuine experience, without offering incentives to do so.
---------
-
-Generate sentences related to each badge to construct a Google review using categories based on the badges given. Here is an example for a coffee shop:
+Generate sentences related to each badge to construct a Google review using categories based on the badges given. Use only basic words, like someone is in a rush to leave. No words that seem too over the top. Here is an example for a coffee shop:
 
 {
   "sentences": [
-    "The rich aroma of the espresso filled the air as soon as I walked in.",
-    "Their latte was creamy and perfectly balanced, just what I needed.",
-    "The croissants here are fresh, buttery, and a perfect pairing with my coffee.",
-    "The staff were incredibly friendly and efficient, making my experience even better.",
-    "It's the perfect spot to relax after a long day or even to get some work done in peace.",
-    "I’d definitely recommend this place to anyone who loves a unique coffee experience.",
-  ],
+    "The espresso smell was awesome as soon as I walked in. Cozy place!",
+    "Latte was great—smooth and balanced. Exactly what I needed.",
+    "Loved the croissants! Super fresh and perfect with coffee. Must-try.",
+    "Staff was super friendly and quick, made it a great experience.",
+    "Perfect spot to chill or get some work done. My go-to now.",
+    "Highly recommend for anyone who loves good coffee. Hidden gem!"
+  ]
 }
 
-Return it in this format ALWAYS and always include 5 options for sentences, in json. Don't include any random white spaces. There should be at most 5 sentences, and make them sound like sentences that people would leave publically on google reviews. Don't overdo it with the tone or anything:
+Return it in this format ALWAYS and always include 3 options for sentences, in json. Don't include any random white spaces. There should be at most 3 sentences, and make them sound like sentences that people would leave publically on google reviews. Don't overdo it with the tone or anything:
 {
   "sentences": [
     "sentence 1",
     "sentence 2",
     "sentence 3",
-   "sentence 4",
-    "sentence 5",
   ],
 }
 """
