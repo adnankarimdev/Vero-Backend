@@ -943,6 +943,7 @@ def get_review_questions(request, place_id):
                 "useBubblePlatform": settings.bubble_rating_platform,
                 "emailDelay": settings.email_delay,
                 "card_description": settings.card_description,
+                "chosen_icon": settings.chosen_icon,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -990,6 +991,7 @@ def get_review_settings(request, place_ids):
                 "emailDelay": settings.email_delay,
                 "categories": settings.categories,
                 "card_description": settings.card_description,
+                "chosen_icon": settings.chosen_icon,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -1111,6 +1113,7 @@ def set_place_ids(request):
                     "card_description": data.get(
                         "cardDescription", "How did we do? 🤔"
                     ),
+                    "chosen_icon": data.get("chosenIcon", "Star"),
                 },
             )
 
@@ -1184,7 +1187,7 @@ def get_customer_reviewed_places(request, email):
     return JsonResponse(
         {
             "data": customer_reviewed_locations,
-            "reviewDates": customer.place_review_dates
+            "reviewDates": customer.place_review_dates,
         },
         status=200,
     )
@@ -1200,6 +1203,7 @@ def get_customer_score(request, email):
         },
         status=200,
     )
+
 
 @csrf_exempt
 def get_customer_information(request, email):
@@ -1461,6 +1465,7 @@ def save_user_review_question_settings(request):
                     "card_description": data.get(
                         "cardDescription", "How did we do? 🤔"
                     ),
+                    "chosen_icon": data.get("chosenIcon", "Star"),
                     # 'website_url': "https://vero-reviews.vercel.app/clientreviews/" + data.get('placeIds', ''),
                     # 'user_email': data.get('userEmail', '')
                 },

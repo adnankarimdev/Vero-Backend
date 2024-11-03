@@ -41,7 +41,7 @@ from .views import (
     customer_journey_analysis,
     save_user_avatar,
     get_customer_svgs,
-    get_customer_information
+    get_customer_information,
 )
 
 urlpatterns = [

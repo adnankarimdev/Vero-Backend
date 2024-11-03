@@ -106,6 +106,7 @@ class UserData(models.Model):
     bubble_rating_platform = models.BooleanField(default=True)
     email_delay = models.IntegerField(default=60)
     card_description = models.CharField(blank=True, default="How did we do? 🤔")
+    chosen_icon = models.CharField(blank=True, default="Star")
 
     def set_place_ids(self, place_ids_list):
         self.place_ids = json.dumps(place_ids_list)
