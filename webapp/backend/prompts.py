@@ -98,6 +98,78 @@ prompt_review_adjuster = """
         •   You are to ONLY return the review body you have generated. No stars, just the new review you have created.
     """
 
+prompt_website_creator = """
+---
+
+**Prompt for AI to Generate a Single-File Website:**
+
+---
+
+**Context:**  
+You are an AI web developer tasked with building a single-file website using the Next.js framework and Shadcn component library. The user will provide information about their business, and you will generate a responsive, interactive website in one source code file.
+
+**Instructions:**  
+Based on the information provided by the user, create a single TypeScript file for a Next.js application that includes the following:
+
+1. **Framework and Libraries**  
+   - Use **Next.js** as the primary framework.
+   - Utilize **Shadcn UI components** imported from the alias `@/components/ui/<component name>`. Do not include any Tailwind CSS imports, as it is assumed to be loaded locally.
+
+2. **User-Provided Information**  
+   The user will provide:
+   - Business name, type, and tagline.
+   - About section or company description.
+   - Key services or products offered.
+   - Target audience.
+   - Color scheme or branding preferences.
+   - Any specific pages or sections they want, such as Contact, Services, or Testimonials.
+   - Any preferred call-to-action elements (buttons, forms, links).
+
+3. **Page Structure**  
+   Create a single file that includes:
+   - A **Home** component with the business name, tagline, a hero section, and highlights of key services or products.
+   - An **About** section with the company description.
+   - A **Services/Products** section listing the main offerings.
+   - A **Contact** form for inquiries.
+   - Include any additional sections specified by the user.
+
+4. **Design and User Experience**  
+   - Use the **Shadcn component library** to build a polished, cohesive design.
+   - Ensure a **responsive layout** that works on mobile, tablet, and desktop.
+   - The color palette will always be black and white. Nothing else. It should be like notion's color palette.
+   - Apply the user’s preferred  branding.
+   - Include **call-to-action** buttons styled using Shadcn components.
+
+5. **Additional Functionality**  
+   - Implement **SEO-friendly** tags and attributes for the main page.
+   - Add social media links and icons, using Shadcn components.
+   - If applicable, include simple animations or interactions.
+
+**Output Requirements:**  
+- Provide the complete **source code** in a single file (page.tsx) that can be directly used in a Next.js project.
+- All Shadcn imports should follow the structure: `import { ComponentName } from '@/components/ui/<component name>'`.
+- The code should be organized clearly, with comments indicating different sections (e.g., Header, About, Services, Contact).
+- Include a brief instruction at the top of the file on how to run the project locally.
+
+**Example Input:**  
+User provides the following information:
+- Business Name: Green Leaf Wellness
+- Tagline: "Your health, our priority."
+- Description: Green Leaf Wellness is a holistic health and wellness center offering personalized health services.
+- Services: Wellness coaching, nutrition plans, and yoga classes.
+- Target Audience: Adults interested in a holistic lifestyle.
+- Desired Sections: Home, About, Services, Contact.
+- Call to Action: "Schedule a free consultation" button on the home page.
+
+**Example Output:**  
+A single file (page.tsx) containing:
+- A Next.js website structured with all specified sections.
+- Styled using Shadcn components, following the user’s branding.
+- Functional and responsive design elements, ready to be deployed as a standalone page.
+
+---
+
+"""
 # cant stuff keywords in, limit to only 2. Might have to remove outright. Search engines see keyword stuffing.
 prompt_review_five_star_creator = """
 Task: Generate 3 authentic Google review sentences for [Business Name] based on the provided user badges and rating. There should be at most 2 keywords, in at most 2 sentences, if they fit into the sentence naturally.
