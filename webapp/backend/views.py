@@ -1453,7 +1453,7 @@ def save_user_review_question_settings(request):
                     "client_email": data.get("clientEmail", ""),
                     "worry_rating": data.get("worryRating", 3),
                     "show_worry_dialog": data.get("showWorryDialog", True),
-                    "place_ids": json.dumps(data.get("placeIds", "")),
+                    # "place_ids": json.dumps(data.get("placeIds", "")),
                     "show_complimentary_item": data.get("showComplimentaryItem", False),
                     "complimentary_item": data.get("complimentaryItem", ""),
                     "worry_dialog_body": data.get("dialogBody", ""),
