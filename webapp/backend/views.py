@@ -1793,21 +1793,6 @@ def send_email_to_post_later(request):
                 to_email, place_id_from_review
             )
 
-            # Combine date and time to form a datetime object
-            date_part = date[:10]
-            combined_datetime = datetime.strptime(
-                f"{date_part} {time}", "%Y-%m-%d %I:%M %p"
-            )
-            print("Naive Datetime:", combined_datetime)
-
-            # Convert to UTC # also gotta figure out different time zone handling. What if somone is in eastern time.
-            local_tz = pytz.timezone("America/Denver")
-            localized_datetime = local_tz.localize(combined_datetime)
-
-            # Convert to UTC
-            utc_datetime = localized_datetime.astimezone(pytz.UTC)
-            print("UTC:", utc_datetime)
-
             messages = [
                 ("system", prompt_review_five_star_creator),
                 ("human", user_query),
@@ -1843,6 +1828,25 @@ def send_email_to_post_later(request):
                     # Print or log the validation errors
                     print("Serializer errors:", serializer.errors)
 
+            if not to_email and (phone_number == "+1" or not phone_number):
+                return JsonResponse({"url": customer_url})
+            
+            print("im in here ", to_email)
+            print("im in here ", phone_number)
+            # Combine date and time to form a datetime object
+            date_part = date[:10]
+            combined_datetime = datetime.strptime(
+                f"{date_part} {time}", "%Y-%m-%d %I:%M %p"
+            )
+            print("Naive Datetime:", combined_datetime)
+
+            # Convert to UTC # also gotta figure out different time zone handling. What if somone is in eastern time.
+            local_tz = pytz.timezone("America/Denver")
+            localized_datetime = local_tz.localize(combined_datetime)
+
+            # Convert to UTC
+            utc_datetime = localized_datetime.astimezone(pytz.UTC)
+            print("UTC:", utc_datetime)
             from_email = "reviews@vero-io.com"
             from_password = google_email_reviews_app_password
             # ugh, 4 segments for this message.
