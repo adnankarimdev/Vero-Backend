@@ -82,6 +82,9 @@ class ReviewsToPostLater(models.Model):
     def __str__(self):
         return self.email
 
+class WebsiteDetails(models.Model):
+    website_key = models.TextField(blank=True, null=True)
+    website_details = models.JSONField(blank=True, null=True)
 
 class UserData(models.Model):
     email_intro = models.TextField(blank=True, null=True)
@@ -107,6 +110,8 @@ class UserData(models.Model):
     email_delay = models.IntegerField(default=60)
     card_description = models.CharField(blank=True, default="How did we do? 🤔")
     chosen_icon = models.CharField(blank=True, default="Star")
+    custom_website_details = models.JSONField(blank=True, null=True)
+    customer_website_url = models.TextField(blank=True, null=True)
 
     def set_place_ids(self, place_ids_list):
         self.place_ids = json.dumps(place_ids_list)

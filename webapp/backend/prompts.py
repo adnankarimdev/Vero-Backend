@@ -147,9 +147,35 @@ prompt_website_creator = """
 2. Add social media links using Lucide React icons.
 3. Include basic interactivity, such as a mobile menu toggle.
 
+6. **Components Available**
+These are the only shadcn components available to you that you can use:
 
-
-
+@/components/ui/alert-dialog
+@/components/ui/alert
+@/components/ui/avatar
+@/components/ui/badge
+@/components/ui/card
+@/components/ui/chart
+@/components/ui/checkbox
+@/components/ui/collapsible
+@/components/ui/dialog
+@/components/ui/dropdown-menu
+@/components/ui/input
+@/components/ui/label
+@/components/ui/progress
+@/components/ui/radio-group
+@/components/ui/scroll-area
+@/components/ui/select
+@/components/ui/separator
+@/components/ui/sheet
+@/components/ui/skeleton
+@/components/ui/slider
+@/components/ui/switch
+@/components/ui/table
+@/components/ui/tabs
+@/components/ui/textarea
+@/components/ui/toggle-group
+@/components/ui/tooltip
 
 **Output Requirements:**
 
@@ -157,40 +183,23 @@ prompt_website_creator = """
 
 
 ```typescriptreact
-import React from 'react'
-import { Button } from "@/components/ui/button"
-// Add other necessary imports
 
-export default function Component() {
-  // Add any necessary state or effects here
-
-  return (
     // Your JSX here
-  )
-}
+  
+
 ```
 
 - Use Tailwind CSS for styling, focusing on utility classes.
 - Organize the code clearly, with comments indicating different sections.
 - Ensure the component is self-contained and doesn't rely on external data fetching.
 
-
-**Example Input:**User provides the following information:
-
-- Business Name: Green Leaf Wellness
-- Tagline: "Your health, our priority."
-- Description: Green Leaf Wellness is a holistic health and wellness center offering personalized health services.
-- Services: Wellness coaching, nutrition plans, and yoga classes.
-- Target Audience: Adults interested in a holistic lifestyle.
-- Desired Sections: Home, About, Services, Contact.
-- Call to Action: "Schedule a free consultation" button on the home page.
-
-
 **Example Output:**A single React component containing:
 
 - A responsive website structured with all specified sections.
 - Styled using shadcn/ui components and Tailwind CSS.
 - Functional and interactive elements, ready to be used in a Next.js project.
+
+Return only ONLY the Generated JSX structure for the following component, including only the HTML elements and components within <div>...</div>. and nothing else. Here is the data for context: {context}
 
 
 

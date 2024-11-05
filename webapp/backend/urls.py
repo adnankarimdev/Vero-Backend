@@ -42,6 +42,8 @@ from .views import (
     save_user_avatar,
     get_customer_svgs,
     get_customer_information,
+    website_creator,
+    get_website_details
 )
 
 urlpatterns = [
@@ -158,6 +160,11 @@ urlpatterns = [
         name="get_customer_information",
     ),
     path(
+        "get-website-details/<str:slug>/",
+        get_website_details,
+        name="get_website_details",
+    ),
+    path(
         "get-customer-reviewed-places/<str:email>/",
         get_customer_reviewed_places,
         name="get_customer_reviewed_places",
@@ -176,5 +183,10 @@ urlpatterns = [
         "customer-journey-analysis/",
         customer_journey_analysis,
         name="customer_journey_analysis",
+    ),
+    path(
+        "website-creator/",
+        website_creator,
+        name="website_creator",
     ),
 ]

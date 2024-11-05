@@ -44,6 +44,7 @@ from backend.prompts import (
     prompt_translate_categories,
     prompt_translate_badge,
     prompt_customer_journey_analyzer,
+    prompt_website_creator,
 )
 import pickle
 
@@ -69,6 +70,7 @@ from .models import (
     ScheduledJob,
     CustomUser,
     CustomerUser,
+    WebsiteDetails,
 )
 import jwt
 import secrets
@@ -239,6 +241,14 @@ llm = ChatOpenAI(
     max_retries=2,
 )
 
+llm_website = ChatOpenAI(
+    model="o1-preview",
+    temperature=1,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+)
+
 
 llm_chat = ChatOpenAI(
     model="gpt-4o",
@@ -252,6 +262,48 @@ tc = TokenCount(model_name="gpt-4o-mini")
 
 
 env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
+
+
+@csrf_exempt
+def get_website_details(request, slug):
+    try:
+        website = WebsiteDetails.objects.get(website_key=slug)
+        website_dict = model_to_dict(website)
+        return JsonResponse({"data": website_dict}, status=200)
+    except ObjectDoesNotExist:
+        return JsonResponse({"error": "Website not found"}, status=404)
+    
+@csrf_exempt
+def website_creator(request):
+    if request.method == "POST":
+        # Parse the JSON data sent from the frontend
+        data = json.loads(request.body)
+        website_data = data.get("data", {})
+        print(website_data)
+        ######
+        user = UserData.objects.get(user_email=website_data["userEmail"])
+        user.custom_website_details = json.dumps(website_data)
+        formatted_business_name = website_data["businessName"].replace(" ", "-").lower()
+        if env_customer_url == "LOCAL":
+            base_url = f"http://localhost:4100/{formatted_business_name}"
+        else:
+            base_url = f"https://vero-reviews.vercel.app/{formatted_business_name}"
+        user.customer_website_url = base_url
+        user.save()
+        ######
+        WebsiteDetails.objects.update_or_create(
+            website_key=formatted_business_name,  # Lookup criteria
+            defaults={'website_details': json.dumps(website_data)}  # Fields to update
+        )
+        #####
+        
+
+        return JsonResponse({"content": "Success"})
+    
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+
+
 
 
 @csrf_exempt
