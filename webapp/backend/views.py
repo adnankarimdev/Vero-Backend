@@ -1496,7 +1496,7 @@ def save_user_review_question_settings(request):
 
         # Extract place_id from the data
         user_email = data.get("userEmail")
-        user_data = UserData.objects.get(client_email=user_email)
+        user_data = UserData.objects.get(user_email=user_email)
         places = user_data.places_information
         # print("my places", places[0])
         places[0]["offer"] = data.get("complimentaryItem", "")
