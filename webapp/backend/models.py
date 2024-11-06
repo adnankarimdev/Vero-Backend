@@ -82,9 +82,11 @@ class ReviewsToPostLater(models.Model):
     def __str__(self):
         return self.email
 
+
 class WebsiteDetails(models.Model):
     website_key = models.TextField(blank=True, null=True)
     website_details = models.JSONField(blank=True, null=True)
+
 
 class UserData(models.Model):
     email_intro = models.TextField(blank=True, null=True)

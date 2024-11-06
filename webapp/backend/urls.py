@@ -43,7 +43,8 @@ from .views import (
     get_customer_svgs,
     get_customer_information,
     website_creator,
-    get_website_details
+    get_website_details,
+    get_website_message,
 )
 
 urlpatterns = [
@@ -158,6 +159,11 @@ urlpatterns = [
         "get-customer-information/<str:email>/",
         get_customer_information,
         name="get_customer_information",
+    ),
+    path(
+        "get-website-message/<str:email>/",
+        get_website_message,
+        name="get_website_message",
     ),
     path(
         "get-website-details/<str:slug>/",

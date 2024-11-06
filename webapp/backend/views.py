@@ -265,6 +265,21 @@ env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
 
 
 @csrf_exempt
+def get_website_message(request, email):
+    try:
+        user = UserData.objects.get(user_email=email)
+        print(user.company_website_urls)
+        print(user.customer_website_url)
+        data_to_return = {
+            "websites": user.company_website_urls,
+            "internal_website": user.customer_website_url,
+        }
+        return JsonResponse({"data": data_to_return}, status=200)
+    except ObjectDoesNotExist:
+        return JsonResponse({"error": "Website not found"}, status=404)
+
+
+@csrf_exempt
 def get_website_details(request, slug):
     try:
         website = WebsiteDetails.objects.get(website_key=slug)
@@ -272,7 +287,8 @@ def get_website_details(request, slug):
         return JsonResponse({"data": website_dict}, status=200)
     except ObjectDoesNotExist:
         return JsonResponse({"error": "Website not found"}, status=404)
-    
+
+
 @csrf_exempt
 def website_creator(request):
     if request.method == "POST":
@@ -285,7 +301,7 @@ def website_creator(request):
         user.custom_website_details = json.dumps(website_data)
         formatted_business_name = website_data["businessName"].replace(" ", "-").lower()
         if env_customer_url == "LOCAL":
-            base_url = f"http://localhost:4100/{formatted_business_name}"
+            base_url = f"http://localhost:4000/{formatted_business_name}"
         else:
             base_url = f"https://vero-reviews.vercel.app/{formatted_business_name}"
         user.customer_website_url = base_url
@@ -293,17 +309,13 @@ def website_creator(request):
         ######
         WebsiteDetails.objects.update_or_create(
             website_key=formatted_business_name,  # Lookup criteria
-            defaults={'website_details': json.dumps(website_data)}  # Fields to update
+            defaults={"website_details": json.dumps(website_data)},  # Fields to update
         )
         #####
-        
 
         return JsonResponse({"content": "Success"})
-    
+
     return JsonResponse({"error": "Invalid request method"}, status=400)
-
-
-
 
 
 @csrf_exempt
@@ -1044,6 +1056,7 @@ def get_review_settings(request, place_ids):
                 "categories": settings.categories,
                 "card_description": settings.card_description,
                 "chosen_icon": settings.chosen_icon,
+                "internal_website": settings.customer_website_url,
             }
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
@@ -1882,7 +1895,7 @@ def send_email_to_post_later(request):
 
             if not to_email and (phone_number == "+1" or not phone_number):
                 return JsonResponse({"url": customer_url})
-            
+
             print("im in here ", to_email)
             print("im in here ", phone_number)
             # Combine date and time to form a datetime object
