@@ -18,6 +18,7 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+X_API_KEY= "xai-agrOJd9vLN7JnV3VfrH9FbAQn0g9guxiwsZYVkizOtr0vXaXzGjyznqPJgMY6c6baZ8MQVIrcX2DzM3O"
 
 
 # Quick-start development settings - unsuitable for production

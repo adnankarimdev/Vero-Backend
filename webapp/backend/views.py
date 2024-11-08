@@ -241,6 +241,16 @@ llm = ChatOpenAI(
     max_retries=2,
 )
 
+llm_xAi = ChatOpenAI(
+    model="grok-beta",
+    api_key=settings.X_API_KEY,
+    base_url="https://api.x.ai/v1",
+    temperature=1,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+)
+
 llm_website = ChatOpenAI(
     model="o1-preview",
     temperature=1,
@@ -753,7 +763,7 @@ def generate_categories(request):
         ]
 
         # # Invoke the LLM with the messages
-        ai_msg = llm.invoke(messages)
+        ai_msg = llm_xAi.invoke(messages)
         # ai_msg = agent.invoke(prompt + search_query)
         tokens = tc.num_tokens_from_string(ai_msg.content)
         print(f"GEN CATGORIES OUTPUT: Tokens in the string: {tokens}")
