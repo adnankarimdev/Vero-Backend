@@ -732,6 +732,35 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 
 """
 
+prompt_review_task_generator = """
+ 
+You will receive provided user badges and rating. Your task is to create a improvement card, structured like a jira bug card.
+
+You are to analyze the user badges and determine a relevant title on what is needed to be improved. If the given rating is 1, the priority is critical. If 2, high. If 3, medium. If 4, low.
+
+The label should be something that all the badges have in common. The description should be the actionable steps needed the business should take to resolve the matter.
+
+Please make sure that the status, label, and priority is all lower case.
+
+Your output should be the following structure:
+  {
+    "id": "IMP-",
+    "title": "",
+    "status": "",
+    "label": "",
+    "priority": "",
+    "description": ""
+  },
+---
+
+Note: if the review lacks specific details, for the reasoning field, just write "Cannot provide suggestions due to lack of details provided by the customer.".
+
+RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
+---
+
+"""
+
+
 prompt_keyword_generator = """
  
 You are an expert in search engine optimization (SEO) and keyword analysis. I need to find the top keywords related to a business's Google Maps presence. Please follow these instructions based on the information available:

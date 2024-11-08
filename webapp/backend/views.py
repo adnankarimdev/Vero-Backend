@@ -45,6 +45,7 @@ from backend.prompts import (
     prompt_translate_badge,
     prompt_customer_journey_analyzer,
     prompt_website_creator,
+    prompt_review_task_generator,
 )
 import pickle
 
@@ -71,6 +72,7 @@ from .models import (
     CustomUser,
     CustomerUser,
     WebsiteDetails,
+    LinearLikeTasks,
 )
 import jwt
 import secrets
@@ -1400,6 +1402,55 @@ def update_customer_score(
 
 
 @csrf_exempt
+def get_linear_task_by_place_id(request, place_id):
+    if request.method == "GET":
+        try:
+            tasks = LinearLikeTasks.objects.get(place_id=place_id)
+            return JsonResponse(tasks.generated_tasks, status=200, safe=False)
+        except UserData.DoesNotExist:
+            return JsonResponse({"error": "Place id not found."}, status=404)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
+    
+def generate_linear_type_task(rating, badges, generated_review, place_id):
+    global prompt_review_task_generator
+    analyzed_data = (
+        "Rating: \n"
+        + str(rating)
+        + "\n"
+        + "Badges: \n"
+        + badges
+        + "\n"
+        + "Extra Infomation: \n"
+        + str(generated_review)
+    )
+    tokens = tc.num_tokens_from_string(prompt_review_task_generator)
+    print(f"ANALYZE REVIEW INPUT: Tokens in the string: {tokens}")
+    messages = [
+        ("system", prompt_review_task_generator),
+        ("human", analyzed_data),
+    ]
+
+    ai_msg = llm.invoke(messages)
+    tokens = tc.num_tokens_from_string(ai_msg.content)
+    print(f"ANALYZE REVIEW OUTPUT: Tokens in the string: {tokens}")
+    data = json.loads(ai_msg.content)
+
+    existing_task, created = LinearLikeTasks.objects.get_or_create(place_id=place_id)
+    if created:
+        # New entry created
+        data["id"] = "IMP-1"
+        existing_task.generated_tasks = [data]
+    else:
+        # Existing entry found, update the field
+        new_id = len(existing_task.generated_tasks) + 1
+        data["id"] = "IMP-" + str(new_id)
+        existing_task.generated_tasks.append(data)
+
+    existing_task.save()
+    return data
+
+@csrf_exempt
 def save_customer_review(request):
     score_received = 0.0
     if request.method == "POST":
@@ -1439,11 +1490,8 @@ def save_customer_review(request):
                     pending_google_review,
                 )
 
-            print("TIME TAKEN: ", time_taken_to_write_review_in_seconds)
-            print("location", location)
-            print("rating", rating)  # cant be 0?
-            print("place id", place_id_from_review)
-
+            linear_task = generate_linear_type_task(rating, badges, generated_review_body, place_id_from_review)
+            print(linear_task)
             if not all([location, rating, place_id_from_review]):
                 print("DIIED HERE 1")
                 return JsonResponse({"error": "Missing required fields"}, status=400)

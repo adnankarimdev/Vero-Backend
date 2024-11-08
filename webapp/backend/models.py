@@ -87,6 +87,10 @@ class WebsiteDetails(models.Model):
     website_key = models.TextField(blank=True, null=True)
     website_details = models.JSONField(blank=True, null=True)
 
+class LinearLikeTasks(models.Model):
+    place_id = models.TextField(blank=True, null=True)
+    generated_tasks = models.JSONField(blank=True, null=True)
+
 
 class UserData(models.Model):
     email_intro = models.TextField(blank=True, null=True)

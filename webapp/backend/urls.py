@@ -45,6 +45,7 @@ from .views import (
     website_creator,
     get_website_details,
     get_website_message,
+    get_linear_task_by_place_id,
 )
 
 urlpatterns = [
@@ -194,5 +195,10 @@ urlpatterns = [
         "website-creator/",
         website_creator,
         name="website_creator",
+    ),
+    path(
+        "get-linear-task-by-place-id/<str:place_id>/",
+        get_linear_task_by_place_id,
+        name="get_linear_task_by_place_id",
     ),
 ]
