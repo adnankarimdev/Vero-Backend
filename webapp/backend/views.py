@@ -1440,11 +1440,13 @@ def generate_linear_type_task(rating, badges, generated_review, place_id):
     if created:
         # New entry created
         data["id"] = "IMP-1"
+        data["createdAt"] = datetime.now().strftime("%Y-%m-%d %I:%M %p")
         existing_task.generated_tasks = [data]
     else:
         # Existing entry found, update the field
         new_id = len(existing_task.generated_tasks) + 1
         data["id"] = "IMP-" + str(new_id)
+        data["createdAt"] = datetime.now().strftime("%Y-%m-%d %I:%M %p")
         existing_task.generated_tasks.append(data)
 
     existing_task.save()

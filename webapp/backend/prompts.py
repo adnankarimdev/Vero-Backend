@@ -738,9 +738,14 @@ You will receive provided user badges and rating. Your task is to create a impro
 
 You are to analyze the user badges and determine a relevant title on what is needed to be improved. If the given rating is 1, the priority is critical. If 2, high. If 3, medium. If 4, low.
 
-The label should be something that all the badges have in common. The description should be the actionable steps needed the business should take to resolve the matter.
+The label should be something that all the badges have in common. 
 
-Please make sure that the status, label, and priority is all lower case.
+The description should be like a story; and please use "we" when referring to the business. You can safely return the description as markdown text:
+1. what was the main issue(s)
+2. why this is a problem for the business; think very far into the future why this issue would hurt the buisness. Be extremely critical. Things that the business owner would over see. Include data that is relevant to the consequence with sources.
+3. actionable steps needed the business should take to resolve the matter.
+
+Please make sure that the status, label, and priority is all lower case. Status should always be open.
 
 Your output should be the following structure:
   {
@@ -750,6 +755,7 @@ Your output should be the following structure:
     "label": "",
     "priority": "",
     "description": ""
+    "createdAt": ""
   },
 ---
 
