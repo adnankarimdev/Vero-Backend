@@ -1557,8 +1557,9 @@ def save_customer_review(request):
                     pending_google_review,
                 )
 
-            linear_task = generate_linear_type_task(rating, badges, generated_review_body, place_id_from_review)
-            print(linear_task)
+            if rating <= 4:
+                linear_task = generate_linear_type_task(rating, badges, generated_review_body, place_id_from_review)
+                print(linear_task)
             if not all([location, rating, place_id_from_review]):
                 print("DIIED HERE 1")
                 return JsonResponse({"error": "Missing required fields"}, status=400)

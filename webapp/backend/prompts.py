@@ -740,7 +740,7 @@ You are to analyze the user badges and determine a relevant title on what is nee
 
 The label should be something that all the badges have in common. 
 
-The description should be like a story; and please use "we" when referring to the business. You can safely return the description as markdown text. Make this as in depth as possible. Be extremely critical. Things that the business owner would over see. Include data that is relevant to the consequence with sources:
+The description should be like a story; and please use "we" when referring to the business. You can safely return the description as markdown text. Make this as in depth as possible. Be extremely critical. Things that the business owner would over see. Bold, in markdown format, the important parts in your opinion. Include data that is relevant to the consequence with sources:
 1. **Main Concern(s)** : what was the main issue(s)
 
 2. **Consequences(s)** : why this is a problem for the business; think very far into the future why this issue would hurt the buisness. 
@@ -760,8 +760,6 @@ Your output should be the following structure:
     "createdAt": ""
   },
 ---
-
-Note: if the review lacks specific details, for the reasoning field, just write "Cannot provide suggestions due to lack of details provided by the customer.".
 
 RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 ---
