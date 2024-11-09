@@ -48,6 +48,7 @@ from .views import (
     get_linear_task_by_place_id,
     update_task,
     update_description,
+    send_email_to_customer_resolved,
 )
 
 urlpatterns = [
@@ -56,6 +57,7 @@ urlpatterns = [
     path("save-user-avatar/", save_user_avatar, name="save_user_avatar"),
     path("create-review-score/", create_review_score, name="create_review_score"),
     path("send-email/", send_email, name="send_email"),
+    path("send-email-to-customer-resolved/", send_email_to_customer_resolved, name="send_email_to_customer_resolved"),
     path("sign-up/", sign_up_user, name="sign_up_user"),
     path("sign-up-customer/", sign_up_customer, name="sign_up_customer"),
     path("login/", log_in_user, name="log_in_user"),

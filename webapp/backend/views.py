@@ -47,6 +47,7 @@ from backend.prompts import (
     prompt_customer_journey_analyzer,
     prompt_website_creator,
     prompt_review_task_generator,
+    prompt_addressed_customer_concern,
 )
 import pickle
 
@@ -1477,11 +1478,17 @@ def get_linear_task_by_place_id(request, place_id):
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
     
-def generate_linear_type_task(rating, badges, generated_review, place_id):
+def generate_linear_type_task(rating, badges, generated_review, place_id, location):
     global prompt_review_task_generator
     analyzed_data = (
         "Rating: \n"
         + str(rating)
+        + "\n"
+        + "place_id: \n"
+        + str(place_id)
+        + "\n"
+        + "location: \n"
+        + str(location)
         + "\n"
         + "Badges: \n"
         + badges
@@ -1558,7 +1565,7 @@ def save_customer_review(request):
                 )
 
             if rating <= 4:
-                linear_task = generate_linear_type_task(rating, badges, generated_review_body, place_id_from_review)
+                linear_task = generate_linear_type_task(rating, badges, generated_review_body, place_id_from_review, location)
                 print(linear_task)
             if not all([location, rating, place_id_from_review]):
                 print("DIIED HERE 1")
@@ -2244,6 +2251,98 @@ def get_client_catgories(
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
 
 
+def update_linear_task_with_email(place_id, email, name):
+    try:
+        # Retrieve the task from the database
+        task = LinearLikeTasks.objects.get(place_id=place_id)
+
+        # Find the specific task in generated_tasks with the matching ID
+        task_to_update = None
+        for index, generated_task in enumerate(task.generated_tasks):
+            if index == len(task.generated_tasks) - 1:
+                task_to_update = generated_task
+                break
+        
+        # If the task is found, update its status
+        if task_to_update:
+            task_to_update['email'] = email 
+            task_to_update['name'] = name # Or set the status to whatever is required
+            task.save()  # Save the updated task with the new status
+
+            return JsonResponse({"message": "Task updated successfully!"}, status=200)
+        else:
+            print("Task not found in generated tasks.")
+            return JsonResponse({"error": "Task not found in generated tasks."}, status=404)
+
+    except LinearLikeTasks.DoesNotExist:
+        print("Task not found.")
+        return JsonResponse({"error": "Task not found."}, status=404)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": str(e)}, status=400)
+    
+
+
+@csrf_exempt
+def send_email_to_customer_resolved(request):
+    global prompt_addressed_customer_concern
+    if request.method == "POST":
+        data = json.loads(request.body)
+        task = data.get("task", {})
+        gpt_body = f"""
+            Customer Name: {task["name"]}
+            Original Issue Description: {task["description"]}
+            Location: {task["location"]}
+            """
+        subject = "Your Concerns were Addressed"
+        messages = [
+            ("system", prompt_addressed_customer_concern),
+            ("human", gpt_body),
+        ]
+
+        # Invoke the LLM with the messages
+        ai_msg = llm.invoke(messages)
+        body = ai_msg.content
+        from_email = "concerns@vero-io.com"
+        from_password = google_email_concerns_app_password
+
+        msg = MIMEMultipart()
+        msg["From"] = from_email
+        msg["To"] = task["email"]
+        msg["Subject"] = subject
+        # msg["Cc"] = cc_email
+
+        # Attach the body text
+        msg.attach(MIMEText(body, "plain"))
+        recipients = [task["email"]]
+        # recipients.append(cc_email)
+
+        try:
+            # Connect to the Gmail SMTP server
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+
+            # Login to the server
+            server.login(from_email, from_password)
+
+            # Send the email
+            server.sendmail(from_email, recipients, msg.as_string())
+            print("Email sent successfully.")
+            return JsonResponse({"content": "Success"})
+
+        except Exception as e:
+            error_message = str(e)
+            return JsonResponse(
+                {"success": False, "error": {"message": error_message}}, status=500
+            )
+
+        finally:
+            # Close the connection to the server
+            server.quit()
+            return JsonResponse({"content": "Success"})
+
+        
+    
 @csrf_exempt
 def send_email(request):
     if request.method == "POST":
@@ -2253,7 +2352,16 @@ def send_email(request):
         review_body = data.get("userReviewToSend", "")
         buisness_name = data.get("buisnessName", "")
         place_id = data.get("placeId", "")
+
+        ## at this point, linear task should be updated.
+        ## we'll have to take the place id, find the most recent task, and update the email
+        update_linear_task_with_email(place_id, to_email, name)
+        return JsonResponse({"content": "Success"})
         all_user_data = UserData.objects.all()
+
+
+
+
         # Filter results by checking if any place_id from place_ids_list exists in each entry's place_ids
         matching_settings = [
             user_data

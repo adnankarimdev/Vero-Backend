@@ -732,9 +732,37 @@ RETURN ONLY THE SPECIFIED OUTPUT MENTIONED.
 
 """
 
+
+prompt_addressed_customer_concern = """
+Please write a professional follow-up email using the following data:
+Customer Name: {name}
+Original Issue Description: {description}
+Location: {Location}
+
+The email should:
+1. Start with a personalized greeting using the customer's name
+2. Reference the specific issue they reported
+3. Explain that the issue has been resolved
+4. Outline what specific steps were taken to fix it (based on the issue description)
+5. Express appreciation for their feedback
+6. Invite them to reach out if they have any questions
+7. End with a professional closing
+8. Do not include a Subject
+
+The tone should be:
+- Professional but warm
+- Always use "we", not "I"
+- Apologetic about the past issue
+- Confident about the resolution
+- Appreciative of their feedback
+- Tell them to come back to visit because of the changes
+- Sign off with {Location}
+
+Keep the email concise but informative, around 3-4 short paragraphs.
+"""
 prompt_review_task_generator = """
  
-You will receive provided user badges and rating. Your task is to create a improvement card, structured like a jira bug card.
+You will receive provided user badges, a place_id, location, and rating. Your task is to create a improvement card, structured like a jira bug card.
 
 You are to analyze the user badges and determine a relevant title on what is needed to be improved. If the given rating is 1, the priority is critical. If 2, high. If 3, medium. If 4, low.
 
@@ -747,7 +775,7 @@ The description should be like a story; and please use "we" when referring to th
 
 3. **Actionable Step(s)** : actionable steps needed the business should take to resolve the matter.
 
-Please make sure that the status, label, and priority is all lower case. Status should always be open.
+Please make sure that the status, label, and priority is all lower case. Status should always be open. If no name and email are provided, keep the key but make the values empty for name and email.
 
 Your output should be the following structure:
   {
@@ -755,9 +783,13 @@ Your output should be the following structure:
     "title": "",
     "status": "",
     "label": "",
+    "place_id": "",
     "priority": "",
-    "description": ""
-    "createdAt": ""
+    "description": "",
+    "createdAt": "",
+    "email": "",
+    "name":"",
+    "location": "",
   },
 ---
 
