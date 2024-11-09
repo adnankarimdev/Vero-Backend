@@ -2,6 +2,7 @@ from django.http import HttpResponse
 import os
 from dotenv import load_dotenv
 from collections import defaultdict
+from django.views.decorators.http import require_http_methods
 import time
 import re
 import json
@@ -1402,11 +1403,42 @@ def update_customer_score(
 
 
 @csrf_exempt
+@require_http_methods(["PUT", "PATCH"])  # Only allow PUT and PATCH requests
+def update_task(request, place_id):
+    try:
+        # Retrieve the task from the database
+        task = LinearLikeTasks.objects.get(place_id=place_id)
+
+        # Parse the incoming data
+        updated_data = json.loads(request.body)
+
+        # Find the specific task in generated_tasks with the matching ID
+        task_to_update = None
+        for generated_task in task.generated_tasks:
+            if generated_task['id'] == updated_data["updatedTask"]['id']:
+                task_to_update = generated_task
+                break
+        
+        # If the task is found, update its status
+        if task_to_update:
+            task_to_update['status'] = updated_data["updatedTask"]['status']  # Or set the status to whatever is required
+            task.save()  # Save the updated task with the new status
+
+            return JsonResponse({"message": "Task updated successfully!"}, status=200)
+        else:
+            return JsonResponse({"error": "Task not found in generated tasks."}, status=404)
+
+    except LinearLikeTasks.DoesNotExist:
+        return JsonResponse({"error": "Task not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+@csrf_exempt
 def get_linear_task_by_place_id(request, place_id):
     if request.method == "GET":
         try:
             tasks = LinearLikeTasks.objects.get(place_id=place_id)
-            return JsonResponse(tasks.generated_tasks, status=200, safe=False)
+            return JsonResponse({"tasks": tasks.generated_tasks, "place_id": place_id}, status=200, safe=False)
         except UserData.DoesNotExist:
             return JsonResponse({"error": "Place id not found."}, status=404)
     else:

@@ -46,6 +46,7 @@ from .views import (
     get_website_details,
     get_website_message,
     get_linear_task_by_place_id,
+    update_task,
 )
 
 urlpatterns = [
@@ -201,4 +202,5 @@ urlpatterns = [
         get_linear_task_by_place_id,
         name="get_linear_task_by_place_id",
     ),
+    path('update-task/<str:place_id>/', update_task, name='update_task'),
 ]
