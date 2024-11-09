@@ -1433,6 +1433,39 @@ def update_task(request, place_id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
     
+
+@csrf_exempt
+@require_http_methods(["PUT", "PATCH"])  # Only allow PUT and PATCH requests
+def update_description(request, place_id):
+    try:
+        # Retrieve the task from the database
+        task = LinearLikeTasks.objects.get(place_id=place_id)
+
+        # Parse the incoming data
+        updated_data = json.loads(request.body)
+
+        # Find the specific task in generated_tasks with the matching ID
+        task_to_update = None
+        for generated_task in task.generated_tasks:
+            if generated_task['id'] == updated_data["updatedTask"]['id']:
+                task_to_update = generated_task
+                break
+        
+        # If the task is found, update its status
+        if task_to_update:
+            task_to_update['description'] = updated_data["updatedTask"]['description']  # Or set the status to whatever is required
+            task.save()  # Save the updated task with the new status
+
+            return JsonResponse({"message": "Task updated successfully!"}, status=200)
+        else:
+            return JsonResponse({"error": "Task not found in generated tasks."}, status=404)
+
+    except LinearLikeTasks.DoesNotExist:
+        return JsonResponse({"error": "Task not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+    
 @csrf_exempt
 def get_linear_task_by_place_id(request, place_id):
     if request.method == "GET":

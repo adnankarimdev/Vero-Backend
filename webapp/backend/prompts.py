@@ -740,10 +740,12 @@ You are to analyze the user badges and determine a relevant title on what is nee
 
 The label should be something that all the badges have in common. 
 
-The description should be like a story; and please use "we" when referring to the business. You can safely return the description as markdown text:
-1. what was the main issue(s)
-2. why this is a problem for the business; think very far into the future why this issue would hurt the buisness. Be extremely critical. Things that the business owner would over see. Include data that is relevant to the consequence with sources.
-3. actionable steps needed the business should take to resolve the matter.
+The description should be like a story; and please use "we" when referring to the business. You can safely return the description as markdown text. Make this as in depth as possible. Be extremely critical. Things that the business owner would over see. Include data that is relevant to the consequence with sources:
+1. **Main Concern(s)** : what was the main issue(s)
+
+2. **Consequences(s)** : why this is a problem for the business; think very far into the future why this issue would hurt the buisness. 
+
+3. **Actionable Step(s)** : actionable steps needed the business should take to resolve the matter.
 
 Please make sure that the status, label, and priority is all lower case. Status should always be open.
 
