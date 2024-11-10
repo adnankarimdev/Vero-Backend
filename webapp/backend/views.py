@@ -2283,6 +2283,27 @@ def update_linear_task_with_email(place_id, email, name):
     
 
 
+def update_email_sent_task(task):
+    # Retrieve the task from the database
+    task_record = LinearLikeTasks.objects.get(place_id=task["place_id"])
+
+    # Find the specific task in generated_tasks with the matching ID
+    task_to_update = None
+    for generated_task in task_record.generated_tasks:
+        if generated_task['id'] == task['id']:
+            task_to_update = generated_task
+            break
+
+    # If the task is found, update its 'email_sent' status
+    if task_to_update:
+        task_to_update['email_sent'] = "True"  # Use the boolean value
+        task_record.save()  # Save the updated task record to the database
+        print("Task updated and saved successfully")
+        return {"message": "Task updated and saved successfully"}
+    else:
+        print("Task not found in generated tasks")
+        return {"error": "Task not found in generated tasks"}
+
 @csrf_exempt
 def send_email_to_customer_resolved(request):
     global prompt_addressed_customer_concern
@@ -2328,6 +2349,9 @@ def send_email_to_customer_resolved(request):
             # Send the email
             server.sendmail(from_email, recipients, msg.as_string())
             print("Email sent successfully.")
+
+            #update emailSent here
+            update_email_sent_task(task)
             return JsonResponse({"content": "Success"})
 
         except Exception as e:

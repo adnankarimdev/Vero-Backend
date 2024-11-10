@@ -790,6 +790,7 @@ Your output should be the following structure:
     "email": "",
     "name":"",
     "location": "",
+    "email_sent": "False"
   },
 ---
 
