@@ -48,6 +48,7 @@ from backend.prompts import (
     prompt_website_creator,
     prompt_review_task_generator,
     prompt_addressed_customer_concern,
+    prompt_blog_writer
 )
 import pickle
 
@@ -597,6 +598,36 @@ def get_reviews_by_client_ids(request):
 
     # Serialize the data
     data = list(reviews.values())
+
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def generate_blog(request):
+    client_ids = request.GET.getlist(
+        "clientIds[]"
+    )  # Get the list of client IDs from the query parameters
+    if not client_ids:
+        return JsonResponse({"error": "No client IDs provided"}, status=400)
+
+    # Query the database
+    reviews = CustomerReviewInfo.objects.filter(place_id_from_review__in=client_ids)
+
+    # Serialize the data
+    data = list(reviews.values())
+    last_ten_elements = data[-10:]
+    messages = [
+    ("system", prompt_blog_writer),
+    ("human", json.dumps({"recent_reviews": last_ten_elements})),
+    ]
+
+
+    # # Invoke the LLM with the messages
+    ai_msg = llm_xAi.invoke(messages)
+    # ai_msg = agent.invoke(prompt + search_query)
+    tokens = tc.num_tokens_from_string(ai_msg.content)
+    print(ai_msg.content)
+
 
     return JsonResponse(data, safe=False)
 

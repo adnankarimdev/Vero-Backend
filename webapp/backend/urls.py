@@ -49,6 +49,7 @@ from .views import (
     update_task,
     update_description,
     send_email_to_customer_resolved,
+    generate_blog,
 )
 
 urlpatterns = [
@@ -112,6 +113,11 @@ urlpatterns = [
         "get-reviews-by-client-ids/",
         get_reviews_by_client_ids,
         name="get_reviews_by_client_ids",
+    ),
+    path(
+        "generate-blog/",
+        generate_blog,
+        name="generate_blog",
     ),
     path(
         "get-customer-svgs/",
