@@ -233,7 +233,7 @@ AUTH_TOKEN_TWILIO = "461a27a99fc2c064264a70d9ebbb0582"
 TWILIO_NUMBER = "+15873172396"
 # embeddings = OpenAIEmbeddings()
 
-SECRET_KEY = secrets.token_urlsafe(32)
+SECRET_KEY = settings.SECRET_KEY
 
 google_email_app_password = "jmym xiii qzgc qnhc"
 google_email_reviews_app_password = "jziu dafb uzex otqm"
@@ -280,18 +280,33 @@ env_customer_url = os.environ.get("ENV_CUSTOMER_URL")
 
 
 @csrf_exempt
-def get_website_message(request, email):
+def get_website_message(request):
+    # Get the Authorization header
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return JsonResponse({"error": "Authorization token missing or invalid"}, status=401)
+
+    token = auth_header.split(" ")[1]
+
     try:
-        user = UserData.objects.get(user_email=email)
-        print(user.company_website_urls)
-        print(user.customer_website_url)
+        # Decode the token
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        email = decoded_token.get("email")  # Extract the email from the decoded token
+
+        # Retrieve the user data using the email
+        user = UserData.objects.get(user_email=email)  # Use the email field
         data_to_return = {
             "websites": user.company_website_urls,
             "internal_website": user.customer_website_url,
         }
         return JsonResponse({"data": data_to_return}, status=200)
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({"error": "Token has expired"}, status=401)
+    except jwt.InvalidTokenError:
+        return JsonResponse({"error": "Invalid token"}, status=401)
     except ObjectDoesNotExist:
-        return JsonResponse({"error": "Website not found"}, status=404)
+        return JsonResponse({"error": "User not found"}, status=404)
 
 
 @csrf_exempt
@@ -732,17 +747,47 @@ def chat_with_badges(request):
 
 
 @csrf_exempt
-def get_user_data(request, email):
+def get_user_data(request):
     if request.method == "GET":
         try:
-            user_data = CustomUser.objects.get(username=email)
+            # Get the JWT token from the request header
+            token = request.headers.get('Authorization')
+
+            # Check if token is provided
+            if not token:
+                return JsonResponse({"error": "Authorization token is missing"}, status=400)
+
+            # Assuming token format is "Bearer <your_token>", we need to split and decode
+            token = token.split(" ")[1]  # Get the token part after "Bearer "
+
+            # Decode the token and extract the payload
+            decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+
+            # Extract email from the decoded token
+            user_email = decoded_token.get("email")
+
+            if not user_email:
+                return JsonResponse({"error": "Email not found in token"}, status=400)
+
+            # Retrieve user data based on the email
+            user_data = CustomUser.objects.get(username=user_email)
+
+            # If found, return the user's data
             data = {
                 "account_type": user_data.account_type,
                 "business_name": user_data.business_name,
             }
             return JsonResponse(data, status=200)
-        except UserData.DoesNotExist:
+
+        except jwt.ExpiredSignatureError:
+            return JsonResponse({"error": "Token has expired"}, status=401)
+
+        except jwt.InvalidTokenError:
+            return JsonResponse({"error": "Invalid token"}, status=401)
+
+        except CustomUser.DoesNotExist:
             return JsonResponse({"error": "User not found."}, status=404)
+
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
 
@@ -991,8 +1036,25 @@ def generate_review_template(request):
 
 
 @csrf_exempt
-def get_place_id_by_email(request, email):
+def get_place_id_by_email(request):
     if request.method == "GET":
+        # Extract the token from the Authorization header
+        auth_header = request.headers.get("Authorization")
+        
+        if not auth_header:
+            return JsonResponse({"error": "Authorization token is missing"}, status=400)
+
+        # Verify the token and decode it to extract the email
+        try:
+            token = auth_header.split(" ")[1]  # Assuming Bearer token
+            decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            email = decoded_token.get("email")  # Make sure your token contains the email
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            return JsonResponse({"error": "Invalid or expired token"}, status=401)
+        
+        if not email:
+            return JsonResponse({"error": "Email not found in token"}, status=400)
+
         try:
             settings = UserData.objects.get(user_email=email)
             place_ids_as_array = (
@@ -1015,7 +1077,7 @@ def get_place_id_by_email(request, email):
             return JsonResponse(data, status=200)
         except UserData.DoesNotExist:
             return JsonResponse(
-                {"error": "Settings not found for the specified placeId."}, status=404
+                {"error": "Settings not found for the specified email."}, status=404
             )
     else:
         return JsonResponse({"error": "Only GET requests are allowed"}, status=405)
@@ -1736,7 +1798,7 @@ def log_in_user(request):
             login(request, user)
 
             # Generate a token (if using JWT)
-            token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm="HS256")
+            token = jwt.encode({"email": user.email}, SECRET_KEY, algorithm="HS256")
 
             return JsonResponse(
                 {
@@ -1820,9 +1882,28 @@ def sign_up_user(request):
 
         serializer = UserSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            # Save the new user
+            user = serializer.save()
 
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+            # Generate the JWT token after user creation
+            token = jwt.encode(
+                {"email": user.email, "exp": datetime.utcnow() + timedelta(hours=24)},  # 24-hour expiry
+                SECRET_KEY,
+                algorithm="HS256",
+            )
+
+            # Return user data along with the JWT token
+            return JsonResponse(
+                {
+                    "message": "User created successfully",
+                    "token": token,
+                    "user": {
+                        "email": user.email,
+                        "account_subscription": user.account_subscription,
+                    },
+                },
+                status=status.HTTP_201_CREATED,
+            )
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return JsonResponse(

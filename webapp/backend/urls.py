@@ -79,7 +79,7 @@ urlpatterns = [
         name="get_client_catgories",
     ),
     path(
-        "get-place-id-by-email/<str:email>/",
+        "get-place-id-by-email/",
         get_place_id_by_email,
         name="get_place_id_by_email",
     ),
@@ -137,7 +137,7 @@ urlpatterns = [
     path("update-review-data/", update_review_data, name="update_review_data"),
     path("chat-with-badges/", chat_with_badges, name="chat_with_badges"),
     path(
-        "get-user-data/<str:email>/",
+        "get-user-data/",
         get_user_data,
         name="get_user_data",
     ),
@@ -172,7 +172,7 @@ urlpatterns = [
         name="get_customer_information",
     ),
     path(
-        "get-website-message/<str:email>/",
+        "get-website-message/",  # No need for <str:email> in the URL anymore
         get_website_message,
         name="get_website_message",
     ),
