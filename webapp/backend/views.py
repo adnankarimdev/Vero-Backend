@@ -1798,7 +1798,7 @@ def log_in_user(request):
             login(request, user)
 
             # Generate a token (if using JWT)
-            token = jwt.encode({"email": user.email}, SECRET_KEY, algorithm="HS256")
+            token = jwt.encode({"email": user.email, "exp": datetime.utcnow() + timedelta(hours=24)}, SECRET_KEY, algorithm="HS256")
 
             return JsonResponse(
                 {
