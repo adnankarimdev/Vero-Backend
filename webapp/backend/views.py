@@ -664,6 +664,33 @@ def get_place_details(request, place_id):
         response = requests.get(url)
         response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()
+        place_id_to_check = data.get('result', {}).get('place_id')
+        print(place_id_to_check)
+        records = UserData.objects.values_list('place_ids', flat=True)
+
+        # Iterate through the records and check if the place_id exists.
+
+        # Iterate through the records and check if the place_id exists
+        for place_ids_str in records:
+            if place_ids_str:  # Check if the string is not empty or null
+                try:
+                    # Use json.loads twice if necessary to handle double-encoded JSON
+                    place_ids = json.loads(place_ids_str)
+                    print(place_ids)
+
+                    # If the result is still a string, decode it again
+                    # if isinstance(place_ids, str):
+                    #     place_ids = json.loads(place_ids)
+
+                    if place_id_to_check in place_ids:
+                        print("opps")
+                        return JsonResponse({"error": "Place already claimed."}, status=500)
+                    else:
+                        print("Place ID does not exist.")
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error: {e}")
+                    continue
+
     except requests.RequestException as e:
         return JsonResponse({"error": str(e)}, status=500)
 
